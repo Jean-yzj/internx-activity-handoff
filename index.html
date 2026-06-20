@@ -39,11 +39,12 @@
       <a href="editor.html" class="btn btn-primary"><i class="ri-edit-box-line"></i> 看主辦方編輯器</a>
       <a href="attendee.html" class="btn btn-ghost"><i class="ri-smartphone-line"></i> 看報名者畫面</a>
       <a href="spec.html" class="btn btn-ghost"><i class="ri-code-s-slash-line"></i> 看資料模型規格</a>
+      <a href="https://github.com/Jean-yzj/internx-activity-handoff/blob/main/INTEGRATION.md" class="btn btn-ghost"><i class="ri-file-text-line"></i> 交接文件（串接步驟）</a>
     </div>
     <div class="kpi">
       <div class="k"><div class="n">4</div><div class="l">編輯步驟，不再一頁塞爆</div></div>
       <div class="k"><div class="n">每張票</div><div class="l">可設販售時間 × 數量上限</div></div>
-      <div class="k"><div class="n">↑ ↓</div><div class="l">欄位用按鈕排序，不靠拖曳</div></div>
+      <div class="k"><div class="n">拖曳</div><div class="l">欄位抓把手就能排序</div></div>
     </div>
   </section>
 
@@ -81,12 +82,12 @@
 
       <div class="card card-pad">
         <span class="badge badge-soldout"><i class="ri-error-warning-line"></i> 問題 3</span>
-        <h3 style="margin-top:12px">報名表單欄位無法上下移動</h3>
-        <p>現在的 FormBuilder 只能用拖曳排序，工程端反映拖曳實作很麻煩、手機上更難用。</p>
-        <p style="font-size:12.5px;color:var(--text-faint)">現況：僅有 drag 的 handleReorderFields — FormBuilder.tsx:88</p>
+        <h3 style="margin-top:12px">報名表單欄位排序不順手</h3>
+        <p>主辦方希望直接<b>拖曳</b>欄位上下排序，但現有拖曳實作不穩、手機難用，工程端也反映從零做拖曳很麻煩。</p>
+        <p style="font-size:12.5px;color:var(--text-faint)">現況：自製 drag 的 handleReorderFields — FormBuilder.tsx:88</p>
         <div class="callout callout-fix" style="margin-bottom:0">
           <i class="ri-check-double-line"></i>
-          <p><b>改法：</b>每個欄位列加 <b>上移 / 下移箭頭按鈕</b>，拖曳變成加分項而非必需；首尾自動禁用箭頭。</p>
+          <p><b>改法：</b>改用成熟拖曳套件 <code>@dnd-kit/sortable</code>，<b>抓住把手即可順暢拖曳</b>；內建觸控與鍵盤支援，工程端不必自己造輪子。</p>
         </div>
       </div>
 
@@ -119,7 +120,7 @@
       </div>
       <div class="card card-pad feature">
         <h3><span class="ico ico-orange"><i class="ri-list-check-2"></i></span> 3 · 報名表單</h3>
-        <p>從欄位庫加欄位，<b>用上下箭頭排序</b>，即時看到報名者會填到的樣子。</p>
+        <p>從欄位庫加欄位，<b>抓把手拖曳排序</b>，即時看到報名者會填到的樣子。</p>
       </div>
       <div class="card card-pad feature">
         <h3><span class="ico ico-blue"><i class="ri-checkbox-circle-line"></i></span> 4 · 進階與送出</h3>
@@ -133,7 +134,8 @@
     <div>
       <p style="margin-bottom:4px"><b>關於這份交接</b></p>
       <p style="margin-bottom:0">本網站是純靜態示意檔（HTML/CSS/JS，無建置流程），用來對齊「介面應該長什麼樣、行為應該怎麼運作」。
-      它<b>不引用、也不修改</b> internx.me 既有專案。工程同事可直接照著 <a href="spec.html">工程規格</a> 一節調整現有的
+      它<b>不引用、也不修改</b> internx.me 既有專案。工程同事可直接照著 <a href="spec.html">工程規格</a> 與
+      <a href="https://github.com/Jean-yzj/internx-activity-handoff/blob/main/INTEGRATION.md">交接文件 INTEGRATION.md</a>，調整現有的
       <code class="coderef">activity-form-schema.ts</code> 與 <code class="coderef">FormBuilder</code>。</p>
     </div>
   </div>

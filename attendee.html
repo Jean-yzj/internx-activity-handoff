@@ -24,93 +24,149 @@
 </header>
 
 <main class="wrap">
-  <div class="section" style="margin-bottom:24px">
+  <div class="section" style="margin-bottom:20px">
     <div class="eyebrow">報名者視角</div>
-    <h1 style="font-size:30px">報名者看到的票券狀態</h1>
-    <p class="lead">同一份票券設定，在報名端會自動依「時間 + 數量」呈現正確狀態。早鳥票過期＝鎖定不可選，這正是現在缺的行為。</p>
+    <h1 style="font-size:30px">報名者看到的完整頁面</h1>
+    <p class="lead">以實習通真實活動「學生創業者小聚」為範例。報名者由上到下看到：
+      <b>① 活動介紹 → ② 報名表單 → ③ 選擇票券</b>，票券狀態依時間與數量自動判斷。</p>
   </div>
 
-  <div style="display:flex;gap:46px;align-items:flex-start;flex-wrap:wrap">
+  <div class="apage">
+    <!-- fake browser chrome -->
+    <div class="app-chrome">
+      <span class="dot"><i class="ri-arrow-left-line"></i></span>
+      <span style="flex:1">internx.me / activity / 學生創業者小聚</span>
+      <span class="dot"><i class="ri-share-line"></i></span>
+      <span class="dot"><i class="ri-heart-line"></i></span>
+    </div>
 
-    <!-- PHONE -->
-    <div class="phone">
-      <div class="notch"></div>
-      <div class="screen">
-        <div class="event-cover">
-          <div>
-            <div style="font-size:12px;opacity:.85;letter-spacing:.05em">2026 / 07 / 12 · 台北</div>
-            <div style="font-size:19px;font-weight:700;margin-top:4px;padding:0 18px">實習通職涯實戰營<br>從履歷到 Offer</div>
-          </div>
+    <div class="app-body">
+      <!-- COVER -->
+      <div class="cover">
+        <span class="ev-type"><i class="ri-shield-check-line"></i> 審核制小聚</span>
+        <h1>學生創業者小聚</h1>
+        <p class="tag">創業最棒的事，是遇到一群能並肩作戰的人。把正在第一線的創業者放進同一個房間，交換課本上學不到的經驗。</p>
+      </div>
+
+      <div class="app-content">
+
+        <!-- meta row -->
+        <div class="event-meta">
+          <div class="m"><div class="lbl"><i class="ri-calendar-event-line"></i> 日期</div><div class="val">6/28（日）14:00–18:00</div></div>
+          <div class="m"><div class="lbl"><i class="ri-map-pin-2-line"></i> 地點</div><div class="val">Garage+ · 台北中山</div></div>
+          <div class="m"><div class="lbl"><i class="ri-group-line"></i> 主辦</div><div class="val">實習通 InternX</div></div>
         </div>
 
-        <div style="padding:16px">
-          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
-            <span class="badge badge-info"><i class="ri-map-pin-line"></i> 信義區實體</span>
-            <span class="badge badge-info"><i class="ri-time-line"></i> 13:30–17:30</span>
+        <!-- ① 活動介紹 -->
+        <section class="sec">
+          <div class="sec-head">
+            <span class="sec-num">1</span><h2>活動介紹</h2>
+            <span class="sec-anno">主辦方在「活動內容」步驟填寫</span>
+          </div>
+          <p>經營 InternX 這段時間，我發現最有價值的時刻，往往不是聽大道理，而是和同樣在第一線、視角完全不同的朋友，交換那些課本上學不到的經驗。所以我想把這群正在解決問題、充滿行動力的人，放進同一個房間。</p>
+          <p>聊的是創業早期最真實的問題：<b>內容、資源、驗證、社群</b>，還有下一步該怎麼走。</p>
+
+          <h3 style="font-size:15px;margin:20px 0 10px">當天流程</h3>
+          <ul class="agenda">
+            <li><span class="t">14:00</span><b>報到</b><p>抵達 Garage+，領取名牌。</p></li>
+            <li><span class="t">14:30</span><b>匿名背景交換</b><p>依照三種經驗軸線，找到可以互補的對象。</p></li>
+            <li><span class="t">16:40</span><b>自由交流</b><p>保留一對一延伸時間，交換可合作的下一步。</p></li>
+            <li><span class="t">18:00</span><b>賦歸</b><p>活動結束。</p></li>
+          </ul>
+
+          <div class="callout callout-info" style="margin:18px 0 0">
+            <i class="ri-information-line"></i>
+            <p style="margin:0"><b>名額有限，先審核後繳費。</b>外部名額有限，先保留給背景與需求明確的夥伴；每一份報名主辦方都會親自看過，通過後再付款。</p>
           </div>
 
-          <h3 style="font-size:15px;margin-bottom:10px">選擇票種</h3>
+          <h3 style="font-size:15px;margin:22px 0 6px">常見問題</h3>
+          <div class="faq">
+            <details open><summary>為什麼需要審核？</summary><p>因為主辦方會親自讀每一份報名，想把有限的名額留給真正準備好交流與互助的人，讓現場每一段對話都有機會變成資源。</p></details>
+            <details><summary>會公布參與者姓名嗎？</summary><p>不會。公開頁面只放匿名經歷；姓名只會在報名確認後，提供給確認參與的夥伴，用於現場必要的聯繫。</p></details>
+          </div>
+        </section>
+
+        <!-- ② 報名表單 -->
+        <section class="sec">
+          <div class="sec-head">
+            <span class="sec-num">2</span><h2>報名表單</h2>
+            <span class="sec-anno">＝編輯器「報名表單」拖曳出的順序</span>
+          </div>
+          <p class="form-note">主辦方在編輯器自訂的欄位，會原封不動、依拖曳後的順序顯示給報名者。<span style="color:var(--cancel-color)">★</span> 為必填。</p>
+
+          <div class="field"><label>姓名 <span class="req">★</span></label><input class="input" placeholder="王小明" /></div>
+          <div class="row2">
+            <div class="field"><label>Email <span class="req">★</span></label><input class="input" type="email" placeholder="you@example.com" /></div>
+            <div class="field"><label>手機號碼 <span class="req">★</span></label><input class="input" placeholder="0912-345-678" /></div>
+          </div>
+          <div class="row2">
+            <div class="field"><label>目前身分 <span class="req">★</span></label>
+              <select class="select"><option>請選擇</option><option>大學生</option><option>碩 / 博士生</option><option>應屆畢業</option><option>連續創業者</option><option>社會人士</option></select></div>
+            <div class="field"><label>學校 / 團隊名稱 <span class="req">★</span></label><input class="input" placeholder="例：實習通 InternX" /></div>
+          </div>
+
+          <div class="note-anon">
+            <i class="ri-shield-keyhole-line"></i>
+            <span>請寫下三個過往經歷（想不到，寫非創業相關的也可以）。這裡只會匿名呈現背景，<b>不會出現姓名、Email 或電話</b>。</span>
+          </div>
+          <div class="row3">
+            <div class="field"><label>過往經歷 ① <span class="req">★</span></label><input class="input" placeholder="例：青年百億計畫" /></div>
+            <div class="field"><label>過往經歷 ② <span class="req">★</span></label><input class="input" placeholder="例：連續創業家" /></div>
+            <div class="field"><label>過往經歷 ③ <span class="req">★</span></label><input class="input" placeholder="例：AppWorks" /></div>
+          </div>
+          <div class="field"><label>你正在做什麼？想在小聚交換什麼？ <span class="req">★</span></label>
+            <textarea class="textarea" rows="3" placeholder="簡單描述你的專案、目前卡住的點，以及想找的夥伴。"></textarea></div>
+          <div class="field"><label>個人 / 作品連結（選填）</label><input class="input" placeholder="https://" /></div>
+          <div class="field" style="margin-bottom:0">
+            <label style="display:flex;align-items:flex-start;gap:9px;font-weight:400;font-size:13.5px;cursor:pointer">
+              <input type="checkbox" style="margin-top:3px" />
+              <span>我已了解本活動為<b>審核制</b>，送出後由主辦方審核，通過後再進行付款。<span class="req">★</span></span>
+            </label>
+          </div>
+        </section>
+
+        <!-- ③ 選擇票券 -->
+        <section class="sec">
+          <div class="sec-head">
+            <span class="sec-num">3</span><h2>選擇票券</h2>
+            <span class="sec-anno">狀態由系統自動判斷</span>
+          </div>
+          <div class="callout callout-fix" style="margin:0 0 16px">
+            <i class="ri-magic-line"></i>
+            <p style="margin:0">主辦方只填販售時間與數量，這裡的四種狀態（<b>販售中・尚未開賣・販售已截止・已售完</b>）全由系統算出。示範目前時間：<b>2026/06/22 14:30</b>。</p>
+          </div>
           <div id="pick"></div>
+        </section>
+      </div>
 
-          <div class="card" style="margin-top:14px;background:var(--bg-gray);border:none">
-            <div style="padding:14px 16px">
-              <div style="display:flex;justify-content:space-between;font-size:14px">
-                <span style="color:var(--text-soft)">小計</span>
-                <b id="total" style="font-family:Poppins;font-size:17px;color:var(--theme-color-dark)">NT$ 0</b>
-              </div>
-              <button class="btn btn-cta btn-block" style="margin-top:12px" id="cta" disabled
-                onclick="toast('（示意）前往填寫報名表單')">請先選擇票種</button>
-            </div>
-          </div>
-
-          <p style="font-size:11px;color:var(--text-faint);text-align:center;margin-top:12px;margin-bottom:0">
-            示範目前時間：2026/06/22 14:30
-          </p>
+      <!-- sticky submit -->
+      <div class="sticky-bar">
+        <div class="sum">
+          <div class="l" id="sumLabel">尚未選擇票券</div>
+          <div class="v" id="total">NT$ 0</div>
         </div>
+        <button class="btn btn-primary" id="cta" disabled onclick="toast('（示意）已送出報名，等待主辦方審核')">
+          <i class="ri-send-plane-line"></i> 送出報名（送審）
+        </button>
       </div>
     </div>
-
-    <!-- EXPLAINER -->
-    <div style="flex:1;min-width:300px;max-width:520px">
-      <h3>四種狀態，全部自動判斷</h3>
-      <p>主辦方只要填販售時間與數量，報名端的狀態完全由系統算出，主辦方不必手動上下架票券。</p>
-
-      <div class="card card-pad" style="margin-bottom:12px">
-        <span class="badge badge-live"><i class="ri-checkbox-circle-line"></i> 販售中</span>
-        <p style="margin:10px 0 0">在販售時間內且尚有名額 → 可選取、可加減數量。</p>
-      </div>
-      <div class="card card-pad" style="margin-bottom:12px">
-        <span class="badge badge-ended"><i class="ri-lock-line"></i> 販售已截止</span>
-        <p style="margin:10px 0 0"><b>早鳥票</b>：販售結束時間已過（6/18 &lt; 6/22）→ 自動鎖定、不可選。<br>
-        <span style="color:var(--cancel-color)">↳ 這就是目前線上版缺少的判斷。</span></p>
-      </div>
-      <div class="card card-pad" style="margin-bottom:12px">
-        <span class="badge badge-soldout"><i class="ri-close-circle-line"></i> 已售完</span>
-        <p style="margin:10px 0 0"><b>學生票</b>：售出 30 / 30 達上限 → 自動售完、不可選。</p>
-      </div>
-      <div class="card card-pad">
-        <span class="badge badge-soon"><i class="ri-time-line"></i> 尚未開賣</span>
-        <p style="margin:10px 0 0"><b>VIP 票</b>：販售 6/25 才開始 → 顯示開賣時間，暫不可選。</p>
-      </div>
-
-      <div class="callout callout-fix" style="margin-top:18px">
-        <i class="ri-arrow-left-right-line"></i>
-        <p style="margin:0">想改票券時間／數量看效果？回到 <a href="editor.html">主辦方編輯器 → 票券設定</a> 調整即可。</p>
-      </div>
-    </div>
-
   </div>
+
+  <p style="text-align:center;color:var(--text-faint);font-size:13px;margin-top:18px">
+    <i class="ri-arrow-left-right-line"></i> 想改活動內容、表單或票券？回到 <a href="editor.html">主辦方編輯器</a>
+  </p>
 </main>
 
-<footer class="foot">實習通 InternX · 報名者畫面示意 · 不影響線上服務</footer>
+<footer class="foot">實習通 InternX · 報名者畫面示意（範例：學生創業者小聚）· 不影響線上服務</footer>
 
 <script src="assets/app.js"></script>
 <script>
+/* tickets for 學生創業者小聚 —審核制，四種狀態示範 */
 const tickets = [
-  { name:'早鳥票', price:590, quantity:50, sold:38, saleStart:new Date(2026,5,1), saleEnd:new Date(2026,5,18,23,59), desc:'6/18 前限定優惠' },
-  { name:'一般票', price:890, quantity:100, sold:32, saleStart:new Date(2026,5,1), saleEnd:new Date(2026,6,10,23,59), desc:'含全日課程與午餐' },
-  { name:'學生票', price:490, quantity:30, sold:30, saleStart:new Date(2026,5,1), saleEnd:new Date(2026,6,10,23,59), desc:'需出示在學證明' },
-  { name:'VIP 一對一票', price:1500, quantity:20, sold:0, saleStart:new Date(2026,5,25), saleEnd:new Date(2026,6,10,23,59), desc:'含業師一對一 30 分鐘' },
+  { name:'早鳥審核票', price:300, quantity:30, sold:22, saleStart:new Date(2026,5,1), saleEnd:new Date(2026,5,18,23,59), desc:'6/18 前報名享優惠' },
+  { name:'一般審核票', price:500, quantity:40, sold:28, saleStart:new Date(2026,5,1), saleEnd:new Date(2026,5,27,23,59), desc:'含活動全程與茶點' },
+  { name:'學生團隊票（2 人）', price:800, quantity:10, sold:10, saleStart:new Date(2026,5,1), saleEnd:new Date(2026,5,27,23,59), desc:'兩人同行，需同校或同團隊' },
+  { name:'現場 VIP 一對一諮詢', price:1500, quantity:8, sold:0, saleStart:new Date(2026,5,25), saleEnd:new Date(2026,5,27,23,59), desc:'活動後與業師一對一 30 分鐘' },
 ];
 const qty = tickets.map(()=>0);
 
@@ -128,7 +184,7 @@ function render(){
         <div class="p-name">${t.name}
           <span class="badge ${st.cls}" style="margin-left:4px;font-size:11px"><i class="${st.icon}"></i> ${st.label}</span>
         </div>
-        <div class="p-desc">${t.desc}${sellable&&remain<=12?` · 僅剩 ${remain} 張`:''}${st.key==='soon'?` · ${fmtDate(t.saleStart)} 開賣`:''}</div>
+        <div class="p-desc">${t.desc}${sellable&&remain<=12?` · 僅剩 ${remain} 張`:''}${st.key==='soon'?` · ${fmtDate(t.saleStart)} 開賣`:''}${st.key==='ended'?' · 販售已結束':''}</div>
       </div>
       <div style="text-align:right">
         <div class="p-price">${NT(t.price)}</div>
@@ -140,10 +196,10 @@ function render(){
   });
   const total = tickets.reduce((s,t,i)=>s+t.price*qty[i],0);
   const count = qty.reduce((a,b)=>a+b,0);
-  document.getElementById('total').textContent = NT(total).replace('免費','NT$ 0');
+  document.getElementById('total').textContent = 'NT$ ' + total.toLocaleString('en-US');
+  document.getElementById('sumLabel').textContent = count===0 ? '尚未選擇票券' : `已選 ${count} 張票`;
   const cta = document.getElementById('cta');
   cta.disabled = count===0;
-  cta.textContent = count===0 ? '請先選擇票種' : `下一步 · 共 ${count} 張`;
 }
 function inc(i){ const remain=tickets[i].quantity-tickets[i].sold; if(qty[i]<Math.min(remain,6)) qty[i]++; render(); }
 function dec(i){ if(qty[i]>0) qty[i]--; render(); }

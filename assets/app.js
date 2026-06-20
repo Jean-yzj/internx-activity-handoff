@@ -54,6 +54,54 @@ function arrMove(arr, from, to) {
   return c;
 }
 
+/* ---- drag-to-reorder (HTML5 DnD, handle-initiated) ----
+   Demonstrates the production behaviour. Drag starts only from an element
+   carrying [data-grip]; rows without one (e.g. locked system fields) can't
+   be dragged. `minIndex` keeps draggable items below any leading locked rows.
+   Production should use @dnd-kit/sortable (pointer + touch + keyboard a11y) —
+   see INTEGRATION.md. Re-run after every render to rebind fresh nodes. */
+function clearDropHints(list) {
+  Array.from(list.children).forEach(r => r.classList.remove('drop-before', 'drop-after'));
+}
+function attachDnD(list, arr, render, minIndex = 0) {
+  let from = -1;
+  Array.from(list.children).forEach((row, i) => {
+    const grip = row.querySelector('[data-grip]');
+    if (!grip) return; // not draggable (locked)
+    const arm = () => { row.draggable = true; };
+    grip.addEventListener('mousedown', arm);
+    grip.addEventListener('touchstart', arm, { passive: true });
+    row.addEventListener('mouseup', () => { row.draggable = false; });
+    row.addEventListener('dragstart', (e) => {
+      from = i; row.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      try { e.dataTransfer.setData('text/plain', String(i)); } catch (_) {}
+    });
+    row.addEventListener('dragend', () => { row.classList.remove('dragging'); row.draggable = false; clearDropHints(list); });
+    row.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      const r = row.getBoundingClientRect();
+      const after = (e.clientY - r.top) > r.height / 2;
+      clearDropHints(list);
+      row.classList.add(after ? 'drop-after' : 'drop-before');
+    });
+    row.addEventListener('drop', (e) => {
+      e.preventDefault();
+      const r = row.getBoundingClientRect();
+      const after = (e.clientY - r.top) > r.height / 2;
+      let to = i + (after ? 1 : 0);
+      if (from < to) to--;
+      to = Math.max(minIndex, to);
+      if (from >= 0 && from !== to) {
+        const [m] = arr.splice(from, 1);
+        arr.splice(to, 0, m);
+      }
+      clearDropHints(list);
+      render();
+    });
+  });
+}
+
 /* ---- mark active top-nav link by filename ---- */
 document.addEventListener('DOMContentLoaded', () => {
   const here = location.pathname.split('/').pop() || 'index.html';

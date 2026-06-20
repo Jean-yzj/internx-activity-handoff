@@ -86,21 +86,31 @@
 
   <!-- 3. form builder -->
   <section class="section">
-    <h2>3 · 報名表單排序：加上 ↑ ↓ 按鈕</h2>
+    <h2>3 · 報名表單排序：用拖曳（@dnd-kit）</h2>
     <div class="callout callout-problem">
       <i class="ri-drag-move-line"></i>
       <p style="margin:0"><b>現況</b> · <code class="coderef">components/Activities/FormBuilder/FormBuilder.tsx:88</code><br>
-      已有 <code>handleReorderFields(fromIndex, toIndex)</code>，但只透過 <code class="coderef">FormPreview</code> 的拖曳觸發。工程端反映拖曳難實作、手機難用。</p>
+      已有 <code>handleReorderFields(fromIndex, toIndex)</code>，但拖曳是自製的、不穩、手機難用，所以才難實作。</p>
     </div>
     <div class="callout callout-fix">
       <i class="ri-check-double-line"></i>
-      <p style="margin:0"><b>改法（很小）：</b>邏輯已存在，只要在每個欄位列加兩顆按鈕呼叫既有函式即可，<b>不必動拖曳</b>：</p>
+      <p style="margin:0"><b>改法：</b>保留既有的 <code>handleReorderFields</code>，改用成熟套件 <code>@dnd-kit</code> 來驅動拖曳。內建指標 / 觸控 / 鍵盤支援，工程端不用自己處理拖曳事件，<b>抓把手就能順暢拖曳</b>。</p>
     </div>
-<pre class="code"><span class="c">// 在 FormPreview 的每個欄位列右側加：</span>
-&lt;button disabled={i === 0} onClick={() =&gt; <span class="n">onReorderFields</span>(i, i - 1)}&gt;↑&lt;/button&gt;
-&lt;button disabled={i === fields.length - 1} onClick={() =&gt; <span class="n">onReorderFields</span>(i, i + 1)}&gt;↓&lt;/button&gt;
-<span class="c">// 首尾自動禁用；拖曳保留為加分項，不再是唯一排序方式。</span></pre>
-    <p>系統必填欄位（姓名 / Email）可標記 <code>locked</code>，禁用刪除並固定在最上方。</p>
+<pre class="code">npm i @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities</pre>
+<pre class="code"><span class="c">// FormPreview：用 SortableContext 包欄位，handleReorderFields 不用改</span>
+&lt;<span class="k">DndContext</span> onDragEnd={({ active, over }) =&gt; {
+  <span class="k">if</span> (over &amp;&amp; active.id !== over.id) {
+    <span class="k">const</span> from = fields.findIndex(f =&gt; f.id === active.id);
+    <span class="k">const</span> to   = fields.findIndex(f =&gt; f.id === over.id);
+    <span class="n">handleReorderFields</span>(from, to);   <span class="c">// 既有函式直接重用</span>
+  }
+}}&gt;
+  &lt;<span class="k">SortableContext</span> items={fields.map(f =&gt; f.id)}&gt;
+    {fields.map(f =&gt; &lt;<span class="k">SortableFieldRow</span> key={f.id} field={f} /&gt;)}
+  &lt;/SortableContext&gt;
+&lt;/DndContext&gt;
+<span class="c">// SortableFieldRow 用 useSortable({id}) 取得把手 listeners，套到 grip 圖示上。</span></pre>
+    <p>系統必填欄位（姓名 / Email）標記 <code>locked</code>：不給拖曳把手、固定最上方，並用 dnd-kit 的 modifiers 限制不可被拖到其上方。完整步驟見 <a href="https://github.com/Jean-yzj/internx-activity-handoff/blob/main/INTEGRATION.md">INTEGRATION.md</a>。</p>
   </section>
 
   <!-- 4. files -->
@@ -126,7 +136,7 @@
     <div class="card card-pad">
       <div style="display:flex;gap:10px;margin-bottom:10px"><i class="ri-checkbox-circle-fill" style="color:var(--confirm-color)"></i> 早鳥票販售結束時間過後，報名端自動鎖定、不可選。</div>
       <div style="display:flex;gap:10px;margin-bottom:10px"><i class="ri-checkbox-circle-fill" style="color:var(--confirm-color)"></i> 每種票可獨立設數量，售完自動標記，且後端防超賣。</div>
-      <div style="display:flex;gap:10px;margin-bottom:10px"><i class="ri-checkbox-circle-fill" style="color:var(--confirm-color)"></i> 表單欄位可用 ↑ ↓ 按鈕排序，首尾按鈕自動禁用。</div>
+      <div style="display:flex;gap:10px;margin-bottom:10px"><i class="ri-checkbox-circle-fill" style="color:var(--confirm-color)"></i> 表單欄位可用拖曳排序（@dnd-kit），系統必填欄位固定最上方。</div>
       <div style="display:flex;gap:10px;margin-bottom:10px"><i class="ri-checkbox-circle-fill" style="color:var(--confirm-color)"></i> 編輯器分四步、欄位固定寬度，輸入時版面不跳動。</div>
       <div style="display:flex;gap:10px"><i class="ri-checkbox-circle-fill" style="color:var(--confirm-color)"></i> 視覺沿用既有 InternX token（#0182fd / Poppins + Noto Sans TC）。</div>
     </div>

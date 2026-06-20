@@ -15,7 +15,7 @@ modify** any existing `internx.me` code.
 |---|---|---|
 | 早鳥票過期還能選 | `feeItems: {name, price}` 無時間欄位 (`activity-form-schema.ts:328`) | 每票加 `saleStart/saleEnd`，狀態自動計算 |
 | 不能限制每種票張數 | 只有全活動名額上限 (`:371`) | 每票各設 `quantity` + 已售/剩餘 |
-| 欄位無法上下移動 | 只有拖曳 `handleReorderFields` (`FormBuilder.tsx:88`) | 加上 ↑ ↓ 箭頭按鈕，拖曳變選用 |
+| 欄位排序不順手 | 自製拖曳不穩、手機難用 (`FormBuilder.tsx:88`) | 改用 `@dnd-kit`，抓把手就能順暢拖曳 |
 | 編輯跑版、不精緻 | 單一長表單 `AddActivity.tsx` | 四步驟、固定寬度版面 + 即時預覽 |
 
 ## 內容
@@ -24,8 +24,9 @@ modify** any existing `internx.me` code.
 |---|---|
 | `index.html` | 總覽：痛點對照與改版重點 |
 | `editor.html` | 主辦方編輯器（票券與表單可實際操作） |
-| `attendee.html` | 報名者畫面（票券狀態自動判斷） |
+| `attendee.html` | 報名者完整頁面：活動介紹 + 報名表單 + 票券狀態（範例：學生創業者小聚） |
 | `spec.html` | 工程規格：資料模型、驗證、改動檔案清單、驗收標準 |
+| `INTEGRATION.md` | **工程交接文件**：前端頁面對應 + 如何串接進 internx.me |
 
 ## 本機預覽
 

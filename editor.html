@@ -107,7 +107,7 @@
       <!-- STEP 3: FORM BUILDER -->
       <section class="pane" data-pane="form">
         <div class="step-head"><div><h2>報名表單</h2></div></div>
-        <p class="step-sub">從左側欄位庫點擊加入，右側用 <b>↑ ↓ 箭頭</b> 調整順序（不需要拖曳）。</p>
+        <p class="step-sub">從左側欄位庫點擊加入，右側<b>拖曳左邊的把手</b>即可上下排序。系統必填欄位固定在最上方。</p>
 
         <div class="fb">
           <aside class="fb-library">
@@ -127,7 +127,7 @@
           <div class="fb-canvas">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
               <div style="font-size:13px;color:var(--text-faint)">報名者會依此順序填寫</div>
-              <div style="font-size:12px;color:var(--text-faint)"><i class="ri-information-line"></i> 點欄位可編輯，箭頭可排序</div>
+              <div style="font-size:12px;color:var(--text-faint)"><i class="ri-information-line"></i> 點欄位可編輯，拖曳把手可排序</div>
             </div>
             <div id="fieldList"></div>
           </div>
@@ -172,7 +172,7 @@
 
         <div style="display:flex;justify-content:space-between;gap:10px;margin-top:18px">
           <button class="btn btn-ghost" onclick="goStep('form')"><i class="ri-arrow-left-line"></i> 上一步</button>
-          <button class="btn btn-cta" onclick="toast('（示意）已送出審核')"><i class="ri-send-plane-line"></i> 送出審核並上架</button>
+          <button class="btn btn-primary" onclick="toast('（示意）已送出審核')"><i class="ri-send-plane-line"></i> 送出審核並上架</button>
         </div>
       </section>
 
@@ -237,15 +237,11 @@ function renderTickets() {
     el.className = 'ticket' + (st.key === 'ended' ? ' is-ended' : '');
     el.innerHTML = `
       <div class="ticket-head" onclick="toggleTicket(${i})">
-        <span class="ticket-grip" title="拖曳排序（選用）"><i class="ri-draggable"></i></span>
+        <span class="ticket-grip" data-grip title="拖曳排序" onclick="event.stopPropagation()"><i class="ri-draggable"></i></span>
         <span class="t-name">${t.name}</span>
         <span class="badge ${st.cls}"><i class="${st.icon}"></i> ${st.label}</span>
         <span class="t-price">${t.price === 0 ? '<span class="free">免費</span>' : NT(t.price)}</span>
         <span class="ticket-actions" onclick="event.stopPropagation()">
-          <span class="reorder">
-            <button class="icon-btn" title="上移" ${i===0?'disabled':''} onclick="moveTicket(${i},-1)"><i class="ri-arrow-up-s-line"></i></button>
-            <button class="icon-btn" title="下移" ${i===tickets.length-1?'disabled':''} onclick="moveTicket(${i},1)"><i class="ri-arrow-down-s-line"></i></button>
-          </span>
           <button class="icon-btn" title="${t.open?'收合':'編輯'}" onclick="toggleTicket(${i})"><i class="ri-${t.open?'subtract':'edit'}-line"></i></button>
           <button class="icon-btn danger" title="刪除" onclick="delTicket(${i})"><i class="ri-delete-bin-line"></i></button>
         </span>
@@ -259,6 +255,7 @@ function renderTickets() {
     `;
     wrap.appendChild(el);
   });
+  attachDnD(wrap, tickets, renderTickets, 0);
 }
 
 function ticketBody(t, i) {
@@ -291,7 +288,6 @@ function ticketBody(t, i) {
 }
 
 function toggleTicket(i){ tickets[i].open = !tickets[i].open; renderTickets(); }
-function moveTicket(i,dir){ tickets = arrMove(tickets,i,i+dir); renderTickets(); }
 function delTicket(i){ if(confirm('刪除「'+tickets[i].name+'」？')){ tickets.splice(i,1); renderTickets(); } }
 function updTicket(i,k,v){ tickets[i][k]=v; const t=tickets[i];
   // live-update head badge/price without losing focus: re-render only the head row would be ideal,
@@ -328,6 +324,7 @@ let fields = [
 ];
 let selectedField = -1;
 
+function lockedLead(){ let n=0; for(const f of fields){ if(f.locked) n++; else break; } return n; }
 function renderFields(){
   const wrap = document.getElementById('fieldList');
   wrap.innerHTML = '';
@@ -336,25 +333,20 @@ function renderFields(){
     const el = document.createElement('div');
     el.className='field-row'+(i===selectedField?' selected':'')+(f.locked?' locked':'');
     el.innerHTML = `
+      ${f.locked
+        ? `<span class="fr-grip-locked" title="系統欄位，固定在最上方"><i class="ri-lock-line"></i></span>`
+        : `<span class="fr-grip" data-grip title="拖曳排序"><i class="ri-draggable"></i></span>`}
       <span class="fr-icon"><i class="${m.icon}"></i></span>
       <span class="fr-main" onclick="selectField(${i})">
         <div class="fr-label">${f.label} ${f.required?'<span class="req">*</span>':''}</div>
         <div class="fr-type">${m.label}${f.locked?' · 系統必填':''}</div>
-      </span>
-      <span class="reorder">
-        <button class="icon-btn" title="上移" ${i===0?'disabled':''} onclick="moveField(${i},-1)"><i class="ri-arrow-up-s-line"></i></button>
-        <button class="icon-btn" title="下移" ${i===fields.length-1?'disabled':''} onclick="moveField(${i},1)"><i class="ri-arrow-down-s-line"></i></button>
       </span>
       <button class="icon-btn" title="${f.required?'設為選填':'設為必填'}" onclick="toggleReq(${i})"><i class="ri-${f.required?'star-fill':'star-line'}"></i></button>
       <button class="icon-btn danger" title="刪除" ${f.locked?'disabled':''} onclick="delField(${i})"><i class="ri-delete-bin-line"></i></button>
     `;
     wrap.appendChild(el);
   });
-}
-function moveField(i,dir){
-  // don't move into the locked system block boundary cosmetically; allow but keep simple
-  fields = arrMove(fields,i,i+dir);
-  if(selectedField===i) selectedField=i+dir; renderFields();
+  attachDnD(wrap, fields, renderFields, lockedLead());
 }
 function selectField(i){ selectedField = (selectedField===i?-1:i); renderFields(); }
 function toggleReq(i){ if(fields[i].locked){toast('系統欄位必填，無法調整');return;} fields[i].required=!fields[i].required; renderFields(); }
