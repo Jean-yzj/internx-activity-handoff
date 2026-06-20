@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>主辦方編輯器 — 實習通活動報名改版</title>
+<link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <a href="index.html" class="brand" style="text-decoration:none">
+    <span class="logo">X</span><span>實習通</span>
+    <span class="sub">主辦方編輯器</span>
+  </a>
+  <span class="spacer"></span>
+  <nav class="topnav">
+    <a href="index.html">總覽</a>
+    <a href="editor.html">主辦方編輯器</a>
+    <a href="attendee.html">報名者畫面</a>
+    <a href="spec.html">工程規格</a>
+  </nav>
+  <span class="mockup-pill">介面示意 Mockup</span>
+</header>
+
+<main class="wrap">
+  <div class="section" style="margin-bottom:24px">
+    <div class="eyebrow">主辦方視角</div>
+    <h1 style="font-size:30px">建立活動 · 編輯器</h1>
+    <p class="lead">左側固定步驟、右側固定寬度表單，不再跑版。最關鍵的 <b>票券設定</b> 與 <b>報名表單</b> 兩步可直接操作試用。</p>
+  </div>
+
+  <div class="editor">
+    <!-- LEFT STEP NAV -->
+    <nav class="editor-nav">
+      <div class="title">建立活動</div>
+      <button class="step active" data-step="content"><span class="num">1</span> 活動內容</button>
+      <button class="step" data-step="tickets"><span class="num">2</span> 票券設定</button>
+      <button class="step" data-step="form"><span class="num">3</span> 報名表單</button>
+      <button class="step" data-step="advanced"><span class="num">4</span> 進階與送出</button>
+    </nav>
+
+    <!-- MAIN -->
+    <div class="editor-main">
+
+      <!-- STEP 1: CONTENT -->
+      <section class="pane active" data-pane="content">
+        <div class="step-head"><div><h2>活動內容</h2></div></div>
+        <p class="step-sub">固定寬度欄位，輸入時版面不會跳動。</p>
+
+        <div class="field">
+          <label>活動名稱 <span class="req">*</span></label>
+          <input class="input" value="2026 實習通職涯實戰營：從履歷到 Offer" />
+        </div>
+        <div class="field">
+          <label>活動封面</label>
+          <div class="card" style="border-style:dashed;display:grid;place-items:center;height:140px;color:var(--text-faint);background:var(--bg-gray)">
+            <div style="text-align:center"><i class="ri-image-add-line" style="font-size:28px"></i><div style="font-size:13px;margin-top:6px">點擊或拖曳上傳，建議 1200 × 630</div></div>
+          </div>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label>活動開始 <span class="req">*</span></label>
+            <input class="input" type="datetime-local" value="2026-07-12T13:30" />
+          </div>
+          <div class="field">
+            <label>活動結束 <span class="req">*</span></label>
+            <input class="input" type="datetime-local" value="2026-07-12T17:30" />
+          </div>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label>形式</label>
+            <select class="select"><option>實體</option><option>線上</option><option>混合</option></select>
+          </div>
+          <div class="field">
+            <label>地點</label>
+            <input class="input" value="台北市信義區松壽路 1 號 · 實習通共創空間" />
+          </div>
+        </div>
+        <div class="field">
+          <label>活動介紹</label>
+          <textarea class="textarea" rows="4">一天密集實戰：上午履歷健診與面試模擬，下午企業聯合說明會。完訓發給結業證明與內推資格。</textarea>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:8px">
+          <button class="btn btn-primary" onclick="goStep('tickets')">下一步：票券設定 <i class="ri-arrow-right-line"></i></button>
+        </div>
+      </section>
+
+      <!-- STEP 2: TICKETS (core) -->
+      <section class="pane" data-pane="tickets">
+        <div class="step-head">
+          <div><h2>票券設定</h2></div>
+          <button class="btn btn-soft btn-sm" onclick="addTicket()"><i class="ri-add-line"></i> 新增票種</button>
+        </div>
+        <p class="step-sub">每一張票都能各自設定 <b>售價</b>、<b>數量上限</b> 與 <b>販售起訖時間</b>。狀態由系統自動計算。</p>
+
+        <div class="callout callout-info" style="margin-top:0">
+          <i class="ri-time-line"></i>
+          <p style="margin:0">示範用「目前時間」設為 <b>2026/06/22 14:30</b>。下方早鳥票販售到 6/18，因此自動顯示
+          <span class="badge badge-ended"><i class="ri-lock-line"></i> 販售已截止</span> 且報名端不可選 — 正是現在缺少的行為。</p>
+        </div>
+
+        <div id="ticketList"></div>
+      </section>
+
+      <!-- STEP 3: FORM BUILDER -->
+      <section class="pane" data-pane="form">
+        <div class="step-head"><div><h2>報名表單</h2></div></div>
+        <p class="step-sub">從左側欄位庫點擊加入，右側用 <b>↑ ↓ 箭頭</b> 調整順序（不需要拖曳）。</p>
+
+        <div class="fb">
+          <aside class="fb-library">
+            <div class="title">欄位庫</div>
+            <button class="fb-chip" onclick="addField('text')"><i class="ri-text"></i> 單行文字</button>
+            <button class="fb-chip" onclick="addField('textarea')"><i class="ri-align-left"></i> 多行文字</button>
+            <button class="fb-chip" onclick="addField('email')"><i class="ri-mail-line"></i> Email</button>
+            <button class="fb-chip" onclick="addField('phone')"><i class="ri-phone-line"></i> 電話</button>
+            <button class="fb-chip" onclick="addField('select')"><i class="ri-list-check"></i> 下拉選單</button>
+            <button class="fb-chip" onclick="addField('radio')"><i class="ri-radio-button-line"></i> 單選題</button>
+            <button class="fb-chip" onclick="addField('checkbox')"><i class="ri-checkbox-multiple-line"></i> 複選題</button>
+            <button class="fb-chip" onclick="addField('date')"><i class="ri-calendar-line"></i> 日期</button>
+            <button class="fb-chip" onclick="addField('file')"><i class="ri-attachment-2"></i> 檔案上傳</button>
+            <button class="fb-chip" onclick="addField('agreement')"><i class="ri-checkbox-circle-line"></i> 同意條款</button>
+          </aside>
+
+          <div class="fb-canvas">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+              <div style="font-size:13px;color:var(--text-faint)">報名者會依此順序填寫</div>
+              <div style="font-size:12px;color:var(--text-faint)"><i class="ri-information-line"></i> 點欄位可編輯，箭頭可排序</div>
+            </div>
+            <div id="fieldList"></div>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px">
+          <button class="btn btn-ghost" onclick="goStep('tickets')"><i class="ri-arrow-left-line"></i> 上一步</button>
+          <button class="btn btn-primary" onclick="goStep('advanced')">下一步：進階設定 <i class="ri-arrow-right-line"></i></button>
+        </div>
+      </section>
+
+      <!-- STEP 4: ADVANCED -->
+      <section class="pane" data-pane="advanced">
+        <div class="step-head"><div><h2>進階與送出</h2></div></div>
+        <p class="step-sub">付款、退款與審核設定，最後預覽送出。</p>
+
+        <div class="field">
+          <label>付款方式</label>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <label class="card card-pad" style="display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer">
+              <input type="checkbox" checked /> <span><b>實習通點數折抵</b><br><small style="color:var(--text-faint)">1 點 = 1 元，即時完成</small></span>
+            </label>
+            <label class="card card-pad" style="display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer">
+              <input type="checkbox" checked /> <span><b>銀行轉帳</b><br><small style="color:var(--text-faint)">回報末五碼，後台對帳</small></span>
+            </label>
+          </div>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label>報名審核</label>
+            <select class="select"><option>自動通過</option><option>需主辦方審核</option></select>
+          </div>
+          <div class="field">
+            <label>退款政策</label>
+            <select class="select"><option>活動前 7 天可全額退款</option><option>不可退款</option><option>自訂</option></select>
+          </div>
+        </div>
+
+        <div class="callout callout-fix">
+          <i class="ri-eye-line"></i>
+          <p style="margin:0">送出前可在 <a href="attendee.html">報名者畫面</a> 預覽整頁外觀與票券狀態。</p>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;gap:10px;margin-top:18px">
+          <button class="btn btn-ghost" onclick="goStep('form')"><i class="ri-arrow-left-line"></i> 上一步</button>
+          <button class="btn btn-cta" onclick="toast('（示意）已送出審核')"><i class="ri-send-plane-line"></i> 送出審核並上架</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <p style="text-align:center;color:var(--text-faint);font-size:13px;margin-top:18px">
+    <i class="ri-cursor-line"></i> 可實際操作：切換步驟、新增/排序票券與欄位、展開票券編輯
+  </p>
+</main>
+
+<footer class="foot">實習通 InternX · 主辦方編輯器示意 · 不影響線上服務</footer>
+
+<script src="assets/app.js"></script>
+<script>
+/* ---------------- step switching ---------------- */
+function goStep(step) {
+  document.querySelectorAll('.step').forEach(s => s.classList.toggle('active', s.dataset.step === step));
+  document.querySelectorAll('.pane').forEach(p => p.classList.toggle('active', p.dataset.pane === step));
+  // mark earlier steps done
+  const order = ['content','tickets','form','advanced'];
+  const idx = order.indexOf(step);
+  document.querySelectorAll('.step').forEach(s => {
+    const i = order.indexOf(s.dataset.step);
+    s.classList.toggle('done', i < idx);
+  });
+  document.querySelector('.editor-main').scrollTop = 0;
+}
+document.querySelectorAll('.step').forEach(s => s.addEventListener('click', () => goStep(s.dataset.step)));
+
+/* ---------------- TICKETS data + render ---------------- */
+let tickets = [
+  { name: '早鳥票', price: 590, quantity: 50, sold: 38,
+    saleStart: new Date(2026,5,1,0,0), saleEnd: new Date(2026,5,18,23,59),
+    desc: '6/18 前限定優惠價', open: false },
+  { name: '一般票', price: 890, quantity: 100, sold: 32,
+    saleStart: new Date(2026,5,1,0,0), saleEnd: new Date(2026,6,10,23,59),
+    desc: '含全日課程與午餐', open: true },
+  { name: '學生票', price: 490, quantity: 30, sold: 30,
+    saleStart: new Date(2026,5,1,0,0), saleEnd: new Date(2026,6,10,23,59),
+    desc: '需出示在學證明', open: false },
+  { name: 'VIP 一對一票', price: 1500, quantity: 20, sold: 0,
+    saleStart: new Date(2026,5,25,0,0), saleEnd: new Date(2026,6,10,23,59),
+    desc: '含業師一對一諮詢 30 分鐘', open: false },
+];
+
+function toLocalInput(d) {
+  if (!d) return '';
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function renderTickets() {
+  const wrap = document.getElementById('ticketList');
+  wrap.innerHTML = '';
+  tickets.forEach((t, i) => {
+    const st = ticketStatus(t);
+    const remain = t.quantity != null ? Math.max(0, t.quantity - t.sold) : '∞';
+    const pct = t.quantity ? Math.min(100, Math.round(t.sold / t.quantity * 100)) : 0;
+    const stockCls = t.quantity && t.sold >= t.quantity ? 'out' : (t.quantity && remain <= 5 ? 'low' : '');
+
+    const el = document.createElement('div');
+    el.className = 'ticket' + (st.key === 'ended' ? ' is-ended' : '');
+    el.innerHTML = `
+      <div class="ticket-head" onclick="toggleTicket(${i})">
+        <span class="ticket-grip" title="拖曳排序（選用）"><i class="ri-draggable"></i></span>
+        <span class="t-name">${t.name}</span>
+        <span class="badge ${st.cls}"><i class="${st.icon}"></i> ${st.label}</span>
+        <span class="t-price">${t.price === 0 ? '<span class="free">免費</span>' : NT(t.price)}</span>
+        <span class="ticket-actions" onclick="event.stopPropagation()">
+          <span class="reorder">
+            <button class="icon-btn" title="上移" ${i===0?'disabled':''} onclick="moveTicket(${i},-1)"><i class="ri-arrow-up-s-line"></i></button>
+            <button class="icon-btn" title="下移" ${i===tickets.length-1?'disabled':''} onclick="moveTicket(${i},1)"><i class="ri-arrow-down-s-line"></i></button>
+          </span>
+          <button class="icon-btn" title="${t.open?'收合':'編輯'}" onclick="toggleTicket(${i})"><i class="ri-${t.open?'subtract':'edit'}-line"></i></button>
+          <button class="icon-btn danger" title="刪除" onclick="delTicket(${i})"><i class="ri-delete-bin-line"></i></button>
+        </span>
+      </div>
+      <div class="ticket-meta">
+        <span class="m"><i class="ri-coupon-3-line"></i> 數量 <b>${t.quantity ?? '不限'}</b>${t.quantity?` · 已售 ${t.sold} · 剩 ${remain}`:''}</span>
+        <span class="m"><i class="ri-calendar-event-line"></i> 販售 <b>${t.saleStart?fmtDate(t.saleStart):'—'} ~ ${t.saleEnd?fmtDate(t.saleEnd):'—'}</b></span>
+      </div>
+      ${t.quantity ? `<div style="padding:0 16px 4px"><div class="stockbar ${stockCls}"><span style="width:${pct}%"></span></div></div>` : ''}
+      ${t.open ? ticketBody(t, i) : ''}
+    `;
+    wrap.appendChild(el);
+  });
+}
+
+function ticketBody(t, i) {
+  return `
+  <div class="ticket-body">
+    <div class="row2">
+      <div class="field"><label>票種名稱 <span class="req">*</span></label>
+        <input class="input" value="${t.name}" oninput="updTicket(${i},'name',this.value)"></div>
+      <div class="field"><label>售價（NT$）</label>
+        <div class="input-group"><span class="input-prefix">NT$</span>
+        <input class="input" type="number" value="${t.price}" oninput="updTicket(${i},'price',+this.value)"></div></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>數量上限</label>
+        <input class="input" type="number" value="${t.quantity ?? ''}" placeholder="留空 = 不限" oninput="updTicket(${i},'quantity',this.value===''?null:+this.value)">
+        <div class="hint">售出達上限會自動標記「已售完」並停止販售</div></div>
+      <div class="field"><label>已售（示範用）</label>
+        <input class="input" type="number" value="${t.sold}" oninput="updTicket(${i},'sold',+this.value)"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>販售開始 <span class="req">*</span></label>
+        <input class="input" type="datetime-local" value="${toLocalInput(t.saleStart)}" onchange="updTicketDate(${i},'saleStart',this.value)"></div>
+      <div class="field"><label>販售結束 <span class="req">*</span></label>
+        <input class="input" type="datetime-local" value="${toLocalInput(t.saleEnd)}" onchange="updTicketDate(${i},'saleEnd',this.value)">
+        <div class="hint">超過此時間，此票券在報名端自動隱藏／鎖定</div></div>
+    </div>
+    <div class="field" style="margin-bottom:0"><label>票券說明</label>
+      <input class="input" value="${t.desc}" oninput="updTicket(${i},'desc',this.value)"></div>
+  </div>`;
+}
+
+function toggleTicket(i){ tickets[i].open = !tickets[i].open; renderTickets(); }
+function moveTicket(i,dir){ tickets = arrMove(tickets,i,i+dir); renderTickets(); }
+function delTicket(i){ if(confirm('刪除「'+tickets[i].name+'」？')){ tickets.splice(i,1); renderTickets(); } }
+function updTicket(i,k,v){ tickets[i][k]=v; const t=tickets[i];
+  // live-update head badge/price without losing focus: re-render only the head row would be ideal,
+  // but for the mockup we update the model and re-render on blur via the meta. Keep input focus:
+  if(k==='name'||k==='price'||k==='quantity'||k==='sold'){ refreshTicketHead(i); }
+}
+function updTicketDate(i,k,v){ tickets[i][k]= v? new Date(v): null; renderTickets(); }
+function refreshTicketHead(i){
+  // re-render whole list but keep open states; acceptable for mockup
+  renderTickets();
+}
+function addTicket(){
+  tickets.push({ name:'新票種', price:0, quantity:null, sold:0,
+    saleStart:new Date(2026,5,22,0,0), saleEnd:new Date(2026,6,12,23,59), desc:'', open:true });
+  renderTickets();
+  document.getElementById('ticketList').lastElementChild.scrollIntoView({behavior:'smooth',block:'center'});
+}
+renderTickets();
+
+/* ---------------- FORM BUILDER ---------------- */
+const FIELD_META = {
+  text:{icon:'ri-text',label:'單行文字'}, textarea:{icon:'ri-align-left',label:'多行文字'},
+  email:{icon:'ri-mail-line',label:'Email'}, phone:{icon:'ri-phone-line',label:'電話'},
+  select:{icon:'ri-list-check',label:'下拉選單'}, radio:{icon:'ri-radio-button-line',label:'單選題'},
+  checkbox:{icon:'ri-checkbox-multiple-line',label:'複選題'}, date:{icon:'ri-calendar-line',label:'日期'},
+  file:{icon:'ri-attachment-2',label:'檔案上傳'}, agreement:{icon:'ri-checkbox-circle-line',label:'同意條款'},
+};
+let fields = [
+  { type:'text', label:'姓名', required:true, locked:true },
+  { type:'email', label:'Email', required:true, locked:true },
+  { type:'phone', label:'手機號碼', required:true, locked:false },
+  { type:'select', label:'目前身分（大一～社會人士）', required:true, locked:false },
+  { type:'file', label:'在學證明（學生票必附）', required:false, locked:false },
+];
+let selectedField = -1;
+
+function renderFields(){
+  const wrap = document.getElementById('fieldList');
+  wrap.innerHTML = '';
+  fields.forEach((f,i)=>{
+    const m = FIELD_META[f.type] || {icon:'ri-question-line',label:f.type};
+    const el = document.createElement('div');
+    el.className='field-row'+(i===selectedField?' selected':'')+(f.locked?' locked':'');
+    el.innerHTML = `
+      <span class="fr-icon"><i class="${m.icon}"></i></span>
+      <span class="fr-main" onclick="selectField(${i})">
+        <div class="fr-label">${f.label} ${f.required?'<span class="req">*</span>':''}</div>
+        <div class="fr-type">${m.label}${f.locked?' · 系統必填':''}</div>
+      </span>
+      <span class="reorder">
+        <button class="icon-btn" title="上移" ${i===0?'disabled':''} onclick="moveField(${i},-1)"><i class="ri-arrow-up-s-line"></i></button>
+        <button class="icon-btn" title="下移" ${i===fields.length-1?'disabled':''} onclick="moveField(${i},1)"><i class="ri-arrow-down-s-line"></i></button>
+      </span>
+      <button class="icon-btn" title="${f.required?'設為選填':'設為必填'}" onclick="toggleReq(${i})"><i class="ri-${f.required?'star-fill':'star-line'}"></i></button>
+      <button class="icon-btn danger" title="刪除" ${f.locked?'disabled':''} onclick="delField(${i})"><i class="ri-delete-bin-line"></i></button>
+    `;
+    wrap.appendChild(el);
+  });
+}
+function moveField(i,dir){
+  // don't move into the locked system block boundary cosmetically; allow but keep simple
+  fields = arrMove(fields,i,i+dir);
+  if(selectedField===i) selectedField=i+dir; renderFields();
+}
+function selectField(i){ selectedField = (selectedField===i?-1:i); renderFields(); }
+function toggleReq(i){ if(fields[i].locked){toast('系統欄位必填，無法調整');return;} fields[i].required=!fields[i].required; renderFields(); }
+function delField(i){ if(fields[i].locked){toast('系統必填欄位不可刪除');return;} fields.splice(i,1); selectedField=-1; renderFields(); }
+function addField(type){
+  const m = FIELD_META[type];
+  fields.push({ type, label: m.label, required:false, locked:false });
+  renderFields();
+  document.getElementById('fieldList').lastElementChild.scrollIntoView({behavior:'smooth',block:'center'});
+}
+renderFields();
+</script>
+</body>
+</html>

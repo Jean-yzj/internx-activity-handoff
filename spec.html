@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>工程規格 — 實習通活動報名改版</title>
+<link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <a href="index.html" class="brand" style="text-decoration:none">
+    <span class="logo">X</span><span>實習通</span>
+    <span class="sub">工程規格</span>
+  </a>
+  <span class="spacer"></span>
+  <nav class="topnav">
+    <a href="index.html">總覽</a>
+    <a href="editor.html">主辦方編輯器</a>
+    <a href="attendee.html">報名者畫面</a>
+    <a href="spec.html">工程規格</a>
+  </nav>
+  <span class="mockup-pill">介面示意 Mockup</span>
+</header>
+
+<main class="wrap wrap-narrow">
+  <div class="section" style="margin-bottom:22px">
+    <div class="eyebrow">給工程同事</div>
+    <h1 style="font-size:30px">工程規格與改動清單</h1>
+    <p class="lead">以下對應現有 <code class="coderef">internx-me/frontend</code> 的檔案。這是建議的最小改動路徑，不是要求重寫。</p>
+  </div>
+
+  <!-- 1. ticket model -->
+  <section class="section">
+    <h2>1 · 票券資料模型（核心）</h2>
+    <p>目前票券只有名稱與價格，缺少「販售時間」與「數量」。建議把 <code class="coderef">feeItems</code> 從 <code>{ name, price }</code> 擴充為完整票券物件。</p>
+
+    <div class="callout callout-problem">
+      <i class="ri-close-circle-line"></i>
+      <p style="margin:0"><b>現況</b> · <code class="coderef">lib/form-schema/activity-form-schema.ts:328</code><br>
+      <code>feeItems: Array&lt;{ name: string; price: number }&gt;</code> — 無時間、無數量，故早鳥過期仍可選、無法限量。</p>
+    </div>
+
+<pre class="code"><span class="c">// 建議的票券型別（新增 data/ticket.ts，或擴充 activity.ts）</span>
+<span class="k">interface</span> Ticket {
+  id: <span class="k">string</span>;
+  name: <span class="k">string</span>;            <span class="c">// 票種名稱</span>
+  price: <span class="k">number</span>;           <span class="c">// 0 = 免費</span>
+  <span class="plus">quantity: number | null;</span>  <span class="c">// + 數量上限，null = 不限</span>
+  <span class="plus">sold: number;</span>             <span class="c">// + 已售（後端維護，前端唯讀）</span>
+  <span class="plus">saleStart: Timestamp;</span>     <span class="c">// + 販售開始</span>
+  <span class="plus">saleEnd: Timestamp;</span>       <span class="c">// + 販售結束</span>
+  description?: <span class="k">string</span>;
+  order: <span class="k">number</span>;           <span class="c">// 排序用</span>
+}</pre>
+
+    <h3 style="margin-top:24px">狀態由系統計算，不另存欄位</h3>
+    <p>報名端與編輯端共用同一個函式，避免主辦方手動上下架。</p>
+<pre class="code"><span class="k">function</span> <span class="n">ticketStatus</span>(t: Ticket, now = new Date()) {
+  <span class="k">if</span> (t.quantity != <span class="k">null</span> && t.sold &gt;= t.quantity) <span class="k">return</span> <span class="s">'soldout'</span>;  <span class="c">// 已售完</span>
+  <span class="k">if</span> (now &lt; t.saleStart) <span class="k">return</span> <span class="s">'soon'</span>;                            <span class="c">// 尚未開賣</span>
+  <span class="k">if</span> (now &gt; t.saleEnd)   <span class="k">return</span> <span class="s">'ended'</span>;                           <span class="c">// 販售已截止</span>
+  <span class="k">return</span> <span class="s">'live'</span>;                                                  <span class="c">// 販售中（唯一可購買）</span>
+}</pre>
+    <div class="callout callout-info">
+      <i class="ri-lightbulb-line"></i>
+      <p style="margin:0">報名送出時後端需<b>再驗一次</b> <code>ticketStatus === 'live'</code> 且 <code>sold &lt; quantity</code>，避免前端被繞過或併發超賣。</p>
+    </div>
+  </section>
+
+  <!-- 2. validation -->
+  <section class="section">
+    <h2>2 · 表單驗證調整</h2>
+    <p><code class="coderef">activity-form-schema.ts</code> 的 <code>feeItems.validation</code> 需加上時間與數量檢查：</p>
+    <table class="spec">
+      <thead><tr><th>規則</th><th>訊息</th></tr></thead>
+      <tbody>
+        <tr><td><code>saleStart &lt; saleEnd</code></td><td>販售開始需早於結束時間</td></tr>
+        <tr><td><code>quantity == null || quantity &gt;= 1</code></td><td>數量上限需 ≥ 1，或留空表示不限</td></tr>
+        <tr><td><code>price &gt;= 0</code></td><td>（現有）價格不可為負</td></tr>
+        <tr><td>付費活動至少 1 張票</td><td>請至少新增一個票種</td></tr>
+      </tbody>
+    </table>
+    <p style="margin-top:12px">原本獨立的 <code class="coderef">feeAmount</code>（單一費用）與 <code class="coderef">參加名額上限</code>（schema:371）可由票券模型取代；保留與否視既有報名資料相容性決定。</p>
+  </section>
+
+  <!-- 3. form builder -->
+  <section class="section">
+    <h2>3 · 報名表單排序：加上 ↑ ↓ 按鈕</h2>
+    <div class="callout callout-problem">
+      <i class="ri-drag-move-line"></i>
+      <p style="margin:0"><b>現況</b> · <code class="coderef">components/Activities/FormBuilder/FormBuilder.tsx:88</code><br>
+      已有 <code>handleReorderFields(fromIndex, toIndex)</code>，但只透過 <code class="coderef">FormPreview</code> 的拖曳觸發。工程端反映拖曳難實作、手機難用。</p>
+    </div>
+    <div class="callout callout-fix">
+      <i class="ri-check-double-line"></i>
+      <p style="margin:0"><b>改法（很小）：</b>邏輯已存在，只要在每個欄位列加兩顆按鈕呼叫既有函式即可，<b>不必動拖曳</b>：</p>
+    </div>
+<pre class="code"><span class="c">// 在 FormPreview 的每個欄位列右側加：</span>
+&lt;button disabled={i === 0} onClick={() =&gt; <span class="n">onReorderFields</span>(i, i - 1)}&gt;↑&lt;/button&gt;
+&lt;button disabled={i === fields.length - 1} onClick={() =&gt; <span class="n">onReorderFields</span>(i, i + 1)}&gt;↓&lt;/button&gt;
+<span class="c">// 首尾自動禁用；拖曳保留為加分項，不再是唯一排序方式。</span></pre>
+    <p>系統必填欄位（姓名 / Email）可標記 <code>locked</code>，禁用刪除並固定在最上方。</p>
+  </section>
+
+  <!-- 4. files -->
+  <section class="section">
+    <h2>4 · 改動檔案清單</h2>
+    <table class="spec">
+      <thead><tr><th>檔案</th><th>動作</th><th>說明</th></tr></thead>
+      <tbody>
+        <tr><td><code>data/ticket.ts</code></td><td class="tag-add">新增</td><td>Ticket 型別 + ticketStatus()，編輯/報名端共用</td></tr>
+        <tr><td><code>data/activity.ts</code></td><td class="tag-add">擴充</td><td>活動關聯 tickets[]（取代或相容 feeItems）</td></tr>
+        <tr><td><code>lib/form-schema/activity-form-schema.ts</code></td><td class="tag-add">改</td><td>feeItems 改為票券物件、新增驗證（:328、:371）</td></tr>
+        <tr><td><code>components/Activities/AddActivity.tsx</code></td><td class="tag-keep">沿用</td><td>維持步驟式結構；票券步驟換成新的編輯器卡片</td></tr>
+        <tr><td><code>components/Activities/FormBuilder/FormPreview.tsx</code></td><td class="tag-add">改</td><td>每列加上 ↑ ↓ 按鈕（呼叫既有 reorder）</td></tr>
+        <tr><td><code>components/Payments/Payments.tsx</code></td><td class="tag-keep">沿用</td><td>金流邏輯不變，僅金額來源改自所選票券</td></tr>
+        <tr><td><code>data/registration.ts</code></td><td class="tag-add">擴充</td><td>報名記錄需存 ticketId 與張數</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 5. acceptance -->
+  <section class="section">
+    <h2>5 · 驗收標準</h2>
+    <div class="card card-pad">
+      <div style="display:flex;gap:10px;margin-bottom:10px"><i class="ri-checkbox-circle-fill" style="color:var(--confirm-color)"></i> 早鳥票販售結束時間過後，報名端自動鎖定、不可選。</div>
+      <div style="display:flex;gap:10px;margin-bottom:10px"><i class="ri-checkbox-circle-fill" style="color:var(--confirm-color)"></i> 每種票可獨立設數量，售完自動標記，且後端防超賣。</div>
+      <div style="display:flex;gap:10px;margin-bottom:10px"><i class="ri-checkbox-circle-fill" style="color:var(--confirm-color)"></i> 表單欄位可用 ↑ ↓ 按鈕排序，首尾按鈕自動禁用。</div>
+      <div style="display:flex;gap:10px;margin-bottom:10px"><i class="ri-checkbox-circle-fill" style="color:var(--confirm-color)"></i> 編輯器分四步、欄位固定寬度，輸入時版面不跳動。</div>
+      <div style="display:flex;gap:10px"><i class="ri-checkbox-circle-fill" style="color:var(--confirm-color)"></i> 視覺沿用既有 InternX token（#0182fd / Poppins + Noto Sans TC）。</div>
+    </div>
+  </section>
+
+  <div class="callout callout-info">
+    <i class="ri-git-branch-line"></i>
+    <p style="margin:0">本交接檔為獨立 repo，與 internx.me 程式碼分離；可作為 PR 描述與設計依據附在工程任務上。</p>
+  </div>
+
+</main>
+
+<footer class="foot">實習通 InternX · 工程規格 · 介面示意檔，不影響線上服務</footer>
+<script src="assets/app.js"></script>
+</body>
+</html>

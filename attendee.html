@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>報名者畫面 — 實習通活動報名改版</title>
+<link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <a href="index.html" class="brand" style="text-decoration:none">
+    <span class="logo">X</span><span>實習通</span>
+    <span class="sub">報名者畫面</span>
+  </a>
+  <span class="spacer"></span>
+  <nav class="topnav">
+    <a href="index.html">總覽</a>
+    <a href="editor.html">主辦方編輯器</a>
+    <a href="attendee.html">報名者畫面</a>
+    <a href="spec.html">工程規格</a>
+  </nav>
+  <span class="mockup-pill">介面示意 Mockup</span>
+</header>
+
+<main class="wrap">
+  <div class="section" style="margin-bottom:24px">
+    <div class="eyebrow">報名者視角</div>
+    <h1 style="font-size:30px">報名者看到的票券狀態</h1>
+    <p class="lead">同一份票券設定，在報名端會自動依「時間 + 數量」呈現正確狀態。早鳥票過期＝鎖定不可選，這正是現在缺的行為。</p>
+  </div>
+
+  <div style="display:flex;gap:46px;align-items:flex-start;flex-wrap:wrap">
+
+    <!-- PHONE -->
+    <div class="phone">
+      <div class="notch"></div>
+      <div class="screen">
+        <div class="event-cover">
+          <div>
+            <div style="font-size:12px;opacity:.85;letter-spacing:.05em">2026 / 07 / 12 · 台北</div>
+            <div style="font-size:19px;font-weight:700;margin-top:4px;padding:0 18px">實習通職涯實戰營<br>從履歷到 Offer</div>
+          </div>
+        </div>
+
+        <div style="padding:16px">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+            <span class="badge badge-info"><i class="ri-map-pin-line"></i> 信義區實體</span>
+            <span class="badge badge-info"><i class="ri-time-line"></i> 13:30–17:30</span>
+          </div>
+
+          <h3 style="font-size:15px;margin-bottom:10px">選擇票種</h3>
+          <div id="pick"></div>
+
+          <div class="card" style="margin-top:14px;background:var(--bg-gray);border:none">
+            <div style="padding:14px 16px">
+              <div style="display:flex;justify-content:space-between;font-size:14px">
+                <span style="color:var(--text-soft)">小計</span>
+                <b id="total" style="font-family:Poppins;font-size:17px;color:var(--theme-color-dark)">NT$ 0</b>
+              </div>
+              <button class="btn btn-cta btn-block" style="margin-top:12px" id="cta" disabled
+                onclick="toast('（示意）前往填寫報名表單')">請先選擇票種</button>
+            </div>
+          </div>
+
+          <p style="font-size:11px;color:var(--text-faint);text-align:center;margin-top:12px;margin-bottom:0">
+            示範目前時間：2026/06/22 14:30
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- EXPLAINER -->
+    <div style="flex:1;min-width:300px;max-width:520px">
+      <h3>四種狀態，全部自動判斷</h3>
+      <p>主辦方只要填販售時間與數量，報名端的狀態完全由系統算出，主辦方不必手動上下架票券。</p>
+
+      <div class="card card-pad" style="margin-bottom:12px">
+        <span class="badge badge-live"><i class="ri-checkbox-circle-line"></i> 販售中</span>
+        <p style="margin:10px 0 0">在販售時間內且尚有名額 → 可選取、可加減數量。</p>
+      </div>
+      <div class="card card-pad" style="margin-bottom:12px">
+        <span class="badge badge-ended"><i class="ri-lock-line"></i> 販售已截止</span>
+        <p style="margin:10px 0 0"><b>早鳥票</b>：販售結束時間已過（6/18 &lt; 6/22）→ 自動鎖定、不可選。<br>
+        <span style="color:var(--cancel-color)">↳ 這就是目前線上版缺少的判斷。</span></p>
+      </div>
+      <div class="card card-pad" style="margin-bottom:12px">
+        <span class="badge badge-soldout"><i class="ri-close-circle-line"></i> 已售完</span>
+        <p style="margin:10px 0 0"><b>學生票</b>：售出 30 / 30 達上限 → 自動售完、不可選。</p>
+      </div>
+      <div class="card card-pad">
+        <span class="badge badge-soon"><i class="ri-time-line"></i> 尚未開賣</span>
+        <p style="margin:10px 0 0"><b>VIP 票</b>：販售 6/25 才開始 → 顯示開賣時間，暫不可選。</p>
+      </div>
+
+      <div class="callout callout-fix" style="margin-top:18px">
+        <i class="ri-arrow-left-right-line"></i>
+        <p style="margin:0">想改票券時間／數量看效果？回到 <a href="editor.html">主辦方編輯器 → 票券設定</a> 調整即可。</p>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<footer class="foot">實習通 InternX · 報名者畫面示意 · 不影響線上服務</footer>
+
+<script src="assets/app.js"></script>
+<script>
+const tickets = [
+  { name:'早鳥票', price:590, quantity:50, sold:38, saleStart:new Date(2026,5,1), saleEnd:new Date(2026,5,18,23,59), desc:'6/18 前限定優惠' },
+  { name:'一般票', price:890, quantity:100, sold:32, saleStart:new Date(2026,5,1), saleEnd:new Date(2026,6,10,23,59), desc:'含全日課程與午餐' },
+  { name:'學生票', price:490, quantity:30, sold:30, saleStart:new Date(2026,5,1), saleEnd:new Date(2026,6,10,23,59), desc:'需出示在學證明' },
+  { name:'VIP 一對一票', price:1500, quantity:20, sold:0, saleStart:new Date(2026,5,25), saleEnd:new Date(2026,6,10,23,59), desc:'含業師一對一 30 分鐘' },
+];
+const qty = tickets.map(()=>0);
+
+function render(){
+  const wrap = document.getElementById('pick');
+  wrap.innerHTML='';
+  tickets.forEach((t,i)=>{
+    const st = ticketStatus(t);
+    const sellable = st.key==='live';
+    const remain = t.quantity - t.sold;
+    const el = document.createElement('div');
+    el.className='pick-ticket'+(sellable?'':' disabled')+(qty[i]>0?' selected':'');
+    el.innerHTML = `
+      <div class="p-main">
+        <div class="p-name">${t.name}
+          <span class="badge ${st.cls}" style="margin-left:4px;font-size:11px"><i class="${st.icon}"></i> ${st.label}</span>
+        </div>
+        <div class="p-desc">${t.desc}${sellable&&remain<=12?` · 僅剩 ${remain} 張`:''}${st.key==='soon'?` · ${fmtDate(t.saleStart)} 開賣`:''}</div>
+      </div>
+      <div style="text-align:right">
+        <div class="p-price">${NT(t.price)}</div>
+        ${sellable ? `<div class="stepper" style="margin-top:6px">
+            <button onclick="dec(${i})">−</button><span>${qty[i]}</span><button onclick="inc(${i})">+</button>
+          </div>` : `<div style="font-size:11px;color:var(--text-faint);margin-top:6px">不可購買</div>`}
+      </div>`;
+    wrap.appendChild(el);
+  });
+  const total = tickets.reduce((s,t,i)=>s+t.price*qty[i],0);
+  const count = qty.reduce((a,b)=>a+b,0);
+  document.getElementById('total').textContent = NT(total).replace('免費','NT$ 0');
+  const cta = document.getElementById('cta');
+  cta.disabled = count===0;
+  cta.textContent = count===0 ? '請先選擇票種' : `下一步 · 共 ${count} 張`;
+}
+function inc(i){ const remain=tickets[i].quantity-tickets[i].sold; if(qty[i]<Math.min(remain,6)) qty[i]++; render(); }
+function dec(i){ if(qty[i]>0) qty[i]--; render(); }
+render();
+</script>
+</body>
+</html>
