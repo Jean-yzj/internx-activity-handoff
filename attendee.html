@@ -24,76 +24,108 @@
   <span class="mockup-pill">介面示意 Mockup</span>
 </header>
 
-<main class="wrap">
+<main class="wrap ix-attendee-wrap">
   <div class="section" style="margin-bottom:20px">
     <div class="eyebrow">報名者視角</div>
-    <h1 style="font-size:30px">報名者看到的完整頁面</h1>
-    <p class="lead">由上到下：<b>① 活動介紹 → ② 報名表單 → ③ 選擇票券</b>。表單欄位與票券都由<b>主辦方編輯器帶入</b>，
-      在編輯器點「預覽報名頁」就會看到自己填的內容出現在這裡。</p>
+    <h1 style="font-size:30px">實習通活動報名頁</h1>
+    <p class="lead">版型對齊原站活動詳情頁：左側活動內容、右側報名資訊卡。票券、表單、付款、退款與審核流程仍由主辦方編輯器帶入。</p>
   </div>
 
-  <div class="apage">
-    <div class="app-chrome">
-      <span class="dot"><i class="ri-arrow-left-line"></i></span>
-      <span style="flex:1" id="chromeUrl">internx.me / activity / ...</span>
-      <span class="dot"><i class="ri-share-line"></i></span>
-      <span class="dot"><i class="ri-heart-line"></i></span>
-    </div>
+  <div class="from-editor" id="editorBanner" style="display:none">
+    <i class="ri-information-line"></i>
+    <span>此預覽<b>帶入了主辦方編輯器目前填寫的內容</b>（標題、介紹、票券、報名表單與進階設定）。</span>
+  </div>
 
-    <div class="app-body">
-      <div class="cover">
-        <span class="ev-type" id="coverType"><i class="ri-shield-check-line"></i> 審核制小聚</span>
+  <div class="ix-activity-layout">
+    <article class="ix-activity-content">
+      <header class="ix-activity-header">
+        <div class="ix-type-line" id="coverType"><i class="ri-team-line"></i> 交流活動</div>
         <h1 id="coverTitle">活動標題</h1>
-        <p class="tag" id="coverTag"></p>
-      </div>
+        <p id="coverTag"></p>
+      </header>
 
-      <div class="app-content">
-        <div class="from-editor" id="editorBanner" style="display:none">
-          <i class="ri-information-line"></i>
-          <span>此預覽<b>帶入了主辦方編輯器目前填寫的內容</b>（標題、介紹、票券與報名表單）。</span>
-        </div>
+      <img class="ix-activity-image" src="assets/img/internx-logo-with-background.png" alt="實習通活動預設圖片" />
 
-        <div class="event-meta">
-          <div class="m"><div class="lbl"><i class="ri-calendar-event-line"></i> 日期</div><div class="val" id="mDate">—</div></div>
-          <div class="m"><div class="lbl"><i class="ri-map-pin-2-line"></i> 地點</div><div class="val" id="mLoc">—</div></div>
-          <div class="m"><div class="lbl"><i class="ri-group-line"></i> 主辦</div><div class="val" id="mOrg">實習通 InternX</div></div>
-        </div>
+      <section class="ix-content-section">
+        <h2>活動介紹</h2>
+        <div class="ix-markdown" id="introBox"></div>
+      </section>
 
-        <section class="sec">
-          <div class="sec-head"><span class="sec-num">1</span><h2>活動介紹</h2><span class="sec-anno">編輯器「活動內容」帶入</span></div>
-          <div id="introBox"></div>
-        </section>
-
-        <section class="sec">
-          <div class="sec-head"><span class="sec-num">2</span><h2>報名表單</h2><span class="sec-anno">＝編輯器拖曳出的欄位與順序</span></div>
-          <p class="form-note">以下欄位與順序，完全來自主辦方在編輯器的設定。<span style="color:var(--cancel-color)">★</span> 為必填。</p>
-          <div id="formBox"></div>
-        </section>
-
-        <section class="sec">
-          <div class="sec-head"><span class="sec-num">3</span><h2>選擇票券</h2><span class="sec-anno">狀態由系統自動判斷</span></div>
-          <div class="callout callout-fix" style="margin:0 0 16px">
-            <i class="ri-magic-line"></i>
-            <p style="margin:0">主辦方只填販售時間與數量，四種狀態（<b>販售中・尚未開賣・販售已截止・已售完</b>）全由系統算出。示範目前時間：<b>2026/06/22 14:30</b>。</p>
+      <section class="ix-content-section">
+        <h2>活動資訊</h2>
+        <div class="ix-detail-list">
+          <div class="ix-detail-item">
+            <i class="ri-calendar-line"></i>
+            <div><div class="ix-detail-label">活動時間</div><div class="ix-detail-value" id="mDate">—</div></div>
           </div>
-          <div id="pick"></div>
-          <div id="payInfo"></div>
-        </section>
+          <div class="ix-detail-item">
+            <i class="ri-map-pin-line"></i>
+            <div><div class="ix-detail-label">活動地點</div><div class="ix-detail-value" id="mLoc">—</div></div>
+          </div>
+          <div class="ix-detail-item">
+            <i class="ri-money-dollar-circle-line"></i>
+            <div><div class="ix-detail-label">參與費用</div><div class="ix-detail-value" id="detailFee">—</div></div>
+          </div>
+          <div class="ix-detail-item">
+            <i class="ri-group-line"></i>
+            <div><div class="ix-detail-label">參加名額</div><div class="ix-detail-value" id="detailCapacity">—</div></div>
+          </div>
+          <div class="ix-detail-item">
+            <i class="ri-user-line"></i>
+            <div><div class="ix-detail-label">報名方式</div><div class="ix-detail-value" id="detailFlow">—</div></div>
+          </div>
+          <div class="ix-detail-item">
+            <i class="ri-building-line"></i>
+            <div><div class="ix-detail-label">主辦單位</div><div class="ix-detail-value" id="mOrg">實習通 InternX</div></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="ix-content-section">
+        <h2>報名表單</h2>
+        <p class="form-note">以下欄位與順序，完全來自主辦方在編輯器的設定。<span style="color:var(--cancel-color)">★</span> 為必填。</p>
+        <div id="formBox"></div>
+      </section>
+
+      <section class="ix-content-section">
+        <h2>選擇票券</h2>
+        <p class="form-note">票券狀態會依販售時間與數量自動判斷。示範目前時間：2026/06/22 14:30。</p>
+        <div id="pick"></div>
+      </section>
+    </article>
+
+    <aside class="ix-registration-card">
+      <h2>報名資訊</h2>
+      <div class="ix-status-section">
+        <span class="ix-status-chip">報名開放中</span>
+        <p>截止時間：2026年6月27日</p>
       </div>
 
-      <div class="sticky-bar">
-        <div class="sum">
-          <div class="l" id="sumLabel">尚未選擇票券</div>
-          <div class="v" id="total">NT$ 0</div>
-        </div>
-        <button class="btn btn-primary" id="cta" disabled onclick="toast('（示意）已送出報名，等待主辦方審核')">
-          <i class="ri-send-plane-line"></i> 送出報名（送審）
-        </button>
+      <div class="ix-info-card">
+        <div class="ix-info-row"><span>活動類型</span><b id="cardType">交流活動</b></div>
+        <div class="ix-info-row"><span>參與費用</span><b id="cardFee">—</b></div>
+        <div class="ix-info-row"><span>活動名額</span><b id="cardCapacity">—</b></div>
+        <div class="ix-info-row"><span>活動地點</span><b id="cardVenue">—</b></div>
       </div>
-    </div>
+
+      <div id="payInfo"></div>
+
+      <div class="ix-ticket-total">
+        <span id="sumLabel">尚未選擇票券</span>
+        <strong id="total">NT$ 0</strong>
+      </div>
+
+      <button class="btn btn-primary btn-block" id="cta" disabled onclick="toast('（示意）已送出報名，等待主辦方審核')">
+        <i class="ri-send-plane-line"></i> 送出報名（送審）
+      </button>
+      <div class="ix-card-actions">
+        <button class="btn btn-ghost btn-sm"><i class="ri-share-line"></i> 分享活動</button>
+        <button class="btn btn-ghost btn-sm"><i class="ri-link"></i> 報名連結</button>
+      </div>
+    </aside>
   </div>
 
-  <p style="text-align:center;color:var(--text-faint);font-size:13px;margin-top:18px">
+  <p style="text-align:center;color:var(--text-faint);font-size:13px;margin-top:22px">
     <i class="ri-arrow-left-right-line"></i> 想改活動內容、表單或票券？回到 <a href="editor.html">主辦方編輯器</a> 編輯後點「預覽報名頁」
   </p>
 </main>
@@ -161,17 +193,37 @@ const flow = A.registrationFlow || {
   refundPolicy: A.refund || '',
   attendeeStatusAfterSubmit: A.approval === '自動通過' ? 'registered' : 'pending_review',
 };
+const isReview = !!flow.requiresApproval;
+
+function getFeeText(){
+  const prices = (A.tickets||[]).map(t=>Number(t.price||0)).filter(n=>Number.isFinite(n));
+  if(!prices.length) return '費用詳洽主辦方';
+  const min = Math.min(...prices);
+  const max = Math.max(...prices);
+  if(min===0 && max===0) return '免費';
+  return min===max ? `NT$${min.toLocaleString('en-US')}` : `NT$${min.toLocaleString('en-US')}~${max.toLocaleString('en-US')}`;
+}
+function getCapacityText(){
+  const caps = (A.tickets||[]).map(t=>t.quantity).filter(n=>n!=null && Number.isFinite(Number(n))).map(Number);
+  if(!caps.length) return '無上限';
+  return `${caps.reduce((sum,n)=>sum+n,0)} 人`;
+}
 
 /* ---- header / meta ---- */
-document.getElementById('chromeUrl').textContent = 'internx.me / activity / ' + A.title;
 document.getElementById('coverTitle').textContent = A.title;
 document.getElementById('coverTag').textContent = A.tagline || (A.intro||'').split('\n')[0].slice(0,60);
-const isReview = !!flow.requiresApproval;
 const evTypeLabel = A.evType || (isReview ? '審核制' : (A.mode ? A.mode + '活動' : '活動報名'));
 document.getElementById('coverType').innerHTML = `<i class="ri-shield-check-line"></i> ${esc(evTypeLabel)}`;
 document.getElementById('mDate').textContent = A.dateText || '—';
 document.getElementById('mLoc').textContent = A.location || '—';
 document.getElementById('mOrg').textContent = A.organizer || '實習通 InternX';
+document.getElementById('detailFee').textContent = getFeeText();
+document.getElementById('detailCapacity').textContent = getCapacityText();
+document.getElementById('detailFlow').textContent = flow.paymentTiming || flow.approvalLabel || '透過實習通報名';
+document.getElementById('cardType').textContent = evTypeLabel;
+document.getElementById('cardFee').textContent = getFeeText();
+document.getElementById('cardCapacity').textContent = getCapacityText();
+document.getElementById('cardVenue').textContent = A.location || '地點未定';
 if(fromEditor) document.getElementById('editorBanner').style.display='flex';
 
 /* ---- ① intro + agenda + faq ---- */
@@ -263,13 +315,11 @@ renderTickets();
 (function(){
   const pay = (flow.paymentMethods && flow.paymentMethods.length) ? flow.paymentMethods.join('、') : '依主辦方通知';
   document.getElementById('payInfo').innerHTML = `
-    <div class="card card-pad" style="margin-top:14px">
-      <div style="display:flex;gap:24px;flex-wrap:wrap;font-size:14px">
-        <div><div style="color:var(--text-faint);font-size:12px;margin-bottom:2px"><i class="ri-bank-card-line"></i> 付款方式</div><b>${esc(pay)}</b></div>
-        <div><div style="color:var(--text-faint);font-size:12px;margin-bottom:2px"><i class="ri-refund-2-line"></i> 退款政策</div><b>${esc(flow.refundPolicy||'—')}</b></div>
-        <div><div style="color:var(--text-faint);font-size:12px;margin-bottom:2px"><i class="ri-shield-check-line"></i> 報名方式</div><b>${esc(flow.approvalLabel||'即時完成')}</b></div>
-        <div><div style="color:var(--text-faint);font-size:12px;margin-bottom:2px"><i class="ri-time-line"></i> 付款時機</div><b>${esc(flow.paymentTiming||'依主辦方通知')}</b></div>
-      </div>
+    <div class="ix-flow-card">
+      <div class="ix-flow-row"><span><i class="ri-bank-card-line"></i> 付款方式</span><b>${esc(pay)}</b></div>
+      <div class="ix-flow-row"><span><i class="ri-refund-2-line"></i> 退款政策</span><b>${esc(flow.refundPolicy||'—')}</b></div>
+      <div class="ix-flow-row"><span><i class="ri-shield-check-line"></i> 報名方式</span><b>${esc(flow.approvalLabel||'即時完成')}</b></div>
+      <div class="ix-flow-row"><span><i class="ri-time-line"></i> 付款時機</span><b>${esc(flow.paymentTiming||'依主辦方通知')}</b></div>
     </div>`;
   const cta=document.getElementById('cta');
   cta.innerHTML = `<i class="ri-send-plane-line"></i> ${isReview?'送出報名（送審）':'送出報名'}`;
