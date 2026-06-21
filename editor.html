@@ -151,27 +151,28 @@
           <label>付款方式</label>
           <div style="display:flex;flex-direction:column;gap:10px">
             <label class="card card-pad" style="display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer">
-              <input type="checkbox" checked /> <span><b>實習通點數折抵</b><br><small style="color:var(--text-faint)">1 點 = 1 元，即時完成</small></span>
+              <input id="payQuota" type="checkbox" checked /> <span><b>實習通點數折抵</b><br><small style="color:var(--text-faint)">1 點 = 1 元，即時完成</small></span>
             </label>
             <label class="card card-pad" style="display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer">
-              <input type="checkbox" checked /> <span><b>銀行轉帳</b><br><small style="color:var(--text-faint)">回報末五碼，後台對帳</small></span>
+              <input id="payBank" type="checkbox" checked /> <span><b>銀行轉帳</b><br><small style="color:var(--text-faint)">回報末五碼，後台對帳</small></span>
             </label>
           </div>
         </div>
         <div class="row2">
           <div class="field">
             <label>報名審核</label>
-            <select class="select"><option>自動通過</option><option>需主辦方審核</option></select>
+            <select id="evApproval" class="select"><option>需主辦方審核</option><option>自動通過</option></select>
+            <div class="hint">「需主辦方審核」＝送出後先送審、通過再付款</div>
           </div>
           <div class="field">
             <label>退款政策</label>
-            <select class="select"><option>活動前 7 天可全額退款</option><option>不可退款</option><option>自訂</option></select>
+            <select id="evRefund" class="select"><option>活動前 7 天可全額退款</option><option>不可退款</option><option>活動前 3 天可退 50%</option></select>
           </div>
         </div>
 
         <div class="callout callout-fix">
           <i class="ri-eye-line"></i>
-          <p style="margin:0">送出前可在 <a href="attendee.html">報名者畫面</a> 預覽整頁外觀與票券狀態。</p>
+          <p style="margin:0">這些設定會一起帶入預覽。送出前可在 <a href="#" onclick="previewRegistration();return false;">報名者畫面</a> 看到完整流程（含審核制與付款方式）。</p>
         </div>
 
         <div style="display:flex;justify-content:space-between;gap:10px;margin-top:18px">
@@ -187,19 +188,6 @@
     <i class="ri-cursor-line"></i> 可實際操作：點欄位編輯（含檔案格式/大小）、拖曳排序、預覽報名頁
   </p>
 </main>
-
-<!-- field settings drawer -->
-<div class="drawer-backdrop" id="fieldDrawerBackdrop" onclick="closeDrawer()"></div>
-<aside class="drawer" id="fieldDrawer" aria-label="欄位設定">
-  <div class="drawer-head">
-    <h3 id="fieldDrawerTitle"><span class="ft"><i class="ri-settings-3-line"></i></span> 欄位設定</h3>
-    <button class="icon-btn" onclick="closeDrawer()" title="關閉"><i class="ri-close-line"></i></button>
-  </div>
-  <div class="drawer-body" id="fieldDrawerBody"></div>
-  <div class="drawer-foot">
-    <button class="btn btn-primary btn-block" onclick="closeDrawer()"><i class="ri-check-line"></i> 完成</button>
-  </div>
-</aside>
 
 <footer class="foot">實習通 InternX · 主辦方編輯器示意 · 不影響線上服務</footer>
 
@@ -358,108 +346,101 @@ function fieldSummary(f){
   if(['select','radio','checkbox'].includes(f.type)) return ` · ${(f.options||[]).length} 個選項`;
   return '';
 }
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function renderFields(){
   const wrap = document.getElementById('fieldList');
   wrap.innerHTML = '';
   fields.forEach((f,i)=>{
     const m = FIELD_META[f.type] || {icon:'ri-question-line',label:f.type};
-    const el = document.createElement('div');
-    el.className='field-row'+(i===selectedField?' selected':'')+(f.locked?' locked':'');
-    el.innerHTML = `
-      ${f.locked
-        ? `<span class="fr-grip-locked" title="系統欄位，固定在最上方"><i class="ri-lock-line"></i></span>`
-        : `<span class="fr-grip" data-grip title="拖曳排序"><i class="ri-draggable"></i></span>`}
-      <span class="fr-icon"><i class="${m.icon}"></i></span>
-      <span class="fr-main" onclick="selectField(${i})">
-        <div class="fr-label">${f.label} ${f.required?'<span class="req">*</span>':''}</div>
-        <div class="fr-type">${m.label}${fieldSummary(f)}</div>
-      </span>
-      <button class="icon-btn" title="編輯欄位" onclick="selectField(${i})"><i class="ri-settings-3-line"></i></button>
-      <button class="icon-btn" title="${f.required?'設為選填':'設為必填'}" onclick="toggleReq(${i})"><i class="ri-${f.required?'star-fill':'star-line'}"></i></button>
-      <button class="icon-btn danger" title="刪除" ${f.locked?'disabled':''} onclick="delField(${i})"><i class="ri-delete-bin-line"></i></button>
+    const open = i===selectedField;
+    const block = document.createElement('div');
+    block.className='field-block'+(open?' open':'');
+    block.innerHTML = `
+      <div class="field-row">
+        ${f.locked
+          ? `<span class="fr-grip-locked" title="系統欄位，固定在最上方"><i class="ri-lock-line"></i></span>`
+          : `<span class="fr-grip" data-grip title="拖曳排序"><i class="ri-draggable"></i></span>`}
+        <span class="fr-icon"><i class="${m.icon}"></i></span>
+        <span class="fr-main" onclick="selectField(${i})">
+          <div class="fr-label">${esc(f.label)} ${f.required?'<span class="req">*</span>':''}</div>
+          <div class="fr-type">${m.label}${fieldSummary(f)}</div>
+        </span>
+        <button class="icon-btn" title="${open?'收合':'編輯'}" onclick="selectField(${i})"><i class="ri-${open?'arrow-up-s':'arrow-down-s'}-line"></i></button>
+        <button class="icon-btn danger" title="刪除" ${f.locked?'disabled':''} onclick="delField(${i})"><i class="ri-delete-bin-line"></i></button>
+      </div>
+      ${open ? `<div class="field-settings">${settingsHTML(i)}</div>` : ''}
     `;
-    wrap.appendChild(el);
+    wrap.appendChild(block);
   });
   attachDnD(wrap, fields, renderFields, lockedLead());
 }
-function selectField(i){ selectedField=i; renderFields(); openDrawer(i); }
-function toggleReq(i){ if(fields[i].locked){toast('系統欄位必填，無法調整');return;} fields[i].required=!fields[i].required; renderFields(); if(selectedField===i) renderDrawer(i); }
-function delField(i){ if(fields[i].locked){toast('系統必填欄位不可刪除');return;} fields.splice(i,1); closeDrawer(); }
+function selectField(i){ selectedField = (selectedField===i ? -1 : i); renderFields(); }
+function delField(i){ if(fields[i].locked){toast('系統必填欄位不可刪除');return;} fields.splice(i,1); selectedField=-1; renderFields(); }
 function addField(type){
   fields.push({ type, label:(FIELD_META[type]||{}).label||'欄位', required:false, locked:false, ...fieldDefaults(type) });
+  selectedField = fields.length-1;
   renderFields();
-  selectField(fields.length-1);
+  document.querySelectorAll('#fieldList .field-block')[selectedField]?.scrollIntoView({behavior:'smooth',block:'center'});
 }
 
-/* ---- field settings drawer ---- */
-function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function openDrawer(i){
-  if(!fields[i]) return;
-  renderDrawer(i);
-  document.getElementById('fieldDrawer').classList.add('open');
-  document.getElementById('fieldDrawerBackdrop').classList.add('open');
-}
-function closeDrawer(){
-  selectedField=-1; renderFields();
-  document.getElementById('fieldDrawer').classList.remove('open');
-  document.getElementById('fieldDrawerBackdrop').classList.remove('open');
-}
-function updField(i,key,val){ fields[i][key]=val; renderFields(); }
-function updOption(i,oi,val){ fields[i].options[oi]=val; renderFields(); }
-function addOption(i){ fields[i].options=[...(fields[i].options||[]),'新選項']; renderFields(); renderDrawer(i); }
-function delOption(i,oi){ if((fields[i].options||[]).length<=1)return; fields[i].options.splice(oi,1); renderFields(); renderDrawer(i); }
-function addDomain(i){ fields[i].allowedDomains=[...(fields[i].allowedDomains||[]),'']; renderFields(); renderDrawer(i); }
-function updDomain(i,di,val){ fields[i].allowedDomains[di]=val; renderFields(); }
-function delDomain(i,di){ fields[i].allowedDomains.splice(di,1); renderFields(); renderDrawer(i); }
-
-function renderDrawer(i){
-  const f=fields[i]; if(!f) return;
-  const m=FIELD_META[f.type]||{label:f.type,icon:'ri-question-line'};
-  document.getElementById('fieldDrawerTitle').innerHTML=`<span class="ft"><i class="${m.icon}"></i></span> ${m.label}設定`;
-  const body=document.getElementById('fieldDrawerBody');
+/* ---- inline settings panel (rendered inside the field block) ---- */
+function settingsHTML(i){
+  const f=fields[i];
   if(f.locked){
-    body.innerHTML=`<div class="locked-banner"><i class="ri-lock-line"></i><div><b>${esc(f.label)}</b> 是系統必填欄位，固定在最上方、不可刪除或改為選填，確保每位報名者都留下基本聯絡資料。</div></div>`;
-    return;
+    return `<div class="locked-banner"><i class="ri-lock-line"></i><div><b>${esc(f.label)}</b> 是系統必填欄位，固定在最上方、不可刪除或改為選填，確保每位報名者都留下基本聯絡資料。</div></div>`;
   }
-  let h=`<div class="seg-title">基本</div>
-    <div class="field"><label>欄位名稱</label><input class="input" value="${esc(f.label)}" oninput="updField(${i},'label',this.value)"></div>`;
+  let h=`<div class="field"><label>欄位名稱</label><input class="input" value="${esc(f.label)}" oninput="setField(${i},'label',this.value)"></div>`;
   if(['text','textarea','email','phone','number'].includes(f.type)){
-    h+=`<div class="field"><label>佔位提示</label><input class="input" value="${esc(f.placeholder)}" oninput="updField(${i},'placeholder',this.value)" placeholder="例如：請輸入您的姓名"></div>`;
+    h+=`<div class="field"><label>佔位提示</label><input class="input" value="${esc(f.placeholder)}" oninput="setField(${i},'placeholder',this.value)" placeholder="例如：請輸入您的姓名"></div>`;
   }
-  h+=`<div class="field"><label>說明文字（選填）</label><input class="input" value="${esc(f.helperText)}" oninput="updField(${i},'helperText',this.value)" placeholder="顯示在欄位下方的提示"></div>
+  h+=`<div class="field"><label>說明文字（選填）</label><input class="input" value="${esc(f.helperText)}" oninput="setField(${i},'helperText',this.value)" placeholder="顯示在欄位下方的提示"></div>
     <div class="toggle-row"><span class="lbl">必填欄位</span>
-      <label class="toggle"><input type="checkbox" ${f.required?'checked':''} onchange="updField(${i},'required',this.checked)"><span class="track"></span></label></div>`;
+      <label class="toggle"><input type="checkbox" ${f.required?'checked':''} onchange="setField(${i},'required',this.checked)"><span class="track"></span></label></div>`;
   if(['select','radio','checkbox'].includes(f.type)){
     h+=`<div class="seg-title">選項</div>`;
-    (f.options||[]).forEach((o,oi)=>{ h+=`<div class="opt-row"><input class="input" value="${esc(o)}" oninput="updOption(${i},${oi},this.value)"><button class="icon-btn danger" title="刪除選項" onclick="delOption(${i},${oi})"><i class="ri-close-line"></i></button></div>`; });
+    (f.options||[]).forEach((o,oi)=>{ h+=`<div class="opt-row"><input class="input" value="${esc(o)}" oninput="setOption(${i},${oi},this.value)"><button class="icon-btn danger" title="刪除選項" onclick="delOption(${i},${oi})"><i class="ri-close-line"></i></button></div>`; });
     h+=`<button class="btn btn-soft btn-sm" onclick="addOption(${i})" style="margin-top:4px"><i class="ri-add-line"></i> 新增選項</button>
       <div class="toggle-row" style="margin-top:14px"><span class="lbl">允許「其他」自填</span>
-        <label class="toggle"><input type="checkbox" ${f.allowOther?'checked':''} onchange="updField(${i},'allowOther',this.checked)"><span class="track"></span></label></div>`;
+        <label class="toggle"><input type="checkbox" ${f.allowOther?'checked':''} onchange="setField(${i},'allowOther',this.checked)"><span class="track"></span></label></div>`;
   }
   if(f.type==='file'){
     h+=`<div class="seg-title">檔案設定</div>
-      <div class="field"><label>允許格式</label><input class="input" value="${esc(f.accept)}" oninput="updField(${i},'accept',this.value)" placeholder="例如：image/*, .pdf, .doc">
+      <div class="field"><label>允許格式</label><input class="input" value="${esc(f.accept)}" oninput="setField(${i},'accept',this.value)" placeholder="例如：image/*, .pdf, .doc">
         <div class="hint">用逗號分隔副檔名或 MIME，例如 <code>.pdf, image/*</code></div></div>
       <div class="row2">
-        <div class="field"><label>檔案大小上限 (MB)</label><input class="input" type="number" value="${f.maxFileSizeMB??''}" oninput="updField(${i},'maxFileSizeMB',this.value===''?null:+this.value)" placeholder="例如：5"></div>
-        <div class="field"><label>檔案數量上限</label><input class="input" type="number" value="${f.maxFiles??1}" oninput="updField(${i},'maxFiles',+this.value||1)" placeholder="1"></div>
+        <div class="field"><label>檔案大小上限 (MB)</label><input class="input" type="number" value="${f.maxFileSizeMB??''}" oninput="setField(${i},'maxFileSizeMB',this.value===''?null:+this.value)" placeholder="例如：5"></div>
+        <div class="field"><label>檔案數量上限</label><input class="input" type="number" value="${f.maxFiles??1}" oninput="setField(${i},'maxFiles',+this.value||1)" placeholder="1"></div>
       </div>`;
   }
   if(f.type==='email'){
     h+=`<div class="seg-title">Email 網域限制</div><p class="hint" style="margin:-8px 0 10px">限制只能用特定網域，例如 <code>.edu.tw</code> 或 <code>@nccu.edu.tw</code>（留空 = 不限）</p>`;
-    (f.allowedDomains||[]).forEach((d,di)=>{ h+=`<div class="opt-row"><input class="input" value="${esc(d)}" oninput="updDomain(${i},${di},this.value)" placeholder="例如：.edu.tw"><button class="icon-btn danger" onclick="delDomain(${i},${di})"><i class="ri-close-line"></i></button></div>`; });
+    (f.allowedDomains||[]).forEach((d,di)=>{ h+=`<div class="opt-row"><input class="input" value="${esc(d)}" oninput="setDomain(${i},${di},this.value)" placeholder="例如：.edu.tw"><button class="icon-btn danger" onclick="delDomain(${i},${di})"><i class="ri-close-line"></i></button></div>`; });
     h+=`<button class="btn btn-soft btn-sm" onclick="addDomain(${i})" style="margin-top:4px"><i class="ri-add-line"></i> 新增網域</button>`;
   }
   if(f.type==='number'){
     h+=`<div class="seg-title">數值範圍</div><div class="row2">
-      <div class="field"><label>最小值</label><input class="input" type="number" value="${f.min??''}" oninput="updField(${i},'min',this.value===''?undefined:+this.value)"></div>
-      <div class="field"><label>最大值</label><input class="input" type="number" value="${f.max??''}" oninput="updField(${i},'max',this.value===''?undefined:+this.value)"></div></div>`;
+      <div class="field"><label>最小值</label><input class="input" type="number" value="${f.min??''}" oninput="setField(${i},'min',this.value===''?undefined:+this.value)"></div>
+      <div class="field"><label>最大值</label><input class="input" type="number" value="${f.max??''}" oninput="setField(${i},'max',this.value===''?undefined:+this.value)"></div></div>`;
   }
   if(f.type==='agreement'){
-    h+=`<div class="seg-title">條款內容</div><div class="field"><textarea class="textarea" rows="3" oninput="updField(${i},'agreementText',this.value)">${esc(f.agreementText)}</textarea></div>`;
+    h+=`<div class="seg-title">條款內容</div><div class="field"><textarea class="textarea" rows="3" oninput="setField(${i},'agreementText',this.value)">${esc(f.agreementText)}</textarea></div>`;
   }
-  body.innerHTML=h;
+  return h;
 }
+/* live model updates WITHOUT rebuilding the list (keeps the input focused) */
+function patchSummary(i){
+  const block=document.querySelectorAll('#fieldList .field-block')[i]; if(!block) return;
+  const f=fields[i], m=FIELD_META[f.type]||{label:f.type};
+  block.querySelector('.fr-label').innerHTML = esc(f.label)+(f.required?' <span class="req">*</span>':'');
+  block.querySelector('.fr-type').innerHTML = m.label+fieldSummary(f);
+}
+function setField(i,key,val){ fields[i][key]=val; patchSummary(i); }
+function setOption(i,oi,val){ fields[i].options[oi]=val; }
+function setDomain(i,di,val){ fields[i].allowedDomains[di]=val; }
+function addOption(i){ fields[i].options=[...(fields[i].options||[]),'新選項']; renderFields(); }
+function delOption(i,oi){ if((fields[i].options||[]).length<=1)return; fields[i].options.splice(oi,1); renderFields(); }
+function addDomain(i){ fields[i].allowedDomains=[...(fields[i].allowedDomains||[]),'']; renderFields(); }
+function delDomain(i,di){ fields[i].allowedDomains.splice(di,1); renderFields(); }
 
 /* ---- save current activity → attendee preview reads it ---- */
 function fmtRange(s,e){
@@ -476,6 +457,9 @@ function saveActivity(){
     mode: g('evMode')?.value || '實體',
     location: g('evLocation')?.value || '',
     intro: g('evIntro')?.value || '',
+    approval: g('evApproval')?.value || '需主辦方審核',
+    payments: [g('payQuota')?.checked ? '實習通點數折抵' : null, g('payBank')?.checked ? '銀行轉帳' : null].filter(Boolean),
+    refund: g('evRefund')?.value || '',
     tickets: tickets.map(t=>({ name:t.name, price:t.price, quantity:t.quantity, sold:t.sold,
       saleStart:t.saleStart?t.saleStart.toISOString():null, saleEnd:t.saleEnd?t.saleEnd.toISOString():null, desc:t.desc })),
     fields: fields.map(f=>{ const c={...f}; delete c.open; return c; }),
