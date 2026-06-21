@@ -27,119 +27,58 @@
   <div class="section" style="margin-bottom:20px">
     <div class="eyebrow">報名者視角</div>
     <h1 style="font-size:30px">報名者看到的完整頁面</h1>
-    <p class="lead">以實習通真實活動「學生創業者小聚」為範例。報名者由上到下看到：
-      <b>① 活動介紹 → ② 報名表單 → ③ 選擇票券</b>，票券狀態依時間與數量自動判斷。</p>
+    <p class="lead">由上到下：<b>① 活動介紹 → ② 報名表單 → ③ 選擇票券</b>。表單欄位與票券都由<b>主辦方編輯器帶入</b>，
+      在編輯器點「預覽報名頁」就會看到自己填的內容出現在這裡。</p>
   </div>
 
   <div class="apage">
-    <!-- fake browser chrome -->
     <div class="app-chrome">
       <span class="dot"><i class="ri-arrow-left-line"></i></span>
-      <span style="flex:1">internx.me / activity / 學生創業者小聚</span>
+      <span style="flex:1" id="chromeUrl">internx.me / activity / ...</span>
       <span class="dot"><i class="ri-share-line"></i></span>
       <span class="dot"><i class="ri-heart-line"></i></span>
     </div>
 
     <div class="app-body">
-      <!-- COVER -->
       <div class="cover">
-        <span class="ev-type"><i class="ri-shield-check-line"></i> 審核制小聚</span>
-        <h1>學生創業者小聚</h1>
-        <p class="tag">創業最棒的事，是遇到一群能並肩作戰的人。把正在第一線的創業者放進同一個房間，交換課本上學不到的經驗。</p>
+        <span class="ev-type" id="coverType"><i class="ri-shield-check-line"></i> 審核制小聚</span>
+        <h1 id="coverTitle">活動標題</h1>
+        <p class="tag" id="coverTag"></p>
       </div>
 
       <div class="app-content">
-
-        <!-- meta row -->
-        <div class="event-meta">
-          <div class="m"><div class="lbl"><i class="ri-calendar-event-line"></i> 日期</div><div class="val">6/28（日）14:00–18:00</div></div>
-          <div class="m"><div class="lbl"><i class="ri-map-pin-2-line"></i> 地點</div><div class="val">Garage+ · 台北中山</div></div>
-          <div class="m"><div class="lbl"><i class="ri-group-line"></i> 主辦</div><div class="val">實習通 InternX</div></div>
+        <div class="from-editor" id="editorBanner" style="display:none">
+          <i class="ri-information-line"></i>
+          <span>此預覽<b>帶入了主辦方編輯器目前填寫的內容</b>（標題、介紹、票券與報名表單）。</span>
         </div>
 
-        <!-- ① 活動介紹 -->
+        <div class="event-meta">
+          <div class="m"><div class="lbl"><i class="ri-calendar-event-line"></i> 日期</div><div class="val" id="mDate">—</div></div>
+          <div class="m"><div class="lbl"><i class="ri-map-pin-2-line"></i> 地點</div><div class="val" id="mLoc">—</div></div>
+          <div class="m"><div class="lbl"><i class="ri-group-line"></i> 主辦</div><div class="val" id="mOrg">實習通 InternX</div></div>
+        </div>
+
         <section class="sec">
-          <div class="sec-head">
-            <span class="sec-num">1</span><h2>活動介紹</h2>
-            <span class="sec-anno">主辦方在「活動內容」步驟填寫</span>
-          </div>
-          <p>經營 InternX 這段時間，我發現最有價值的時刻，往往不是聽大道理，而是和同樣在第一線、視角完全不同的朋友，交換那些課本上學不到的經驗。所以我想把這群正在解決問題、充滿行動力的人，放進同一個房間。</p>
-          <p>聊的是創業早期最真實的問題：<b>內容、資源、驗證、社群</b>，還有下一步該怎麼走。</p>
-
-          <h3 style="font-size:15px;margin:20px 0 10px">當天流程</h3>
-          <ul class="agenda">
-            <li><span class="t">14:00</span><b>報到</b><p>抵達 Garage+，領取名牌。</p></li>
-            <li><span class="t">14:30</span><b>匿名背景交換</b><p>依照三種經驗軸線，找到可以互補的對象。</p></li>
-            <li><span class="t">16:40</span><b>自由交流</b><p>保留一對一延伸時間，交換可合作的下一步。</p></li>
-            <li><span class="t">18:00</span><b>賦歸</b><p>活動結束。</p></li>
-          </ul>
-
-          <div class="callout callout-info" style="margin:18px 0 0">
-            <i class="ri-information-line"></i>
-            <p style="margin:0"><b>名額有限，先審核後繳費。</b>外部名額有限，先保留給背景與需求明確的夥伴；每一份報名主辦方都會親自看過，通過後再付款。</p>
-          </div>
-
-          <h3 style="font-size:15px;margin:22px 0 6px">常見問題</h3>
-          <div class="faq">
-            <details open><summary>為什麼需要審核？</summary><p>因為主辦方會親自讀每一份報名，想把有限的名額留給真正準備好交流與互助的人，讓現場每一段對話都有機會變成資源。</p></details>
-            <details><summary>會公布參與者姓名嗎？</summary><p>不會。公開頁面只放匿名經歷；姓名只會在報名確認後，提供給確認參與的夥伴，用於現場必要的聯繫。</p></details>
-          </div>
+          <div class="sec-head"><span class="sec-num">1</span><h2>活動介紹</h2><span class="sec-anno">編輯器「活動內容」帶入</span></div>
+          <div id="introBox"></div>
         </section>
 
-        <!-- ② 報名表單 -->
         <section class="sec">
-          <div class="sec-head">
-            <span class="sec-num">2</span><h2>報名表單</h2>
-            <span class="sec-anno">＝編輯器「報名表單」拖曳出的順序</span>
-          </div>
-          <p class="form-note">主辦方在編輯器自訂的欄位，會原封不動、依拖曳後的順序顯示給報名者。<span style="color:var(--cancel-color)">★</span> 為必填。</p>
-
-          <div class="field"><label>姓名 <span class="req">★</span></label><input class="input" placeholder="王小明" /></div>
-          <div class="row2">
-            <div class="field"><label>Email <span class="req">★</span></label><input class="input" type="email" placeholder="you@example.com" /></div>
-            <div class="field"><label>手機號碼 <span class="req">★</span></label><input class="input" placeholder="0912-345-678" /></div>
-          </div>
-          <div class="row2">
-            <div class="field"><label>目前身分 <span class="req">★</span></label>
-              <select class="select"><option>請選擇</option><option>大學生</option><option>碩 / 博士生</option><option>應屆畢業</option><option>連續創業者</option><option>社會人士</option></select></div>
-            <div class="field"><label>學校 / 團隊名稱 <span class="req">★</span></label><input class="input" placeholder="例：實習通 InternX" /></div>
-          </div>
-
-          <div class="note-anon">
-            <i class="ri-shield-keyhole-line"></i>
-            <span>請寫下三個過往經歷（想不到，寫非創業相關的也可以）。這裡只會匿名呈現背景，<b>不會出現姓名、Email 或電話</b>。</span>
-          </div>
-          <div class="row3">
-            <div class="field"><label>過往經歷 ① <span class="req">★</span></label><input class="input" placeholder="例：青年百億計畫" /></div>
-            <div class="field"><label>過往經歷 ② <span class="req">★</span></label><input class="input" placeholder="例：連續創業家" /></div>
-            <div class="field"><label>過往經歷 ③ <span class="req">★</span></label><input class="input" placeholder="例：AppWorks" /></div>
-          </div>
-          <div class="field"><label>你正在做什麼？想在小聚交換什麼？ <span class="req">★</span></label>
-            <textarea class="textarea" rows="3" placeholder="簡單描述你的專案、目前卡住的點，以及想找的夥伴。"></textarea></div>
-          <div class="field"><label>個人 / 作品連結（選填）</label><input class="input" placeholder="https://" /></div>
-          <div class="field" style="margin-bottom:0">
-            <label style="display:flex;align-items:flex-start;gap:9px;font-weight:400;font-size:13.5px;cursor:pointer">
-              <input type="checkbox" style="margin-top:3px" />
-              <span>我已了解本活動為<b>審核制</b>，送出後由主辦方審核，通過後再進行付款。<span class="req">★</span></span>
-            </label>
-          </div>
+          <div class="sec-head"><span class="sec-num">2</span><h2>報名表單</h2><span class="sec-anno">＝編輯器拖曳出的欄位與順序</span></div>
+          <p class="form-note">以下欄位與順序，完全來自主辦方在編輯器的設定。<span style="color:var(--cancel-color)">★</span> 為必填。</p>
+          <div id="formBox"></div>
         </section>
 
-        <!-- ③ 選擇票券 -->
         <section class="sec">
-          <div class="sec-head">
-            <span class="sec-num">3</span><h2>選擇票券</h2>
-            <span class="sec-anno">狀態由系統自動判斷</span>
-          </div>
+          <div class="sec-head"><span class="sec-num">3</span><h2>選擇票券</h2><span class="sec-anno">狀態由系統自動判斷</span></div>
           <div class="callout callout-fix" style="margin:0 0 16px">
             <i class="ri-magic-line"></i>
-            <p style="margin:0">主辦方只填販售時間與數量，這裡的四種狀態（<b>販售中・尚未開賣・販售已截止・已售完</b>）全由系統算出。示範目前時間：<b>2026/06/22 14:30</b>。</p>
+            <p style="margin:0">主辦方只填販售時間與數量，四種狀態（<b>販售中・尚未開賣・販售已截止・已售完</b>）全由系統算出。示範目前時間：<b>2026/06/22 14:30</b>。</p>
           </div>
           <div id="pick"></div>
         </section>
       </div>
 
-      <!-- sticky submit -->
       <div class="sticky-bar">
         <div class="sum">
           <div class="l" id="sumLabel">尚未選擇票券</div>
@@ -153,7 +92,7 @@
   </div>
 
   <p style="text-align:center;color:var(--text-faint);font-size:13px;margin-top:18px">
-    <i class="ri-arrow-left-right-line"></i> 想改活動內容、表單或票券？回到 <a href="editor.html">主辦方編輯器</a>
+    <i class="ri-arrow-left-right-line"></i> 想改活動內容、表單或票券？回到 <a href="editor.html">主辦方編輯器</a> 編輯後點「預覽報名頁」
   </p>
 </main>
 
@@ -161,36 +100,128 @@
 
 <script src="assets/app.js"></script>
 <script>
-/* tickets for 學生創業者小聚 —審核制，四種狀態示範 */
-const tickets = [
-  { name:'早鳥審核票', price:300, quantity:30, sold:22, saleStart:new Date(2026,5,1), saleEnd:new Date(2026,5,18,23,59), desc:'6/18 前報名享優惠' },
-  { name:'一般審核票', price:500, quantity:40, sold:28, saleStart:new Date(2026,5,1), saleEnd:new Date(2026,5,27,23,59), desc:'含活動全程與茶點' },
-  { name:'學生團隊票（2 人）', price:800, quantity:10, sold:10, saleStart:new Date(2026,5,1), saleEnd:new Date(2026,5,27,23,59), desc:'兩人同行，需同校或同團隊' },
-  { name:'現場 VIP 一對一諮詢', price:1500, quantity:8, sold:0, saleStart:new Date(2026,5,25), saleEnd:new Date(2026,5,27,23,59), desc:'活動後與業師一對一 30 分鐘' },
-];
-const qty = tickets.map(()=>0);
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-function render(){
-  const wrap = document.getElementById('pick');
-  wrap.innerHTML='';
+/* default sample = 學生創業者小聚 (used when not opened from the editor) */
+const DEFAULT_ACTIVITY = {
+  title:'學生創業者小聚', evType:'審核制小聚',
+  tagline:'創業最棒的事，是遇到一群能並肩作戰的人。把正在第一線的創業者放進同一個房間，交換課本上學不到的經驗。',
+  dateText:'6/28（日）14:00–18:00', mode:'實體',
+  location:'Garage+ · 台北市中山區中山北路二段 96 號 9 樓', organizer:'實習通 InternX',
+  intro:'經營 InternX 這段時間，我發現最有價值的時刻，往往不是聽大道理，而是和同樣在第一線、視角完全不同的朋友，交換那些課本上學不到的經驗。所以我想把這群正在解決問題、充滿行動力的人，放進同一個房間。\n聊的是創業早期最真實的問題：內容、資源、驗證、社群，還有下一步該怎麼走。',
+  agenda:[
+    {time:'14:00',title:'報到',desc:'抵達 Garage+，領取名牌。'},
+    {time:'14:30',title:'匿名背景交換',desc:'依照三種經驗軸線，找到可以互補的對象。'},
+    {time:'16:40',title:'自由交流',desc:'保留一對一延伸時間，交換可合作的下一步。'},
+    {time:'18:00',title:'賦歸',desc:'活動結束。'},
+  ],
+  faq:[
+    {q:'為什麼需要審核？',a:'因為主辦方會親自讀每一份報名，想把有限的名額留給真正準備好交流與互助的人。'},
+    {q:'會公布參與者姓名嗎？',a:'不會。公開頁面只放匿名經歷；姓名只會在報名確認後提供給確認參與的夥伴。'},
+  ],
+  tickets:[
+    { name:'早鳥審核票', price:300, quantity:30, sold:22, saleStart:new Date(2026,5,1), saleEnd:new Date(2026,5,18,23,59), desc:'6/18 前報名享優惠' },
+    { name:'一般審核票', price:500, quantity:40, sold:28, saleStart:new Date(2026,5,1), saleEnd:new Date(2026,5,27,23,59), desc:'含活動全程與茶點' },
+    { name:'學生團隊票（2 人）', price:800, quantity:10, sold:10, saleStart:new Date(2026,5,1), saleEnd:new Date(2026,5,27,23,59), desc:'兩人同行，需同校或同團隊' },
+    { name:'現場 VIP 一對一諮詢', price:1500, quantity:8, sold:0, saleStart:new Date(2026,5,25), saleEnd:new Date(2026,5,27,23,59), desc:'活動後與業師一對一 30 分鐘' },
+  ],
+  fields:[
+    { type:'text', label:'姓名', required:true, placeholder:'王小明' },
+    { type:'email', label:'Email', required:true, placeholder:'you@example.com' },
+    { type:'phone', label:'手機號碼', required:true, placeholder:'0912-345-678' },
+    { type:'select', label:'目前身分', required:true, options:['大學生','碩 / 博士生','應屆畢業','連續創業者','社會人士'] },
+    { type:'text', label:'學校 / 團隊名稱', required:true, placeholder:'例：實習通 InternX' },
+    { type:'text', label:'過往經歷 ①', required:true, placeholder:'例：青年百億計畫' },
+    { type:'text', label:'過往經歷 ②', required:true, placeholder:'例：連續創業家' },
+    { type:'text', label:'過往經歷 ③', required:true, placeholder:'例：AppWorks' },
+    { type:'textarea', label:'你正在做什麼？想在小聚交換什麼？', required:true, placeholder:'簡單描述你的專案與想找的夥伴。' },
+    { type:'file', label:'在學證明（學生團隊票需附）', required:false, accept:'.pdf, image/*', maxFileSizeMB:5, maxFiles:1, helperText:'PDF 或圖片，5MB 以內' },
+    { type:'agreement', label:'審核制同意', required:true, agreementText:'我已了解本活動為審核制，送出後由主辦方審核，通過後再付款。' },
+  ],
+};
+
+const fromEditor = !!loadHandoffActivity();
+const A = loadHandoffActivity() || DEFAULT_ACTIVITY;
+
+/* ---- header / meta ---- */
+document.getElementById('chromeUrl').textContent = 'internx.me / activity / ' + A.title;
+document.getElementById('coverTitle').textContent = A.title;
+document.getElementById('coverTag').textContent = A.tagline || (A.intro||'').split('\n')[0].slice(0,60);
+document.getElementById('coverType').innerHTML = `<i class="ri-shield-check-line"></i> ${esc(A.evType || (A.mode? A.mode+'活動':'活動報名'))}`;
+document.getElementById('mDate').textContent = A.dateText || '—';
+document.getElementById('mLoc').textContent = A.location || '—';
+document.getElementById('mOrg').textContent = A.organizer || '實習通 InternX';
+if(fromEditor) document.getElementById('editorBanner').style.display='flex';
+
+/* ---- ① intro + agenda + faq ---- */
+(function(){
+  let h = (A.intro||'').split(/\n+/).filter(Boolean).map(p=>`<p>${esc(p)}</p>`).join('');
+  if(A.agenda && A.agenda.length){
+    h += `<h3 style="font-size:15px;margin:20px 0 10px">當天流程</h3><ul class="agenda">` +
+      A.agenda.map(a=>`<li><span class="t">${esc(a.time)}</span><b>${esc(a.title)}</b><p>${esc(a.desc||'')}</p></li>`).join('') + `</ul>`;
+  }
+  h += `<div class="callout callout-info" style="margin:18px 0 0"><i class="ri-information-line"></i>
+    <p style="margin:0"><b>名額有限。</b>送出報名後，由主辦方確認/審核，再進行後續付款。</p></div>`;
+  if(A.faq && A.faq.length){
+    h += `<h3 style="font-size:15px;margin:22px 0 6px">常見問題</h3><div class="faq">` +
+      A.faq.map((f,i)=>`<details ${i===0?'open':''}><summary>${esc(f.q)}</summary><p>${esc(f.a)}</p></details>`).join('') + `</div>`;
+  }
+  document.getElementById('introBox').innerHTML = h;
+})();
+
+/* ---- ② form fields (how each field displays to the attendee) ---- */
+function renderForm(fields){
+  return (fields||[]).map(f=>{
+    const req = f.required ? ' <span class="req">★</span>' : '';
+    let help = f.helperText ? `<div class="hint">${esc(f.helperText)}</div>` : '';
+    let ctrl='';
+    switch(f.type){
+      case 'textarea': ctrl=`<textarea class="textarea" rows="3" placeholder="${esc(f.placeholder)}"></textarea>`; break;
+      case 'select': ctrl=`<select class="select"><option>請選擇</option>${(f.options||[]).map(o=>`<option>${esc(o)}</option>`).join('')}${f.allowOther?'<option>其他…</option>':''}</select>`; break;
+      case 'radio': case 'checkbox':
+        ctrl=`<div class="opt-list">${(f.options||[]).map(o=>`<label class="opt-pick"><span class="mk ${f.type==='checkbox'?'sq':''}"></span>${esc(o)}</label>`).join('')}${f.allowOther?`<label class="opt-pick"><span class="mk ${f.type==='checkbox'?'sq':''}"></span>其他…</label>`:''}</div>`; break;
+      case 'date': ctrl=`<input class="input" type="date">`; break;
+      case 'number': ctrl=`<input class="input" type="number" placeholder="${esc(f.placeholder)}"${f.min!=null?` min="${f.min}"`:''}${f.max!=null?` max="${f.max}"`:''}>`; break;
+      case 'email':
+        ctrl=`<input class="input" type="email" placeholder="${esc(f.placeholder)}">`;
+        if(f.allowedDomains && f.allowedDomains.filter(Boolean).length) help=`<div class="hint">僅接受 ${f.allowedDomains.filter(Boolean).map(esc).join('、')} 網域</div>`;
+        break;
+      case 'file': {
+        const p=[]; if(f.accept && f.accept!=='*/*') p.push('接受 '+f.accept);
+        if(f.maxFileSizeMB) p.push('單檔 ≤ '+f.maxFileSizeMB+'MB'); p.push('最多 '+(f.maxFiles||1)+' 個');
+        ctrl=`<div class="filebox"><i class="ri-upload-cloud-2-line"></i><div>點擊或拖曳上傳<br><small>${esc(p.join(' · '))}</small></div></div>`; break;
+      }
+      case 'agreement':
+        return `<div class="field"><label class="opt-pick" style="font-weight:400;align-items:flex-start"><span class="mk sq" style="margin-top:2px"></span><span>${esc(f.agreementText||f.label)}${req}</span></label>${help}</div>`;
+      default: ctrl=`<input class="input" placeholder="${esc(f.placeholder)}">`;
+    }
+    return `<div class="field"><label>${esc(f.label)}${req}</label>${ctrl}${help}</div>`;
+  }).join('');
+}
+document.getElementById('formBox').innerHTML = renderForm(A.fields);
+
+/* ---- ③ ticket selection ---- */
+const tickets = A.tickets || [];
+const qty = tickets.map(()=>0);
+function renderTickets(){
+  const wrap = document.getElementById('pick'); wrap.innerHTML='';
   tickets.forEach((t,i)=>{
     const st = ticketStatus(t);
     const sellable = st.key==='live';
-    const remain = t.quantity - t.sold;
+    const remain = t.quantity!=null ? (t.quantity - t.sold) : Infinity;
     const el = document.createElement('div');
     el.className='pick-ticket'+(sellable?'':' disabled')+(qty[i]>0?' selected':'');
     el.innerHTML = `
       <div class="p-main">
-        <div class="p-name">${t.name}
+        <div class="p-name">${esc(t.name)}
           <span class="badge ${st.cls}" style="margin-left:4px;font-size:11px"><i class="${st.icon}"></i> ${st.label}</span>
         </div>
-        <div class="p-desc">${t.desc}${sellable&&remain<=12?` · 僅剩 ${remain} 張`:''}${st.key==='soon'?` · ${fmtDate(t.saleStart)} 開賣`:''}${st.key==='ended'?' · 販售已結束':''}</div>
+        <div class="p-desc">${esc(t.desc||'')}${sellable&&remain<=12?` · 僅剩 ${remain} 張`:''}${st.key==='soon'?` · ${fmtDate(t.saleStart)} 開賣`:''}${st.key==='ended'?' · 販售已結束':''}</div>
       </div>
       <div style="text-align:right">
         <div class="p-price">${NT(t.price)}</div>
-        ${sellable ? `<div class="stepper" style="margin-top:6px">
-            <button onclick="dec(${i})">−</button><span>${qty[i]}</span><button onclick="inc(${i})">+</button>
-          </div>` : `<div style="font-size:11px;color:var(--text-faint);margin-top:6px">不可購買</div>`}
+        ${sellable ? `<div class="stepper" style="margin-top:6px"><button onclick="dec(${i})">−</button><span>${qty[i]}</span><button onclick="inc(${i})">+</button></div>`
+                   : `<div style="font-size:11px;color:var(--text-faint);margin-top:6px">不可購買</div>`}
       </div>`;
     wrap.appendChild(el);
   });
@@ -198,12 +229,11 @@ function render(){
   const count = qty.reduce((a,b)=>a+b,0);
   document.getElementById('total').textContent = 'NT$ ' + total.toLocaleString('en-US');
   document.getElementById('sumLabel').textContent = count===0 ? '尚未選擇票券' : `已選 ${count} 張票`;
-  const cta = document.getElementById('cta');
-  cta.disabled = count===0;
+  document.getElementById('cta').disabled = count===0;
 }
-function inc(i){ const remain=tickets[i].quantity-tickets[i].sold; if(qty[i]<Math.min(remain,6)) qty[i]++; render(); }
-function dec(i){ if(qty[i]>0) qty[i]--; render(); }
-render();
+function inc(i){ const r=tickets[i].quantity!=null?tickets[i].quantity-tickets[i].sold:99; if(qty[i]<Math.min(r,6)) qty[i]++; renderTickets(); }
+function dec(i){ if(qty[i]>0) qty[i]--; renderTickets(); }
+renderTickets();
 </script>
 </body>
 </html>

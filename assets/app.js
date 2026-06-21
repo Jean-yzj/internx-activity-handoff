@@ -102,6 +102,35 @@ function attachDnD(list, arr, render, minIndex = 0) {
   });
 }
 
+/* ---- editor → attendee data bridge ----
+   The editor saves the activity it's editing to localStorage; the attendee
+   page reads it so "what the organiser typed" actually flows into the final
+   registration page. Falls back to a default sample when nothing is saved. */
+const HANDOFF_KEY = 'internx_handoff_activity';
+function saveHandoffActivity(a) { try { localStorage.setItem(HANDOFF_KEY, JSON.stringify(a)); } catch (_) {} }
+function loadHandoffActivity() {
+  try {
+    const s = localStorage.getItem(HANDOFF_KEY);
+    if (!s) return null;
+    const a = JSON.parse(s);
+    (a.tickets || []).forEach(t => {           // revive dates for ticketStatus()
+      t.saleStart = t.saleStart ? new Date(t.saleStart) : null;
+      t.saleEnd = t.saleEnd ? new Date(t.saleEnd) : null;
+    });
+    return a;
+  } catch (_) { return null; }
+}
+
+/* ---- field-type metadata shared by editor + attendee form renderer ---- */
+const FIELD_META = {
+  text: { icon: 'ri-text', label: '單行文字' }, textarea: { icon: 'ri-align-left', label: '多行文字' },
+  email: { icon: 'ri-mail-line', label: 'Email' }, phone: { icon: 'ri-phone-line', label: '電話' },
+  number: { icon: 'ri-hashtag', label: '數字' },
+  select: { icon: 'ri-list-check', label: '下拉選單' }, radio: { icon: 'ri-radio-button-line', label: '單選題' },
+  checkbox: { icon: 'ri-checkbox-multiple-line', label: '複選題' }, date: { icon: 'ri-calendar-line', label: '日期' },
+  file: { icon: 'ri-attachment-2', label: '檔案上傳' }, agreement: { icon: 'ri-checkbox-circle-line', label: '同意條款' },
+};
+
 /* ---- mark active top-nav link by filename ---- */
 document.addEventListener('DOMContentLoaded', () => {
   const here = location.pathname.split('/').pop() || 'index.html';

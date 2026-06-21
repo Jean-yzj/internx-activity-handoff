@@ -28,6 +28,9 @@
     <div class="eyebrow">主辦方視角</div>
     <h1 style="font-size:30px">建立活動 · 編輯器</h1>
     <p class="lead">左側固定步驟、右側固定寬度表單，不再跑版。最關鍵的 <b>票券設定</b> 與 <b>報名表單</b> 兩步可直接操作試用。</p>
+    <div style="margin-top:14px">
+      <button class="btn btn-soft" onclick="previewRegistration()"><i class="ri-external-link-line"></i> 預覽報名頁（帶入目前填寫內容）</button>
+    </div>
   </div>
 
   <div class="editor">
@@ -50,7 +53,7 @@
 
         <div class="field">
           <label>活動名稱 <span class="req">*</span></label>
-          <input class="input" value="2026 實習通職涯實戰營：從履歷到 Offer" />
+          <input id="evTitle" class="input" value="學生創業者小聚" />
         </div>
         <div class="field">
           <label>活動封面</label>
@@ -61,26 +64,26 @@
         <div class="row2">
           <div class="field">
             <label>活動開始 <span class="req">*</span></label>
-            <input class="input" type="datetime-local" value="2026-07-12T13:30" />
+            <input id="evStart" class="input" type="datetime-local" value="2026-06-28T14:00" />
           </div>
           <div class="field">
             <label>活動結束 <span class="req">*</span></label>
-            <input class="input" type="datetime-local" value="2026-07-12T17:30" />
+            <input id="evEnd" class="input" type="datetime-local" value="2026-06-28T18:00" />
           </div>
         </div>
         <div class="row2">
           <div class="field">
             <label>形式</label>
-            <select class="select"><option>實體</option><option>線上</option><option>混合</option></select>
+            <select id="evMode" class="select"><option>實體</option><option>線上</option><option>混合</option></select>
           </div>
           <div class="field">
             <label>地點</label>
-            <input class="input" value="台北市信義區松壽路 1 號 · 實習通共創空間" />
+            <input id="evLocation" class="input" value="Garage+ · 台北市中山區中山北路二段 96 號 9 樓" />
           </div>
         </div>
         <div class="field">
           <label>活動介紹</label>
-          <textarea class="textarea" rows="4">一天密集實戰：上午履歷健診與面試模擬，下午企業聯合說明會。完訓發給結業證明與內推資格。</textarea>
+          <textarea id="evIntro" class="textarea" rows="4">把正在第一線的創業者放進同一個房間，交換課本上學不到的經驗，也找到下一個能互相支援的夥伴。聊的是創業早期最真實的問題：內容、資源、驗證、社群，還有下一步該怎麼走。</textarea>
         </div>
         <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:8px">
           <button class="btn btn-primary" onclick="goStep('tickets')">下一步：票券設定 <i class="ri-arrow-right-line"></i></button>
@@ -180,9 +183,22 @@
   </div>
 
   <p style="text-align:center;color:var(--text-faint);font-size:13px;margin-top:18px">
-    <i class="ri-cursor-line"></i> 可實際操作：切換步驟、新增/排序票券與欄位、展開票券編輯
+    <i class="ri-cursor-line"></i> 可實際操作：點欄位編輯（含檔案格式/大小）、拖曳排序、預覽報名頁
   </p>
 </main>
+
+<!-- field settings drawer -->
+<div class="drawer-backdrop" id="fieldDrawerBackdrop" onclick="closeDrawer()"></div>
+<aside class="drawer" id="fieldDrawer" aria-label="欄位設定">
+  <div class="drawer-head">
+    <h3 id="fieldDrawerTitle"><span class="ft"><i class="ri-settings-3-line"></i></span> 欄位設定</h3>
+    <button class="icon-btn" onclick="closeDrawer()" title="關閉"><i class="ri-close-line"></i></button>
+  </div>
+  <div class="drawer-body" id="fieldDrawerBody"></div>
+  <div class="drawer-foot">
+    <button class="btn btn-primary btn-block" onclick="closeDrawer()"><i class="ri-check-line"></i> 完成</button>
+  </div>
+</aside>
 
 <footer class="foot">實習通 InternX · 主辦方編輯器示意 · 不影響線上服務</footer>
 
@@ -205,18 +221,18 @@ document.querySelectorAll('.step').forEach(s => s.addEventListener('click', () =
 
 /* ---------------- TICKETS data + render ---------------- */
 let tickets = [
-  { name: '早鳥票', price: 590, quantity: 50, sold: 38,
+  { name: '早鳥審核票', price: 300, quantity: 30, sold: 22,
     saleStart: new Date(2026,5,1,0,0), saleEnd: new Date(2026,5,18,23,59),
-    desc: '6/18 前限定優惠價', open: false },
-  { name: '一般票', price: 890, quantity: 100, sold: 32,
-    saleStart: new Date(2026,5,1,0,0), saleEnd: new Date(2026,6,10,23,59),
-    desc: '含全日課程與午餐', open: true },
-  { name: '學生票', price: 490, quantity: 30, sold: 30,
-    saleStart: new Date(2026,5,1,0,0), saleEnd: new Date(2026,6,10,23,59),
-    desc: '需出示在學證明', open: false },
-  { name: 'VIP 一對一票', price: 1500, quantity: 20, sold: 0,
-    saleStart: new Date(2026,5,25,0,0), saleEnd: new Date(2026,6,10,23,59),
-    desc: '含業師一對一諮詢 30 分鐘', open: false },
+    desc: '6/18 前報名享優惠', open: false },
+  { name: '一般審核票', price: 500, quantity: 40, sold: 28,
+    saleStart: new Date(2026,5,1,0,0), saleEnd: new Date(2026,5,27,23,59),
+    desc: '含活動全程與茶點', open: true },
+  { name: '學生團隊票（2 人）', price: 800, quantity: 10, sold: 10,
+    saleStart: new Date(2026,5,1,0,0), saleEnd: new Date(2026,5,27,23,59),
+    desc: '兩人同行，需同校或同團隊', open: false },
+  { name: '現場 VIP 一對一諮詢', price: 1500, quantity: 8, sold: 0,
+    saleStart: new Date(2026,5,25,0,0), saleEnd: new Date(2026,5,27,23,59),
+    desc: '活動後與業師一對一 30 分鐘', open: false },
 ];
 
 function toLocalInput(d) {
@@ -307,24 +323,40 @@ function addTicket(){
 }
 renderTickets();
 
-/* ---------------- FORM BUILDER ---------------- */
-const FIELD_META = {
-  text:{icon:'ri-text',label:'單行文字'}, textarea:{icon:'ri-align-left',label:'多行文字'},
-  email:{icon:'ri-mail-line',label:'Email'}, phone:{icon:'ri-phone-line',label:'電話'},
-  select:{icon:'ri-list-check',label:'下拉選單'}, radio:{icon:'ri-radio-button-line',label:'單選題'},
-  checkbox:{icon:'ri-checkbox-multiple-line',label:'複選題'}, date:{icon:'ri-calendar-line',label:'日期'},
-  file:{icon:'ri-attachment-2',label:'檔案上傳'}, agreement:{icon:'ri-checkbox-circle-line',label:'同意條款'},
-};
+/* ---------------- FORM BUILDER ----------------  (FIELD_META is in app.js) */
+function fieldDefaults(type){
+  switch(type){
+    case 'select': case 'radio': case 'checkbox': return {options:['選項 1','選項 2'], allowOther:false};
+    case 'file': return {accept:'*/*', maxFileSizeMB:5, maxFiles:1};
+    case 'email': return {allowedDomains:[]};
+    case 'number': return {min:undefined,max:undefined};
+    case 'agreement': return {agreementText:'我同意以上條款'};
+    case 'textarea': return {placeholder:'請輸入內容...'};
+    default: return {placeholder:''};
+  }
+}
 let fields = [
-  { type:'text', label:'姓名', required:true, locked:true },
-  { type:'email', label:'Email', required:true, locked:true },
-  { type:'phone', label:'手機號碼', required:true, locked:false },
-  { type:'select', label:'目前身分（大一～社會人士）', required:true, locked:false },
-  { type:'file', label:'在學證明（學生票必附）', required:false, locked:false },
+  { type:'text', label:'姓名', required:true, locked:true, placeholder:'王小明' },
+  { type:'email', label:'Email', required:true, locked:true, placeholder:'you@example.com' },
+  { type:'phone', label:'手機號碼', required:true, locked:false, placeholder:'0912-345-678' },
+  { type:'select', label:'目前身分', required:true, locked:false, options:['大學生','碩 / 博士生','應屆畢業','連續創業者','社會人士'], allowOther:false },
+  { type:'text', label:'學校 / 團隊名稱', required:true, locked:false, placeholder:'例：實習通 InternX' },
+  { type:'text', label:'過往經歷 ①', required:true, locked:false, placeholder:'例：青年百億計畫' },
+  { type:'text', label:'過往經歷 ②', required:true, locked:false, placeholder:'例：連續創業家' },
+  { type:'text', label:'過往經歷 ③', required:true, locked:false, placeholder:'例：AppWorks' },
+  { type:'textarea', label:'你正在做什麼？想在小聚交換什麼？', required:true, locked:false, placeholder:'簡單描述你的專案與想找的夥伴。' },
+  { type:'file', label:'在學證明（學生團隊票需附）', required:false, locked:false, accept:'.pdf, image/*', maxFileSizeMB:5, maxFiles:1, helperText:'PDF 或圖片，5MB 以內' },
+  { type:'agreement', label:'審核制同意', required:true, locked:false, agreementText:'我已了解本活動為審核制，送出後由主辦方審核，通過後再付款。' },
 ];
 let selectedField = -1;
 
 function lockedLead(){ let n=0; for(const f of fields){ if(f.locked) n++; else break; } return n; }
+function fieldSummary(f){
+  if(f.locked) return ' · 系統必填';
+  if(f.type==='file') return ` · ${f.accept||'不限格式'}・${f.maxFileSizeMB||'?'}MB・最多 ${f.maxFiles||1} 個`;
+  if(['select','radio','checkbox'].includes(f.type)) return ` · ${(f.options||[]).length} 個選項`;
+  return '';
+}
 function renderFields(){
   const wrap = document.getElementById('fieldList');
   wrap.innerHTML = '';
@@ -339,8 +371,9 @@ function renderFields(){
       <span class="fr-icon"><i class="${m.icon}"></i></span>
       <span class="fr-main" onclick="selectField(${i})">
         <div class="fr-label">${f.label} ${f.required?'<span class="req">*</span>':''}</div>
-        <div class="fr-type">${m.label}${f.locked?' · 系統必填':''}</div>
+        <div class="fr-type">${m.label}${fieldSummary(f)}</div>
       </span>
+      <button class="icon-btn" title="編輯欄位" onclick="selectField(${i})"><i class="ri-settings-3-line"></i></button>
       <button class="icon-btn" title="${f.required?'設為選填':'設為必填'}" onclick="toggleReq(${i})"><i class="ri-${f.required?'star-fill':'star-line'}"></i></button>
       <button class="icon-btn danger" title="刪除" ${f.locked?'disabled':''} onclick="delField(${i})"><i class="ri-delete-bin-line"></i></button>
     `;
@@ -348,15 +381,107 @@ function renderFields(){
   });
   attachDnD(wrap, fields, renderFields, lockedLead());
 }
-function selectField(i){ selectedField = (selectedField===i?-1:i); renderFields(); }
-function toggleReq(i){ if(fields[i].locked){toast('系統欄位必填，無法調整');return;} fields[i].required=!fields[i].required; renderFields(); }
-function delField(i){ if(fields[i].locked){toast('系統必填欄位不可刪除');return;} fields.splice(i,1); selectedField=-1; renderFields(); }
+function selectField(i){ selectedField=i; renderFields(); openDrawer(i); }
+function toggleReq(i){ if(fields[i].locked){toast('系統欄位必填，無法調整');return;} fields[i].required=!fields[i].required; renderFields(); if(selectedField===i) renderDrawer(i); }
+function delField(i){ if(fields[i].locked){toast('系統必填欄位不可刪除');return;} fields.splice(i,1); closeDrawer(); }
 function addField(type){
-  const m = FIELD_META[type];
-  fields.push({ type, label: m.label, required:false, locked:false });
+  fields.push({ type, label:(FIELD_META[type]||{}).label||'欄位', required:false, locked:false, ...fieldDefaults(type) });
   renderFields();
-  document.getElementById('fieldList').lastElementChild.scrollIntoView({behavior:'smooth',block:'center'});
+  selectField(fields.length-1);
 }
+
+/* ---- field settings drawer ---- */
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function openDrawer(i){
+  if(!fields[i]) return;
+  renderDrawer(i);
+  document.getElementById('fieldDrawer').classList.add('open');
+  document.getElementById('fieldDrawerBackdrop').classList.add('open');
+}
+function closeDrawer(){
+  selectedField=-1; renderFields();
+  document.getElementById('fieldDrawer').classList.remove('open');
+  document.getElementById('fieldDrawerBackdrop').classList.remove('open');
+}
+function updField(i,key,val){ fields[i][key]=val; renderFields(); }
+function updOption(i,oi,val){ fields[i].options[oi]=val; renderFields(); }
+function addOption(i){ fields[i].options=[...(fields[i].options||[]),'新選項']; renderFields(); renderDrawer(i); }
+function delOption(i,oi){ if((fields[i].options||[]).length<=1)return; fields[i].options.splice(oi,1); renderFields(); renderDrawer(i); }
+function addDomain(i){ fields[i].allowedDomains=[...(fields[i].allowedDomains||[]),'']; renderFields(); renderDrawer(i); }
+function updDomain(i,di,val){ fields[i].allowedDomains[di]=val; renderFields(); }
+function delDomain(i,di){ fields[i].allowedDomains.splice(di,1); renderFields(); renderDrawer(i); }
+
+function renderDrawer(i){
+  const f=fields[i]; if(!f) return;
+  const m=FIELD_META[f.type]||{label:f.type,icon:'ri-question-line'};
+  document.getElementById('fieldDrawerTitle').innerHTML=`<span class="ft"><i class="${m.icon}"></i></span> ${m.label}設定`;
+  const body=document.getElementById('fieldDrawerBody');
+  if(f.locked){
+    body.innerHTML=`<div class="locked-banner"><i class="ri-lock-line"></i><div><b>${esc(f.label)}</b> 是系統必填欄位，固定在最上方、不可刪除或改為選填，確保每位報名者都留下基本聯絡資料。</div></div>`;
+    return;
+  }
+  let h=`<div class="seg-title">基本</div>
+    <div class="field"><label>欄位名稱</label><input class="input" value="${esc(f.label)}" oninput="updField(${i},'label',this.value)"></div>`;
+  if(['text','textarea','email','phone','number'].includes(f.type)){
+    h+=`<div class="field"><label>佔位提示</label><input class="input" value="${esc(f.placeholder)}" oninput="updField(${i},'placeholder',this.value)" placeholder="例如：請輸入您的姓名"></div>`;
+  }
+  h+=`<div class="field"><label>說明文字（選填）</label><input class="input" value="${esc(f.helperText)}" oninput="updField(${i},'helperText',this.value)" placeholder="顯示在欄位下方的提示"></div>
+    <div class="toggle-row"><span class="lbl">必填欄位</span>
+      <label class="toggle"><input type="checkbox" ${f.required?'checked':''} onchange="updField(${i},'required',this.checked)"><span class="track"></span></label></div>`;
+  if(['select','radio','checkbox'].includes(f.type)){
+    h+=`<div class="seg-title">選項</div>`;
+    (f.options||[]).forEach((o,oi)=>{ h+=`<div class="opt-row"><input class="input" value="${esc(o)}" oninput="updOption(${i},${oi},this.value)"><button class="icon-btn danger" title="刪除選項" onclick="delOption(${i},${oi})"><i class="ri-close-line"></i></button></div>`; });
+    h+=`<button class="btn btn-soft btn-sm" onclick="addOption(${i})" style="margin-top:4px"><i class="ri-add-line"></i> 新增選項</button>
+      <div class="toggle-row" style="margin-top:14px"><span class="lbl">允許「其他」自填</span>
+        <label class="toggle"><input type="checkbox" ${f.allowOther?'checked':''} onchange="updField(${i},'allowOther',this.checked)"><span class="track"></span></label></div>`;
+  }
+  if(f.type==='file'){
+    h+=`<div class="seg-title">檔案設定</div>
+      <div class="field"><label>允許格式</label><input class="input" value="${esc(f.accept)}" oninput="updField(${i},'accept',this.value)" placeholder="例如：image/*, .pdf, .doc">
+        <div class="hint">用逗號分隔副檔名或 MIME，例如 <code>.pdf, image/*</code></div></div>
+      <div class="row2">
+        <div class="field"><label>檔案大小上限 (MB)</label><input class="input" type="number" value="${f.maxFileSizeMB??''}" oninput="updField(${i},'maxFileSizeMB',this.value===''?null:+this.value)" placeholder="例如：5"></div>
+        <div class="field"><label>檔案數量上限</label><input class="input" type="number" value="${f.maxFiles??1}" oninput="updField(${i},'maxFiles',+this.value||1)" placeholder="1"></div>
+      </div>`;
+  }
+  if(f.type==='email'){
+    h+=`<div class="seg-title">Email 網域限制</div><p class="hint" style="margin:-8px 0 10px">限制只能用特定網域，例如 <code>.edu.tw</code> 或 <code>@nccu.edu.tw</code>（留空 = 不限）</p>`;
+    (f.allowedDomains||[]).forEach((d,di)=>{ h+=`<div class="opt-row"><input class="input" value="${esc(d)}" oninput="updDomain(${i},${di},this.value)" placeholder="例如：.edu.tw"><button class="icon-btn danger" onclick="delDomain(${i},${di})"><i class="ri-close-line"></i></button></div>`; });
+    h+=`<button class="btn btn-soft btn-sm" onclick="addDomain(${i})" style="margin-top:4px"><i class="ri-add-line"></i> 新增網域</button>`;
+  }
+  if(f.type==='number'){
+    h+=`<div class="seg-title">數值範圍</div><div class="row2">
+      <div class="field"><label>最小值</label><input class="input" type="number" value="${f.min??''}" oninput="updField(${i},'min',this.value===''?undefined:+this.value)"></div>
+      <div class="field"><label>最大值</label><input class="input" type="number" value="${f.max??''}" oninput="updField(${i},'max',this.value===''?undefined:+this.value)"></div></div>`;
+  }
+  if(f.type==='agreement'){
+    h+=`<div class="seg-title">條款內容</div><div class="field"><textarea class="textarea" rows="3" oninput="updField(${i},'agreementText',this.value)">${esc(f.agreementText)}</textarea></div>`;
+  }
+  body.innerHTML=h;
+}
+
+/* ---- save current activity → attendee preview reads it ---- */
+function fmtRange(s,e){
+  if(!s) return '';
+  const ds=new Date(s); const de=e?new Date(e):null;
+  const base=`${ds.getMonth()+1}/${ds.getDate()}（${'日一二三四五六'[ds.getDay()]}）${pad(ds.getHours())}:${pad(ds.getMinutes())}`;
+  return de? `${base}–${pad(de.getHours())}:${pad(de.getMinutes())}` : base;
+}
+function saveActivity(){
+  const g=id=>document.getElementById(id);
+  saveHandoffActivity({
+    title: g('evTitle')?.value || '活動名稱',
+    dateText: fmtRange(g('evStart')?.value, g('evEnd')?.value),
+    mode: g('evMode')?.value || '實體',
+    location: g('evLocation')?.value || '',
+    intro: g('evIntro')?.value || '',
+    tickets: tickets.map(t=>({ name:t.name, price:t.price, quantity:t.quantity, sold:t.sold,
+      saleStart:t.saleStart?t.saleStart.toISOString():null, saleEnd:t.saleEnd?t.saleEnd.toISOString():null, desc:t.desc })),
+    fields: fields.map(f=>{ const c={...f}; delete c.open; return c; }),
+  });
+}
+function previewRegistration(){ saveActivity(); toast('已帶入目前內容，開啟報名頁預覽'); window.open('attendee.html','_blank'); }
+
 renderFields();
 </script>
 </body>
