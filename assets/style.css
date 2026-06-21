@@ -328,20 +328,6 @@ code, .mono { font-family: "SFMono-Regular", "JetBrains Mono", Menlo, monospace;
 .field-row.locked { background: var(--bg-gray); }
 .field-row.locked .fr-icon { background: #e9edf3; color: var(--text-soft); }
 
-/* ---------- Field settings drawer ---------- */
-.drawer-backdrop { position: fixed; inset: 0; background: rgba(16,32,46,.35); z-index: 60; opacity: 0; pointer-events: none; transition: opacity .2s; }
-.drawer-backdrop.open { opacity: 1; pointer-events: auto; }
-.drawer {
-  position: fixed; top: 0; right: 0; height: 100vh; width: 390px; max-width: 92vw;
-  background: #fff; z-index: 61; box-shadow: -14px 0 44px rgba(16,32,46,.18);
-  transform: translateX(102%); transition: transform .24s ease; display: flex; flex-direction: column;
-}
-.drawer.open { transform: none; }
-.drawer-head { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-.drawer-head h3 { margin: 0; font-size: 16px; display: flex; align-items: center; gap: 9px; }
-.drawer-head .ft { width: 30px; height: 30px; border-radius: 8px; background: var(--theme-white); color: var(--theme-color); display: grid; place-items: center; font-size: 16px; }
-.drawer-body { padding: 18px 20px; overflow-y: auto; flex: 1; }
-.drawer-foot { padding: 14px 20px; border-top: 1px solid var(--border); display: flex; gap: 10px; flex-shrink: 0; }
 .seg-title { font-size: 12px; font-weight: 600; color: var(--text-faint); text-transform: uppercase; letter-spacing: .04em; margin: 22px 0 12px; padding-top: 16px; border-top: 1px dashed var(--border); }
 .seg-title:first-child { border-top: none; padding-top: 0; margin-top: 0; }
 .opt-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }

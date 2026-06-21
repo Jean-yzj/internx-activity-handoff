@@ -111,6 +111,14 @@ const DEFAULT_ACTIVITY = {
   dateText:'6/28（日）14:00–18:00', mode:'實體',
   location:'Garage+ · 台北市中山區中山北路二段 96 號 9 樓', organizer:'實習通 InternX',
   approval:'需主辦方審核', payments:['實習通點數折抵','銀行轉帳'], refund:'活動前 7 天可全額退款',
+  registrationFlow:{
+    requiresApproval:true,
+    approvalLabel:'需主辦方審核',
+    paymentTiming:'審核通過後付款',
+    paymentMethods:['實習通點數折抵','銀行轉帳'],
+    refundPolicy:'活動前 7 天可全額退款',
+    attendeeStatusAfterSubmit:'pending_review',
+  },
   intro:'經營 InternX 這段時間，我發現最有價值的時刻，往往不是聽大道理，而是和同樣在第一線、視角完全不同的朋友，交換那些課本上學不到的經驗。所以我想把這群正在解決問題、充滿行動力的人，放進同一個房間。\n聊的是創業早期最真實的問題：內容、資源、驗證、社群，還有下一步該怎麼走。',
   agenda:[
     {time:'14:00',title:'報到',desc:'抵達 Garage+，領取名牌。'},
@@ -145,12 +153,20 @@ const DEFAULT_ACTIVITY = {
 
 const fromEditor = !!loadHandoffActivity();
 const A = loadHandoffActivity() || DEFAULT_ACTIVITY;
+const flow = A.registrationFlow || {
+  requiresApproval: A.approval ? A.approval === '需主辦方審核' : true,
+  approvalLabel: A.approval || '需主辦方審核',
+  paymentTiming: A.approval === '自動通過' ? '送出後立即付款' : '審核通過後付款',
+  paymentMethods: A.payments || [],
+  refundPolicy: A.refund || '',
+  attendeeStatusAfterSubmit: A.approval === '自動通過' ? 'registered' : 'pending_review',
+};
 
 /* ---- header / meta ---- */
 document.getElementById('chromeUrl').textContent = 'internx.me / activity / ' + A.title;
 document.getElementById('coverTitle').textContent = A.title;
 document.getElementById('coverTag').textContent = A.tagline || (A.intro||'').split('\n')[0].slice(0,60);
-const isReview = A.approval ? A.approval === '需主辦方審核' : true;
+const isReview = !!flow.requiresApproval;
 const evTypeLabel = A.evType || (isReview ? '審核制' : (A.mode ? A.mode + '活動' : '活動報名'));
 document.getElementById('coverType').innerHTML = `<i class="ri-shield-check-line"></i> ${esc(evTypeLabel)}`;
 document.getElementById('mDate').textContent = A.dateText || '—';
@@ -167,7 +183,7 @@ if(fromEditor) document.getElementById('editorBanner').style.display='flex';
   }
   const approvalNote = isReview
     ? '<b>名額有限，採審核制。</b>送出報名後由主辦方審核，通過後再進行付款。'
-    : '<b>名額有限。</b>送出後即完成報名'+(A.payments&&A.payments.length?'，並依所選方式付款。':'。');
+    : '<b>名額有限。</b>送出後即完成報名'+(flow.paymentMethods&&flow.paymentMethods.length?'，並依所選方式付款。':'。');
   h += `<div class="callout callout-info" style="margin:18px 0 0"><i class="ri-information-line"></i>
     <p style="margin:0">${approvalNote}</p></div>`;
   if(A.faq && A.faq.length){
@@ -245,13 +261,14 @@ renderTickets();
 
 /* ---- 進階設定：付款 / 退款 / 審核 帶入 ---- */
 (function(){
-  const pay = (A.payments && A.payments.length) ? A.payments.join('、') : '依主辦方通知';
+  const pay = (flow.paymentMethods && flow.paymentMethods.length) ? flow.paymentMethods.join('、') : '依主辦方通知';
   document.getElementById('payInfo').innerHTML = `
     <div class="card card-pad" style="margin-top:14px">
       <div style="display:flex;gap:24px;flex-wrap:wrap;font-size:14px">
         <div><div style="color:var(--text-faint);font-size:12px;margin-bottom:2px"><i class="ri-bank-card-line"></i> 付款方式</div><b>${esc(pay)}</b></div>
-        <div><div style="color:var(--text-faint);font-size:12px;margin-bottom:2px"><i class="ri-refund-2-line"></i> 退款政策</div><b>${esc(A.refund||'—')}</b></div>
-        <div><div style="color:var(--text-faint);font-size:12px;margin-bottom:2px"><i class="ri-shield-check-line"></i> 報名方式</div><b>${isReview?'審核制（通過後付款）':'即時完成'}</b></div>
+        <div><div style="color:var(--text-faint);font-size:12px;margin-bottom:2px"><i class="ri-refund-2-line"></i> 退款政策</div><b>${esc(flow.refundPolicy||'—')}</b></div>
+        <div><div style="color:var(--text-faint);font-size:12px;margin-bottom:2px"><i class="ri-shield-check-line"></i> 報名方式</div><b>${esc(flow.approvalLabel||'即時完成')}</b></div>
+        <div><div style="color:var(--text-faint);font-size:12px;margin-bottom:2px"><i class="ri-time-line"></i> 付款時機</div><b>${esc(flow.paymentTiming||'依主辦方通知')}</b></div>
       </div>
     </div>`;
   const cta=document.getElementById('cta');

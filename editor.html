@@ -131,7 +131,7 @@
           <div class="fb-canvas">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
               <div style="font-size:13px;color:var(--text-faint)">報名者會依此順序填寫</div>
-              <div style="font-size:12px;color:var(--text-faint)"><i class="ri-information-line"></i> 點欄位可編輯，拖曳把手可排序</div>
+              <div style="font-size:12px;color:var(--text-faint)"><i class="ri-information-line"></i> 點欄位本身可原地編輯，拖曳把手可排序</div>
             </div>
             <div id="fieldList"></div>
           </div>
@@ -356,23 +356,27 @@ function renderFields(){
     const block = document.createElement('div');
     block.className='field-block'+(open?' open':'');
     block.innerHTML = `
-      <div class="field-row">
+      <div class="field-row" onclick="handleFieldRowClick(event, ${i})">
         ${f.locked
-          ? `<span class="fr-grip-locked" title="系統欄位，固定在最上方"><i class="ri-lock-line"></i></span>`
-          : `<span class="fr-grip" data-grip title="拖曳排序"><i class="ri-draggable"></i></span>`}
+          ? `<span class="fr-grip-locked" title="系統欄位，固定在最上方" onclick="event.stopPropagation()"><i class="ri-lock-line"></i></span>`
+          : `<span class="fr-grip" data-grip title="拖曳排序" onclick="event.stopPropagation()"><i class="ri-draggable"></i></span>`}
         <span class="fr-icon"><i class="${m.icon}"></i></span>
-        <span class="fr-main" onclick="selectField(${i})">
+        <span class="fr-main">
           <div class="fr-label">${esc(f.label)} ${f.required?'<span class="req">*</span>':''}</div>
           <div class="fr-type">${m.label}${fieldSummary(f)}</div>
         </span>
-        <button class="icon-btn" title="${open?'收合':'編輯'}" onclick="selectField(${i})"><i class="ri-${open?'arrow-up-s':'arrow-down-s'}-line"></i></button>
-        <button class="icon-btn danger" title="刪除" ${f.locked?'disabled':''} onclick="delField(${i})"><i class="ri-delete-bin-line"></i></button>
+        <button class="icon-btn" title="${open?'收合':'編輯'}" onclick="event.stopPropagation();selectField(${i})"><i class="ri-${open?'arrow-up-s':'arrow-down-s'}-line"></i></button>
+        <button class="icon-btn danger" title="刪除" ${f.locked?'disabled':''} onclick="event.stopPropagation();delField(${i})"><i class="ri-delete-bin-line"></i></button>
       </div>
       ${open ? `<div class="field-settings">${settingsHTML(i)}</div>` : ''}
     `;
     wrap.appendChild(block);
   });
   attachDnD(wrap, fields, renderFields, lockedLead());
+}
+function handleFieldRowClick(e,i){
+  if(e.target.closest('button,[data-grip],input,textarea,select,label,.toggle,.opt-row')) return;
+  selectField(i);
 }
 function selectField(i){ selectedField = (selectedField===i ? -1 : i); renderFields(); }
 function delField(i){ if(fields[i].locked){toast('系統必填欄位不可刪除');return;} fields.splice(i,1); selectedField=-1; renderFields(); }
@@ -451,15 +455,28 @@ function fmtRange(s,e){
 }
 function saveActivity(){
   const g=id=>document.getElementById(id);
+  const approval = g('evApproval')?.value || '需主辦方審核';
+  const payments = [g('payQuota')?.checked ? '實習通點數折抵' : null, g('payBank')?.checked ? '銀行轉帳' : null].filter(Boolean);
+  const refund = g('evRefund')?.value || '';
+  const requiresApproval = approval === '需主辦方審核';
   saveHandoffActivity({
     title: g('evTitle')?.value || '活動名稱',
     dateText: fmtRange(g('evStart')?.value, g('evEnd')?.value),
     mode: g('evMode')?.value || '實體',
     location: g('evLocation')?.value || '',
     intro: g('evIntro')?.value || '',
-    approval: g('evApproval')?.value || '需主辦方審核',
-    payments: [g('payQuota')?.checked ? '實習通點數折抵' : null, g('payBank')?.checked ? '銀行轉帳' : null].filter(Boolean),
-    refund: g('evRefund')?.value || '',
+    evType: requiresApproval ? '審核制活動' : '即時報名活動',
+    approval,
+    payments,
+    refund,
+    registrationFlow: {
+      requiresApproval,
+      approvalLabel: approval,
+      paymentTiming: requiresApproval ? '審核通過後付款' : '送出後立即付款',
+      paymentMethods: payments,
+      refundPolicy: refund,
+      attendeeStatusAfterSubmit: requiresApproval ? 'pending_review' : 'registered',
+    },
     tickets: tickets.map(t=>({ name:t.name, price:t.price, quantity:t.quantity, sold:t.sold,
       saleStart:t.saleStart?t.saleStart.toISOString():null, saleEnd:t.saleEnd?t.saleEnd.toISOString():null, desc:t.desc })),
     fields: fields.map(f=>{ const c={...f}; delete c.open; return c; }),
