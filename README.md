@@ -25,6 +25,7 @@ modify** any existing `internx.me` code.
 | `index.html` | 總覽：痛點對照與改版重點 |
 | `editor.html` | 主辦方編輯器（票券與表單可實際操作） |
 | `attendee.html` | 報名者完整頁面：活動介紹 + 報名表單 + 票券狀態（範例：學生創業者小聚） |
+| `integration.html` | 整合動線：它接進實習通的哪個位置（路由 + 點擊路徑） |
 | `spec.html` | 工程規格：資料模型、驗證、改動檔案清單、驗收標準 |
 | `INTEGRATION.md` | **工程交接文件**：前端頁面對應 + 如何串接進 internx.me |
 

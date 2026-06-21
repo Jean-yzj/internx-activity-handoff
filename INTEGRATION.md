@@ -160,6 +160,18 @@ export function FormPreview({ fields, onReorderFields, ... }) {
 - dnd-kit 內建 `KeyboardSensor`，鍵盤也能排序（無障礙），這是自製拖曳沒有的。
 - mockup（`editor.html`）為了零依賴用 HTML5 drag 示意，正式版請用 dnd-kit。
 
+**欄位設定抽屜（點欄位即可編輯）** — 對應現有 `FormBuilder/FieldSettingsDrawer.tsx`，模型欄位已存在於 `FormBuilder/types.ts`：
+
+| 欄位型別 | 可設定 | 對應 FormField 欄位 |
+|---|---|---|
+| 共用 | 名稱、佔位提示、說明、必填 | `label` / `placeholder` / `helperText` / `required` |
+| 檔案上傳 | **允許格式、檔案大小上限、數量上限** | `accept` / `maxFileSize`(bytes) / `maxFiles` |
+| 下拉 / 單選 / 複選 | 選項、允許「其他」 | `options` / `allowOther` |
+| Email | 限定網域 | `allowedDomains` |
+| 數字 | 最小 / 最大 | `min` / `max` |
+
+報名者端要依這些設定驗證：檔案型別檢查 `accept` 副檔名與 `maxFileSize`、Email 檢查 `allowedDomains`、數字檢查 `min/max`。mockup 的報名頁（`attendee.html`）已照 `accept` / `maxFileSize` / `maxFiles` 顯示「接受 .pdf, image/* · 單檔 ≤ 5MB · 最多 1 個」。
+
 ### 4.4 報名者頁面（C：活動介紹 + 表單 + 票券）
 
 對照 mockup `attendee.html`，報名者由上到下看到三段（順序很重要）：

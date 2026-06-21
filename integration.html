@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>整合動線 — 它如何接進實習通</title>
+<link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <a href="index.html" class="brand" style="text-decoration:none">
+    <span class="logo">X</span><span>實習通</span>
+    <span class="sub">整合動線</span>
+  </a>
+  <span class="spacer"></span>
+  <nav class="topnav">
+    <a href="index.html">總覽</a>
+    <a href="editor.html">主辦方編輯器</a>
+    <a href="attendee.html">報名者畫面</a>
+    <a href="integration.html">整合動線</a>
+    <a href="spec.html">工程規格</a>
+  </nav>
+  <span class="mockup-pill">介面示意 Mockup</span>
+</header>
+
+<main class="wrap">
+  <div class="section" style="margin-bottom:24px">
+    <div class="eyebrow">系統整合與動線</div>
+    <h1 style="font-size:30px">它不是新畫面，而是接進實習通既有位置</h1>
+    <p class="lead">這個編輯器與報名頁<b>不會憑空跳出</b>。它們替換 / 升級實習通現有的兩個位置：
+      主辦方的「新增 / 編輯活動」，以及報名者的「活動詳情頁」。下面用實習通的介面動線說明點擊路徑。</p>
+  </div>
+
+  <!-- WHERE IT PLUGS IN -->
+  <section class="section">
+    <h2>串接位置（對應現有路由與檔案）</h2>
+    <table class="spec">
+      <thead><tr><th>新畫面</th><th>實習通位置（路由）</th><th>對應現有檔案</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><b>主辦方編輯器</b><br><small style="color:var(--text-faint)">新增活動</small></td>
+          <td><code>/[lang]/professional/new-activity</code><br><small style="color:var(--text-faint)">側邊欄「主辦專區 → 新增活動」</small></td>
+          <td><code>pages/[lang]/professional/new-activity.jsx</code><br><code>components/Activities/AddActivity.tsx</code></td>
+        </tr>
+        <tr>
+          <td><b>主辦方編輯器</b><br><small style="color:var(--text-faint)">編輯既有活動</small></td>
+          <td><code>/[lang]/activity/[activityId]/edit</code><br><small style="color:var(--text-faint)">活動卡片「編輯」</small></td>
+          <td><code>components/Activities/AddActivity.tsx</code><br><code>FormBuilder/</code>、<code>activity-form-schema.ts</code></td>
+        </tr>
+        <tr>
+          <td><b>報名者畫面</b><br><small style="color:var(--text-faint)">活動詳情 + 報名</small></td>
+          <td><code>/[lang]/activity/[activityId]</code><br><small style="color:var(--text-faint)">活動列表點任一活動</small></td>
+          <td><code>components/Activities/ActivityContent.jsx</code><br><code>components/Registration/Registration.tsx</code></td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="callout callout-info">
+      <i class="ri-camera-line"></i>
+      <p style="margin:0">下方實習通畫面，是依<b>現有前端程式碼結構與側邊欄項目重繪的示意</b>（登入後畫面無法headless擷取）。
+      正式交接可直接換成實際截圖 — 動線位置與路由不變。</p>
+    </div>
+  </section>
+
+  <!-- ORGANIZER FLOW -->
+  <section class="section">
+    <div class="eyebrow">動線 A · 主辦方</div>
+    <h2>主辦方：從「主辦專區」進入新編輯器</h2>
+    <div class="flow" style="margin-top:18px">
+      <!-- real context (reconstructed shell) -->
+      <div class="ix">
+        <div class="ix-top">
+          <span class="l"><span class="lg">X</span> 實習通</span>
+          <span class="ix-search"><i class="ri-search-line"></i> 搜尋公司、活動、夥伴</span>
+          <span class="av"></span>
+        </div>
+        <div class="ix-main">
+          <div class="ix-side">
+            <div class="ix-nav"><i class="ri-home-5-line"></i> 實習通首頁</div>
+            <div class="ix-nav"><i class="ri-team-line"></i> 人脈與小夥伴們</div>
+            <div class="ix-nav"><i class="ri-calendar-event-line"></i> 職涯活動媒人婆</div>
+            <div class="ix-nav active hotspot"><i class="ri-store-2-line"></i> 主辦專區</div>
+            <div class="ix-nav"><i class="ri-cup-line"></i> 人生飲料店</div>
+            <div class="ix-nav"><i class="ri-coin-line"></i> 賺取及使用點數</div>
+          </div>
+          <div class="ix-content">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+              <b style="font-size:15px">活動管理</b>
+              <span class="btn btn-primary btn-sm hotspot-card" style="position:relative"><i class="ri-add-line"></i> 新增活動</span>
+            </div>
+            <div class="ix-actcard">
+              <div class="thumb"></div>
+              <div class="meta"><div class="t">學生創業者小聚</div><div class="s">6/28 · Garage+ · 報名 28 / 80</div></div>
+              <span class="btn btn-ghost btn-sm"><i class="ri-edit-line"></i> 編輯</span>
+            </div>
+            <div class="ix-actcard">
+              <div class="thumb" style="background:linear-gradient(135deg,#ffd16b,#e2a200)"></div>
+              <div class="meta"><div class="t">職涯實戰營</div><div class="s">7/12 · 信義區 · 報名 64 / 120</div></div>
+              <span class="btn btn-ghost btn-sm"><i class="ri-edit-line"></i> 編輯</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="arrow"><i class="ri-arrow-right-line"></i></div>
+
+      <!-- new screen -->
+      <a class="frame" href="editor.html" style="text-decoration:none;color:inherit">
+        <img src="assets/screens/shot-editor-tickets.png" alt="新主辦方編輯器" />
+        <div class="cap"><span class="new-tag">新</span> 主辦方編輯器（票券設定）· 點開放大</div>
+      </a>
+    </div>
+    <p style="color:var(--text-soft);font-size:14px;margin-top:14px">
+      <i class="ri-corner-down-right-line"></i> 點側邊欄「主辦專區 → 新增活動」（或活動卡片「編輯」）→ 開啟新編輯器，分四步：活動內容 / 票券設定 / 報名表單 / 進階送出。
+    </p>
+  </section>
+
+  <!-- ATTENDEE FLOW -->
+  <section class="section">
+    <div class="eyebrow">動線 B · 報名者</div>
+    <h2>報名者：從活動列表進入新報名頁</h2>
+    <div class="flow" style="margin-top:18px">
+      <div class="ix">
+        <div class="ix-top">
+          <span class="l"><span class="lg">X</span> 實習通</span>
+          <span class="ix-search"><i class="ri-search-line"></i> 搜尋公司、活動、夥伴</span>
+          <span class="av"></span>
+        </div>
+        <div class="ix-main">
+          <div class="ix-side">
+            <div class="ix-nav"><i class="ri-home-5-line"></i> 實習通首頁</div>
+            <div class="ix-nav"><i class="ri-team-line"></i> 人脈與小夥伴們</div>
+            <div class="ix-nav active hotspot"><i class="ri-calendar-event-line"></i> 職涯活動媒人婆</div>
+            <div class="ix-nav"><i class="ri-store-2-line"></i> 主辦專區</div>
+            <div class="ix-nav"><i class="ri-cup-line"></i> 人生飲料店</div>
+            <div class="ix-nav"><i class="ri-coin-line"></i> 賺取及使用點數</div>
+          </div>
+          <div class="ix-content">
+            <b style="font-size:15px;display:block;margin-bottom:14px">職涯活動</b>
+            <div class="ix-actcard hotspot-card">
+              <div class="thumb"></div>
+              <div class="meta"><div class="t">學生創業者小聚</div><div class="s">6/28 · Garage+ · 審核制 · NT$300 起</div></div>
+              <span class="btn btn-primary btn-sm">查看</span>
+            </div>
+            <div class="ix-actcard">
+              <div class="thumb" style="background:linear-gradient(135deg,#ffd16b,#e2a200)"></div>
+              <div class="meta"><div class="t">職涯實戰營</div><div class="s">7/12 · 信義區 · NT$890</div></div>
+              <span class="btn btn-ghost btn-sm">查看</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="arrow"><i class="ri-arrow-right-line"></i></div>
+
+      <a class="frame" href="attendee.html" style="text-decoration:none;color:inherit">
+        <img src="assets/screens/shot-attendee.png" alt="新報名者畫面" />
+        <div class="cap"><span class="new-tag">新</span> 報名者畫面（活動介紹＋表單＋票券）· 點開放大</div>
+      </a>
+    </div>
+    <p style="color:var(--text-soft);font-size:14px;margin-top:14px">
+      <i class="ri-corner-down-right-line"></i> 報名者在「職涯活動媒人婆」點任一活動 → 進入活動詳情頁（即新報名頁），由上到下：活動介紹 → 報名表單 → 選擇票券 → 送出。
+    </p>
+  </section>
+
+  <!-- HOW TO CONNECT -->
+  <section class="section">
+    <h2>如何串接（給工程師）</h2>
+    <div class="grid grid-2">
+      <div class="card card-pad">
+        <h3 style="font-size:16px"><i class="ri-store-2-line" style="color:var(--theme-color)"></i> 主辦方編輯器</h3>
+        <p>用新編輯器取代 <code class="coderef">new-activity.jsx</code> 與活動 <code class="coderef">/edit</code> 內的舊票價 / 表單區塊。沿用既有步驟式 <code class="coderef">AddActivity.tsx</code> 外殼，把「票券」與「報名表單」兩步換成新版（票券含販售時間/數量、表單用 @dnd-kit 拖曳＋欄位設定抽屜）。</p>
+      </div>
+      <div class="card card-pad">
+        <h3 style="font-size:16px"><i class="ri-calendar-event-line" style="color:var(--theme-color)"></i> 報名者畫面</h3>
+        <p>新報名頁就是現有 <code class="coderef">activity/[activityId]</code>。把 <code class="coderef">ActivityContent.jsx</code> 的版型對齊（介紹 → 表單 → 票券），<code class="coderef">Registration.tsx</code> 依 <code>activity.formSchema</code> 動態渲染欄位，票券狀態用共用的 <code>ticketStatus()</code>。</p>
+      </div>
+    </div>
+    <div class="callout callout-fix" style="margin-top:16px">
+      <i class="ri-route-line"></i>
+      <p style="margin:0">關鍵：報名者填的欄位 = 主辦方在編輯器拖曳出的欄位（同一份 <code>formSchema</code>）。資料模型與逐步做法見
+      <a href="spec.html">工程規格</a> 與 <a href="https://github.com/Jean-yzj/internx-activity-handoff/blob/main/INTEGRATION.md">INTEGRATION.md</a>。</p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="foot">實習通 InternX · 整合動線示意 · 實習通介面為依現有結構重繪，可換成實際截圖</footer>
+<script src="assets/app.js"></script>
+</body>
+</html>

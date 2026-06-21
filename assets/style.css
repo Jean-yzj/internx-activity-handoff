@@ -458,6 +458,54 @@ pre.code .s { color: #9be0a8; }
 pre.code .n { color: #ffcf8b; }
 pre.code .plus { color: #7ee07e; }
 
+/* ---------- Reconstructed InternX app shell (integration flow) ---------- */
+.ix { border: 1px solid var(--border); border-radius: 14px; overflow: hidden; box-shadow: var(--shadow-md); background: #fff; }
+.ix-top { height: 50px; display: flex; align-items: center; gap: 14px; padding: 0 16px; background: #fff; border-bottom: 1px solid var(--border); }
+.ix-top .l { display: flex; align-items: center; gap: 8px; font-weight: 700; color: var(--text); font-size: 15px; }
+.ix-top .l .lg { width: 26px; height: 26px; border-radius: 7px; background: linear-gradient(135deg, var(--theme-color), var(--theme-light)); display: grid; place-items: center; color: #fff; font-weight: 800; font-size: 13px; }
+.ix-search { flex: 1; max-width: 300px; height: 32px; border-radius: 8px; background: var(--bg-gray); border: 1px solid var(--border); display: flex; align-items: center; padding: 0 12px; color: var(--text-faint); font-size: 13px; gap: 8px; }
+.ix-top .av { width: 30px; height: 30px; border-radius: 50%; background: var(--theme-white); margin-left: auto; flex-shrink: 0; }
+.ix-main { display: grid; grid-template-columns: 200px 1fr; min-height: 330px; }
+.ix-side { background: #fbfcfe; border-right: 1px solid var(--border); padding: 12px 10px; }
+.ix-nav { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 9px; font-size: 13px; color: var(--text-soft); font-weight: 500; margin-bottom: 2px; position: relative; }
+.ix-nav i { font-size: 17px; color: var(--text-faint); }
+.ix-nav.active { background: var(--theme-white); color: var(--theme-color-dark); font-weight: 600; }
+.ix-nav.active i { color: var(--theme-color); }
+.ix-content { padding: 20px; background: var(--bg-theme); }
+.ix-actcard { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 14px; display: flex; gap: 12px; align-items: center; margin-bottom: 10px; }
+.ix-actcard .thumb { width: 64px; height: 64px; border-radius: 9px; background: linear-gradient(135deg, var(--theme-light), var(--theme-color)); flex-shrink: 0; }
+.ix-actcard .meta { flex: 1; }
+.ix-actcard .meta .t { font-weight: 600; font-size: 14px; }
+.ix-actcard .meta .s { font-size: 12px; color: var(--text-faint); margin-top: 2px; }
+
+/* hotspot pulse + pointer label */
+.hotspot { box-shadow: 0 0 0 2px var(--link-color) !important; background: #fff !important; }
+.hotspot::after { content: ""; position: absolute; right: 9px; top: 50%; transform: translateY(-50%); width: 11px; height: 11px; border-radius: 50%; background: var(--link-color); animation: pulse 1.6s infinite; }
+.hotspot-card { position: relative; box-shadow: 0 0 0 2px var(--link-color); }
+.hotspot-card::after { content: "點這裡"; position: absolute; right: -8px; top: -10px; background: var(--link-color); color: #fff; font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 999px; }
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(195,85,0,.5); } 70% { box-shadow: 0 0 0 9px rgba(195,85,0,0); } 100% { box-shadow: 0 0 0 0 rgba(195,85,0,0); } }
+
+/* flow: real context → new screen */
+.flow { display: grid; grid-template-columns: 1fr 44px 1fr; gap: 14px; align-items: center; }
+.flow .arrow { font-size: 28px; color: var(--theme-color); text-align: center; }
+.flow .frame { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow-sm); background: #fff; }
+.flow .frame > img { width: 100%; display: block; }
+.flow .cap { font-size: 12.5px; color: var(--text-soft); padding: 9px 12px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 7px; background: #fff; }
+.new-tag { background: var(--theme-color); color: #fff; font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 999px; }
+@media (max-width: 820px) {
+  .flow { grid-template-columns: 1fr; }
+  .flow .arrow { transform: rotate(90deg); }
+  .ix-main { grid-template-columns: 1fr; }
+  .ix-side { display: none; }
+}
+
+/* keep wide spec tables inside the viewport on phones */
+@media (max-width: 600px) {
+  table.spec { table-layout: fixed; width: 100%; }
+  table.spec th, table.spec td { word-break: break-word; padding: 8px 8px; font-size: 12.5px; }
+  table.spec code, .coderef { white-space: normal; word-break: break-all; }
+}
+
 /* ---------- Footer ---------- */
 .foot { border-top: 1px solid var(--border); padding: 26px 22px; text-align: center; color: var(--text-faint); font-size: 13px; }
 
