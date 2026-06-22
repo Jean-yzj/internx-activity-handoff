@@ -939,3 +939,13 @@ main {
 }
 .mobileMenuPanel a:hover, .mobileMenuPanel a.selected { background: var(--theme-white); color: var(--theme-color); }
 .mobileMenuPanel a i { font-size: 20px; }
+
+/* =====================================================================
+   TABLES & CODE — 先前完全沒有樣式，導致表格/程式碼在窄螢幕撐破頁面
+   ===================================================================== */
+.tableWrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.tableWrap table { width: 100%; border-collapse: collapse; }
+.tableWrap th, .tableWrap td { padding: 11px 13px; text-align: left; font-size: 13.5px; vertical-align: middle; border-bottom: 1px solid #eef0f4; }
+.tableWrap th { font-size: 12.5px; font-weight: 600; color: #5b6b7e; background: #f7faff; white-space: nowrap; }
+.tableWrap tr:last-child td, .tableWrap tbody tr:last-child td { border-bottom: none; }
+pre { overflow-x: auto; max-width: 100%; }

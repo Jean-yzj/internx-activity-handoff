@@ -41,7 +41,18 @@
   @media (max-width: 760px) { .mRow { flex-wrap: wrap; } }
   /* 內容少的分頁：卡片貼齊內容，不拉伸到側欄高度、不留 58vh 白塊（修「點了空一塊」） */
   .layout { align-items: flex-start; }
-  .main .mainCard { flex: 0 0 auto; min-height: 0; }
+  /* 導覽移到側欄後，右側只剩內容卡：補回上框與完整圓角 */
+  .main .mainCard { flex: 0 0 auto; min-height: 0; border-top: 1px solid #e0e0e0; border-radius: var(--border-radius); }
+  /* 側欄導覽（取代上方 tab，貼近實習通官方帳號後台的側欄） */
+  .navLabel { font-size: 11.5px; font-weight: 600; color: #9aa5b4; letter-spacing: .04em; padding: 0 10px 6px; }
+  .bkNav { font-size: 14px; padding: 9px 12px; }
+  .bkNav.active { background: var(--theme-white); color: var(--theme-color-black); font-weight: 600; }
+  .bkNav.active i { color: var(--theme-color); }
+  .navPend { background: #d80f0f; color: #fff; font-size: 11px; font-weight: 700; border-radius: 999px; padding: 0 6px; margin-left: auto; }
+  /* 報名名單表格：短欄不換行（避免姓名直書），背景標籤欄可換行 */
+  #regBody td:nth-child(1), #regBody td:nth-child(2), #regBody td:nth-child(4), #regBody td:nth-child(5) { white-space: nowrap; }
+  #regBody td:nth-child(3) { min-width: 170px; }
+  #regBody .regActs { white-space: nowrap; }
   /* 既有功能分頁的置中說明區 */
   .sumNote { text-align: center; padding: 30px 22px; }
   .sumNote .ricon { width: 52px; height: 52px; border-radius: 14px; background: var(--theme-white); color: var(--theme-color); display: grid; place-items: center; font-size: 24px; margin: 0 auto 14px; }
@@ -79,23 +90,19 @@
             <div class="statBox warn"><b id="statPend">3</b><span>待審核</span></div>
           </div>
           <div class="sidebarDivider"></div>
-          <div class="infoList">
-            <button class="pointsInfoRow" onclick="goTab('manage')"><i class="ri-calendar-todo-line"></i> 活動管理</button>
-            <button class="pointsInfoRow" onclick="goTab('regs')"><i class="ri-list-check-2"></i> 報名名單</button>
-            <button class="pointsInfoRow" onclick="goTab('content')"><i class="ri-quill-pen-line"></i> 創作內容</button>
+          <div class="navLabel">後臺功能</div>
+          <div class="infoList" id="bkNav">
+            <button class="pointsInfoRow bkNav active" data-go="manage"><i class="ri-calendar-todo-line"></i> 活動管理</button>
+            <button class="pointsInfoRow bkNav" data-go="regs"><i class="ri-list-check-2"></i> 報名名單 <span id="navPend" class="navPend">3</span></button>
+            <button class="pointsInfoRow bkNav" data-go="content"><i class="ri-quill-pen-line"></i> 創作內容</button>
+            <button class="pointsInfoRow bkNav" data-go="showcase"><i class="ri-medal-line"></i> 成果展示</button>
+            <button class="pointsInfoRow bkNav" data-go="reviews"><i class="ri-chat-3-line"></i> 回應評價</button>
           </div>
         </div>
       </aside>
 
       <!-- RIGHT: 分頁內容（tab 收在右欄、靠左，與創作者主頁一致） -->
       <div class="main">
-        <div class="sectionTabs" data-tabs="oa">
-          <button class="sectionTab active" data-tab="manage">活動管理</button>
-          <button class="sectionTab" data-tab="regs">報名名單 <span id="pendPill" style="background:#d80f0f;color:#fff;font-size:11px;font-weight:700;border-radius:999px;padding:0 6px;margin-left:4px">3</span></button>
-          <button class="sectionTab" data-tab="content">創作內容</button>
-          <button class="sectionTab" data-tab="showcase">成果展示</button>
-          <button class="sectionTab" data-tab="reviews">回應評價</button>
-        </div>
         <div class="mainCard">
 
           <!-- 活動管理 -->
@@ -212,7 +219,13 @@
 <script src="/assets/cz/app.js"></script>
 <script>
   document.getElementById("bkAvatar").innerHTML = CZ.avatar("X", "#0182fd", 96, "sidebarAvatar");
-  function goTab(k){ document.querySelector(`.sectionTab[data-tab="${k}"]`)?.click(); }
+  function showSection(k){
+    document.querySelectorAll(".tabPane").forEach(p => p.classList.toggle("active", p.dataset.paneKey === k));
+    document.querySelectorAll(".bkNav").forEach(n => n.classList.toggle("active", n.dataset.go === k));
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+  function goTab(k){ showSection(k); }
+  document.querySelectorAll(".bkNav").forEach(b => b.addEventListener("click", () => showSection(b.dataset.go)));
 
   let regs = [
     { name:"王＊明", ticket:"一般審核票", traits:["青年百億計畫","連續創業家","AppWorks"], status:"pending" },
@@ -238,8 +251,8 @@
     }).join("");
     const pend = regs.filter(r=>r.status==="pending").length;
     document.getElementById("statPend").textContent = pend;
-    const pill = document.getElementById("pendPill");
-    pill.textContent = pend; pill.style.display = pend ? "inline-block" : "none";
+    const np = document.getElementById("navPend");
+    if (np) { np.textContent = pend; np.style.display = pend ? "inline-flex" : "none"; }
   }
   function setReg(i,s){ regs[i].status = s; renderRegs();
     CZ.toast(s==="approved" ? "已通過，實習通將寄信通知報名者繳費" : s==="rejected" ? "已拒絕，已通知報名者" : "報名者已於平台繳費，自動標記已付款"); }

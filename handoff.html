@@ -17,6 +17,13 @@
   .demoCard .go { font-size: 13px; font-weight: 600; color: var(--theme-color); }
   .demoCard .tag { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: var(--theme-white); color: var(--theme-color-black); margin-left: 6px; }
   .sectionLead { color: #5c6675; max-width: 760px; }
+  /* rendered-markdown doc: keep code/tables inside the page on mobile */
+  #docBody { max-width: 100%; overflow-wrap: break-word; }
+  #docBody pre { background: #0f1b2d; color: #e7edf5; border-radius: 10px; padding: 14px 16px; font-size: 12.5px; line-height: 1.6; margin: 12px 0; }
+  #docBody pre code { background: none; color: inherit; padding: 0; font-family: "SFMono-Regular", Menlo, monospace; }
+  #docBody code { background: #eef2f7; color: #11243f; padding: 1px 6px; border-radius: 5px; font-size: 12.5px; }
+  #docBody table { margin: 12px 0; }
+  #docBody h2 { margin-top: 26px; }
 </style>
 </head>
 <body data-page="handoff">
