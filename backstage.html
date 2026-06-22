@@ -39,6 +39,14 @@
   .gapItem .gs { font-size: 11.5px; font-weight: 600; padding: 2px 8px; border-radius: 999px; height: fit-content; white-space: nowrap; }
   .gs.have { background: #e4f9e8; color: #1a8a35; } .gs.partial { background: #fff4d6; color: #9a7400; } .gs.todo { background: #fdeaea; color: #d80f0f; }
   @media (max-width: 760px) { .mRow { flex-wrap: wrap; } }
+  /* 內容少的分頁：卡片貼齊內容，不拉伸到側欄高度、不留 58vh 白塊（修「點了空一塊」） */
+  .layout { align-items: flex-start; }
+  .main .mainCard { flex: 0 0 auto; min-height: 0; }
+  /* 既有功能分頁的置中說明區 */
+  .sumNote { text-align: center; padding: 30px 22px; }
+  .sumNote .ricon { width: 52px; height: 52px; border-radius: 14px; background: var(--theme-white); color: var(--theme-color); display: grid; place-items: center; font-size: 24px; margin: 0 auto 14px; }
+  .sumNote h3 { font-size: 17px; color: #11243f; margin: 0 0 6px; }
+  .sumNote p { font-size: 13.5px; color: #667; line-height: 1.7; max-width: 460px; margin: 0 auto; }
 </style>
 </head>
 <body data-page="backstage">
@@ -163,10 +171,20 @@
 
           <!-- 成果展示 / 回應評價（既有功能） -->
           <div class="tabPane" data-pane="oa" data-pane-key="showcase">
-            <div class="cz-info" style="background:#f0f7ff;border:1px solid #cfe6ff;border-radius:12px;padding:14px 16px;font-size:13.5px;color:#33506e"><i class="ri-image-2-line"></i> 「成果展示」是官方帳號既有功能（<code>professional/activity-showcase</code>）：活動結束後上傳花絮與回饋，前台活動卡顯示成果版本。此處沿用。</div>
+            <div class="sectionHeader"><div class="sectionHeaderLeft"><i class="ri-medal-line"></i> 成果展示</div></div>
+            <div class="sumNote">
+              <div class="ricon"><i class="ri-image-2-line"></i></div>
+              <h3>沿用官方帳號既有功能</h3>
+              <p>對應 <code>professional/activity-showcase</code>：活動結束後上傳花絮與回饋，前台活動卡顯示「成果版本」。此分頁不需新做，掛在同一個後臺即可。</p>
+            </div>
           </div>
           <div class="tabPane" data-pane="oa" data-pane-key="reviews">
-            <div class="cz-info" style="background:#f0f7ff;border:1px solid #cfe6ff;border-radius:12px;padding:14px 16px;font-size:13.5px;color:#33506e"><i class="ri-chat-3-line"></i> 「回應評價」是官方帳號既有功能：代表公司回覆求職者評價、發布最新資訊。此處沿用。</div>
+            <div class="sectionHeader"><div class="sectionHeaderLeft"><i class="ri-chat-3-line"></i> 回應評價</div></div>
+            <div class="sumNote">
+              <div class="ricon"><i class="ri-chat-3-line"></i></div>
+              <h3>沿用官方帳號既有功能</h3>
+              <p>代表公司回覆求職者評價、發布最新資訊。與既有官方帳號功能相同，掛在同一個後臺即可，不需新做。</p>
+            </div>
           </div>
 
         </div>
