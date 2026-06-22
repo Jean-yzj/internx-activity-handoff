@@ -15,7 +15,15 @@
   <div class="section" style="margin-bottom:22px">
     <div class="eyebrow">給工程同事</div>
     <h1 style="font-size:30px">工程規格與改動清單</h1>
-    <p class="lead">以下對應現有 <code class="coderef">internx-me/frontend</code> 的檔案。這是建議的最小改動路徑，不是要求重寫。</p>
+    <p class="lead">以下對應現有 <code class="coderef">internx-me/frontend</code> 的檔案，是建議的最小改動路徑、不是要求重寫。資料模型、狀態機、API、權限、通知、話題牆都列在下面；更完整的整合全貌與流程圖見 <a href="/handoff">交接首頁的 INTEGRATION.md</a>。</p>
+    <div class="callout callout-info" style="margin-top:14px">
+      <i class="ri-list-check-2"></i>
+      <p style="margin:0"><b>本頁 13 節：</b>
+        <b>前端</b> 1 票券模型・2 表單驗證・3 拖曳・4 FormField；
+        <b>後端</b> 5 報名狀態機・6 金流・8 API・10 Firestore 規則・9 通知；
+        <b>身分/整合</b> 7 帳號認證並行・11 話題牆；
+        <b>收尾</b> 12 改動檔案清單・13 驗收標準。</p>
+    </div>
   </div>
 
   <!-- 1. ticket model -->
@@ -101,9 +109,181 @@
     <p>系統必填欄位（姓名 / Email）標記 <code>locked</code>：不給拖曳把手、固定最上方，並用 dnd-kit 的 modifiers 限制不可被拖到其上方。完整步驟見 <a href="https://github.com/Jean-yzj/internx-activity-handoff/blob/main/INTEGRATION.md">INTEGRATION.md</a>。</p>
   </section>
 
-  <!-- 4. files -->
+  <!-- 4. FormField -->
   <section class="section">
-    <h2>4 · 改動檔案清單</h2>
+    <h2>4 · 報名表單欄位型別（FormField）</h2>
+    <p>報名者端依此 schema 渲染與驗證。對應 <code class="coderef">components/Activities/FormBuilder/types.ts</code>。</p>
+<pre class="code"><span class="k">type</span> FieldType =
+  <span class="s">'text'</span> | <span class="s">'textarea'</span> | <span class="s">'email'</span> | <span class="s">'phone'</span> | <span class="s">'number'</span>
+  | <span class="s">'select'</span> | <span class="s">'radio'</span> | <span class="s">'checkbox'</span> | <span class="s">'date'</span> | <span class="s">'file'</span> | <span class="s">'agreement'</span>;
+
+<span class="k">interface</span> FormField {
+  id: <span class="k">string</span>; type: FieldType; label: <span class="k">string</span>;
+  required: <span class="k">boolean</span>; locked?: <span class="k">boolean</span>;     <span class="c">// 系統必填(姓名/Email)：不可刪/拖、固定最上</span>
+  order: <span class="k">number</span>; placeholder?: <span class="k">string</span>; helperText?: <span class="k">string</span>;
+  options?: <span class="k">string</span>[]; allowOther?: <span class="k">boolean</span>;        <span class="c">// 選項型</span>
+  accept?: <span class="k">string</span>; maxFileSize?: <span class="k">number</span>; maxFiles?: <span class="k">number</span>;  <span class="c">// 檔案型</span>
+  allowedDomains?: <span class="k">string</span>[];                       <span class="c">// Email 限定網域</span>
+  min?: <span class="k">number</span>; max?: <span class="k">number</span>;                       <span class="c">// 數字</span>
+  agreementText?: <span class="k">string</span>;                          <span class="c">// 同意條款</span>
+}</pre>
+    <table class="spec">
+      <thead><tr><th>型別</th><th>前端驗證</th><th>後端必驗（前端可被繞過）</th></tr></thead>
+      <tbody>
+        <tr><td><code>file</code></td><td>副檔名 ∈ accept、size ≤ maxFileSize、數量 ≤ maxFiles</td><td>同左 + 類型/病毒掃描</td></tr>
+        <tr><td><code>email</code></td><td>格式 + 網域 ∈ allowedDomains</td><td>同左</td></tr>
+        <tr><td><code>number</code></td><td>min ≤ v ≤ max</td><td>同左</td></tr>
+        <tr><td><code>select/radio/checkbox</code></td><td>值 ∈ options（或 allowOther）</td><td>同左</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 5. registration + state machine -->
+  <section class="section">
+    <h2>5 · 報名資料模型與狀態機</h2>
+    <p>「報名者審核」是這次新增的概念，<b>與「活動發布審核」(<code>approvalStatus</code>) 不同</b>：前者主辦方審個別報名者，後者平台審活動能否上架。對應 <code class="coderef">data/registration.ts</code>。</p>
+<pre class="code"><span class="k">type</span> RegistrationStatus =
+  <span class="s">'pending'</span>    <span class="c">// 待主辦方審核</span>
+  | <span class="s">'approved'</span> <span class="c">// 已通過，待繳費（系統已寄通知）</span>
+  | <span class="s">'paid'</span>     <span class="c">// 已繳費（付款 webhook 回寫）</span>
+  | <span class="s">'rejected'</span> | <span class="s">'cancelled'</span> | <span class="s">'refunded'</span>;
+
+<span class="k">interface</span> Registration {
+  id: <span class="k">string</span>; activityId: <span class="k">string</span>; userUid: <span class="k">string</span>;
+  ticketId: <span class="k">string</span>; qty: <span class="k">number</span>; amount: <span class="k">number</span>;   <span class="c">// 送出當下金額快照</span>
+  answers: Record&lt;<span class="k">string</span>, unknown&gt;;                 <span class="c">// key = FormField.id</span>
+  status: RegistrationStatus;
+  createdAt: Timestamp; approvedAt?: Timestamp; paidAt?: Timestamp;
+  rejectedAt?: Timestamp; rejectReason?: <span class="k">string</span>;
+  paymentId?: <span class="k">string</span>; reviewerUid?: <span class="k">string</span>;
+}</pre>
+<pre class="code"><span class="c">// 狀態機</span>
+送出 ──▶ pending ──(主辦通過)──▶ approved ──(線上繳費)──▶ paid
+            │ (主辦拒絕)              │ (逾期/取消)
+            ▼                       ▼
+         rejected               cancelled         paid ──(退款)──▶ refunded</pre>
+    <table class="spec">
+      <thead><tr><th>轉換</th><th>觸發者</th><th>後端動作 / 副作用</th></tr></thead>
+      <tbody>
+        <tr><td>→ pending</td><td>報名者送出</td><td>建 registration；sold += qty（佔位）；通知主辦方</td></tr>
+        <tr><td>pending → approved</td><td>主辦方</td><td>寫 approvedAt；<b>寄信 + 站內</b>通知繳費</td></tr>
+        <tr><td>pending → rejected</td><td>主辦方</td><td>sold -= qty（釋放）；通知報名者</td></tr>
+        <tr><td>approved → paid</td><td>付款 webhook</td><td>寫 paidAt / paymentId；後台自動顯示已付款；寄收據</td></tr>
+        <tr><td>paid → refunded</td><td>平台退款</td><td>sold -= qty；退款記錄</td></tr>
+      </tbody>
+    </table>
+    <div class="callout callout-info"><i class="ri-lightbulb-line"></i><p style="margin:0"><b>佔位策略：</b>pending 即扣 sold，避免審核期間名額被搶光。若不希望待審佔名額，改 approved 才扣，但要在當下重驗 <code>ticketStatus==='live'</code> 且未超賣。</p></div>
+  </section>
+
+  <!-- 6. payment -->
+  <section class="section">
+    <h2>6 · 金流：平台代收代付（主辦方不對帳）</h2>
+    <p>金流由實習通統一處理，主辦方只審核、不碰錢。沿用 <code class="coderef">components/Payments/Payments.tsx</code>。</p>
+    <table class="spec">
+      <thead><tr><th>步驟</th><th>動作</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>報名者送出 → registration 建為 <code>pending</code></td></tr>
+        <tr><td>2</td><td>主辦方「通過」→ <code>approved</code>，<b>系統自動寄信</b>通知可繳費</td></tr>
+        <tr><td>3</td><td>報名者於實習通<b>線上繳費</b>（點數折抵 / 轉帳；金額 = 票券 × 張數）</td></tr>
+        <tr><td>4</td><td>付款 webhook → <code>paid</code>，後台<b>自動</b>顯示已付款（無人工標記、無末五碼對帳）</td></tr>
+        <tr><td>5</td><td>退款同樣由平台處理</td></tr>
+      </tbody>
+    </table>
+    <div class="callout callout-fix"><i class="ri-bank-card-line"></i><p style="margin:0">主辦方端對付款狀態<b>唯讀</b>；registration 存 <code>ticketId / qty / status / paidAt</code>。</p></div>
+  </section>
+
+  <!-- 7. identity -->
+  <section class="section">
+    <h2>7 · 帳號與認證：並行邏輯</h2>
+    <p><b>沒有「創作者帳號」這種東西。</b>一個帳號 ＋ 一個 <code>verified-creator</code> 標章；「主辦單位 ＝ 認證創作者 ＝ 同一標章」。取得標章有<b>兩個可並行的入口</b>，共用同一套審核（<code class="coderef">verifiedRoleApplications</code>）。</p>
+<pre class="code"><span class="c">// 入口 B：onboarding 選身分（新增一步）</span>
+<span class="k">function</span> <span class="n">onOnboardingIdentitySelected</span>(role) {
+  createBasicAccount();                          <span class="c">// 一律先建一般帳號</span>
+  <span class="k">if</span> (role === <span class="s">'creator'</span>) goTo(<span class="s">'/dashboard/verified-role-apply'</span>);
+  <span class="k">else</span> finishOnboarding();
+}
+<span class="c">// 入口 A：事後任意時間（設定頁、或點建立活動/撰寫文章時）</span>
+<span class="k">function</span> <span class="n">onClickApplyVerification</span>() { goTo(<span class="s">'/dashboard/verified-role-apply'</span>); }
+<span class="c">// 兩入口都送同一支 → verifiedRoleApplications(pending) → 審核 → grantVerifiedBadgeToUser</span>
+submitVerifiedRoleApplication(payload);
+
+<span class="c">// 能力判斷：只看標章 / admining，不看「是不是創作者帳號」</span>
+<span class="k">const</span> isCreator       = profile.badges.includes(<span class="s">'verified-creator'</span>);
+<span class="k">const</span> canHostActivity = profile.admining || isCreator;
+<span class="k">const</span> canPublishBlog  = isCreator;</pre>
+    <div class="callout callout-info"><i class="ri-information-line"></i><p style="margin:0">審核期間（pending）仍可正常使用平台；通過後才解鎖辦活動/發文/主頁。建議預設走<b>入口 A（事後申請）</b>，註冊零阻力。完整見 <a href="/handoff">交接首頁 §10.1</a>。</p></div>
+  </section>
+
+  <!-- 8. API -->
+  <section class="section">
+    <h2>8 · API / Cloud Functions 介面（建議）</h2>
+    <p>審核與金流走後端，前端只呼叫、<b>不直接改 status</b>，避免被繞過。</p>
+<pre class="code"><span class="c">// 主辦方審核（驗 caller 是該 activity 的 admining 成員）</span>
+approveRegistration({ registrationId })       <span class="c">// pending→approved + 寄繳費通知；非 pending 回 409</span>
+rejectRegistration({ registrationId, reason? }) <span class="c">// pending→rejected + 釋放 sold</span>
+<span class="c">// 報名者繳費</span>
+createPaymentSession({ registrationId })      <span class="c">// 限 approved；金額 = registration.amount → { paymentUrl }</span>
+onPaymentSucceeded(webhook)                   <span class="c">// approved→paid（後端，前端不可呼叫）</span>
+refundRegistration({ registrationId })        <span class="c">// paid→refunded</span>
+<span class="c">// 報名送出（務必用 transaction，見 §1 提示）</span>
+submitRegistration({ activityId, ticketId, qty, answers }) <span class="c">// → { registrationId }</span></pre>
+    <p>錯誤碼：<code>TICKET_NOT_ON_SALE</code> / <code>SOLD_OUT</code> / <code>NOT_PENDING</code> / <code>NOT_APPROVED</code> / <code>FORBIDDEN</code> / <code>VALIDATION_FAILED</code>。</p>
+  </section>
+
+  <!-- 9. notifications -->
+  <section class="section">
+    <h2>9 · 通知事件（Email + 站內）</h2>
+    <table class="spec">
+      <thead><tr><th>事件</th><th>對象</th><th>管道</th></tr></thead>
+      <tbody>
+        <tr><td>新報名待審</td><td>主辦方</td><td>站內（可選 Email）</td></tr>
+        <tr><td>審核通過・待繳費</td><td>報名者</td><td><b>Email + 站內</b></td></tr>
+        <tr><td>審核未通過</td><td>報名者</td><td>Email + 站內（含 rejectReason）</td></tr>
+        <tr><td>繳費完成（收據）</td><td>報名者</td><td>Email</td></tr>
+        <tr><td>繳費完成</td><td>主辦方</td><td>站內（後台自動轉已付款）</td></tr>
+        <tr><td>退款完成</td><td>報名者</td><td>Email</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 10. firestore rules -->
+  <section class="section">
+    <h2>10 · Firestore 安全規則（草稿）</h2>
+    <p><code>sold</code> / <code>status</code> / <code>paidAt</code> 全部只由後端寫，前端唯讀；報名者只能建自己的 <code>pending</code>。</p>
+<pre class="code"><span class="k">match</span> /activities/{aid} {
+  allow read: <span class="k">if</span> <span class="k">true</span>;                       <span class="c">// 公開活動頁</span>
+  allow write: <span class="k">if</span> isActivityAdmin(aid);          <span class="c">// 僅該官方帳號成員</span>
+  <span class="k">match</span> /tickets/{tid} {
+    allow read: <span class="k">if</span> <span class="k">true</span>;
+    allow write: <span class="k">if</span> <span class="k">false</span>;                  <span class="c">// sold 只由後端 transaction 改</span>
+  }
+}
+<span class="k">match</span> /registrations/{rid} {
+  allow create: <span class="k">if</span> request.auth.uid == request.resource.data.userUid
+                && request.resource.data.status == <span class="s">'pending'</span>;
+  allow read:   <span class="k">if</span> isOwner(rid) || isActivityAdmin(resource.data.activityId);
+  allow update, delete: <span class="k">if</span> <span class="k">false</span>;          <span class="c">// status 轉換走 Cloud Functions</span>
+}</pre>
+  </section>
+
+  <!-- 11. needs-wall -->
+  <section class="section">
+    <h2>11 · 話題牆（NeedsWall）串接</h2>
+    <p>話題牆＝既有 <code class="coderef">data/needs-wall-live.js</code>（依行業 <code>forumId</code> 分版的話題；含 branches / poll）＋論壇 <code class="coderef">data/chat.ts</code> ChatRoom。Post / ChatMessage 已顯示 <code>verified-creator</code> 標章。這次只新增「活動 / 創作者 ↔ 話題牆」的關聯。</p>
+    <table class="spec">
+      <thead><tr><th>串接</th><th>機制</th><th>欄位 / 檔案</th></tr></thead>
+      <tbody>
+        <tr><td>活動 → 話題牆</td><td>活動上架(approved) 依行業 forumId 自動建/連話題；活動頁顯示「社群討論」</td><td class="tag-add">新增 activity.needsWallTopicId；createNeedsWallTopic()</td></tr>
+        <tr><td>活動 → 論壇討論區</td><td>付費 / internx_form 活動開專屬討論區</td><td class="tag-add">新增 activity.chatRoomId；ChatRoom.create()</td></tr>
+        <tr><td>創作者 → 話題牆</td><td>話題頁顯示「行業認證專家」</td><td class="tag-keep">沿用 verifiedRolePitch.expertiseForumIds 命中 forumId</td></tr>
+      </tbody>
+    </table>
+    <div class="callout callout-info"><i class="ri-information-line"></i><p style="margin:0">活動對到哪個行業版：<code>activity.ts</code> 無行業欄位 → 由主辦公司產業推導，或建立活動時選一個 forumId（建議）。完整見 <a href="/handoff">交接首頁 §17</a>。</p></div>
+  </section>
+
+  <!-- 12. files -->
+  <section class="section">
+    <h2>12 · 改動檔案清單</h2>
     <table class="spec">
       <thead><tr><th>檔案</th><th>動作</th><th>說明</th></tr></thead>
       <tbody>
@@ -111,20 +291,34 @@
         <tr><td><code>data/activity.ts</code></td><td class="tag-add">擴充</td><td>活動關聯 tickets[]（取代或相容 feeItems）</td></tr>
         <tr><td><code>lib/form-schema/activity-form-schema.ts</code></td><td class="tag-add">改</td><td>feeItems 改為票券物件、新增驗證（:328、:371）</td></tr>
         <tr><td><code>components/Activities/AddActivity.tsx</code></td><td class="tag-keep">沿用</td><td>維持步驟式結構；票券步驟換成新的編輯器卡片</td></tr>
-        <tr><td><code>components/Activities/FormBuilder/FormPreview.tsx</code></td><td class="tag-add">改</td><td>每列加上 ↑ ↓ 按鈕（呼叫既有 reorder）</td></tr>
-        <tr><td><code>components/Payments/Payments.tsx</code></td><td class="tag-keep">沿用</td><td>平台代收代付：審核通過→自動通知→線上繳費→自動回寫 paid；金額來自所選票券，主辦方不對帳</td></tr>
-        <tr><td><code>data/registration.ts</code></td><td class="tag-add">擴充</td><td>報名記錄需存 ticketId 與張數</td></tr>
+        <tr><td><code>components/Activities/FormBuilder/FormPreview.tsx</code></td><td class="tag-add">改</td><td>改用 @dnd-kit 拖曳排序（沿用 handleReorderFields）</td></tr>
+        <tr><td><code>components/Activities/FormBuilder/types.ts</code></td><td class="tag-keep">沿用</td><td>FormField 型別已存在（accept / maxFileSize / options / allowedDomains…），§4</td></tr>
+        <tr><td><code>components/Payments/Payments.tsx</code></td><td class="tag-keep">沿用</td><td>平台代收代付：通過→通知→線上繳費→自動回寫 paid；主辦方不對帳</td></tr>
+        <tr><td><code>data/registration.ts</code></td><td class="tag-add">擴充</td><td>加 <code>status</code> 狀態機 + ticketId / qty / amount / paidAt（§5）</td></tr>
+        <tr><td>Cloud Functions（後端）</td><td class="tag-add">新增</td><td>approve / reject / pay webhook / refund / submit（§8）；status 只由後端改</td></tr>
+        <tr><td>通知服務</td><td class="tag-add">新增 / 接</td><td>審核 / 繳費 / 退款事件 Email + 站內（§9）</td></tr>
+        <tr><td><code>lib/config.js</code> PROFESSIONAL_SERVICES</td><td class="tag-add">改</td><td>側欄加「報名名單」「創作內容」；進入條件放寬為 admining OR verified-creator（§7）</td></tr>
+        <tr><td><code>pages/[lang]/professional/registrations</code></td><td class="tag-add">新增</td><td>報名名單 + 審核 UI（§5）</td></tr>
+        <tr><td><code>data/blog.ts</code> + BlockEditor</td><td class="tag-keep">沿用</td><td>部落格發佈權放寬給帶 verified-creator 標章者（一行條件）</td></tr>
+        <tr><td><code>Profile.tsx</code></td><td class="tag-add">改</td><td>activeSectionTab 加「部落格 / 主辦活動 / 活動紀錄」分頁</td></tr>
+        <tr><td><code>data/verified-role-application.ts</code></td><td class="tag-keep">沿用</td><td>身分申請 + 審核（§7）；兩入口共用</td></tr>
+        <tr><td><code>data/needs-wall-live.js</code> / <code>data/chat.ts</code></td><td class="tag-add">接</td><td>活動上架建話題（needsWallTopicId）/ 專屬討論區（chatRoomId）（§11）</td></tr>
       </tbody>
     </table>
   </section>
 
-  <!-- 5. acceptance -->
+  <!-- 13. acceptance -->
   <section class="section">
-    <h2>5 · 驗收標準</h2>
+    <h2>13 · 驗收標準</h2>
     <div class="card card-pad">
       <div style="display:flex;gap:10px;margin-bottom:10px"><i class="ri-checkbox-circle-fill" style="color:var(--confirm-color)"></i> 早鳥票販售結束時間過後，報名端自動鎖定、不可選。</div>
-      <div style="display:flex;gap:10px;margin-bottom:10px"><i class="ri-checkbox-circle-fill" style="color:var(--confirm-color)"></i> 每種票可獨立設數量，售完自動標記，且後端防超賣。</div>
-      <div style="display:flex;gap:10px;margin-bottom:10px"><i class="ri-checkbox-circle-fill" style="color:var(--confirm-color)"></i> 表單欄位可用拖曳排序（@dnd-kit），系統必填欄位固定最上方。</div>
+      <div style="display:flex;gap:10px;margin-bottom:10px"><i class="ri-checkbox-circle-fill" style="color:var(--confirm-color)"></i> 每種票可獨立設數量，售完自動標記，且後端 transaction 防超賣。</div>
+      <div style="display:flex;gap:10px;margin-bottom:10px"><i class="ri-checkbox-circle-fill" style="color:var(--confirm-color)"></i> 表單欄位可用拖曳排序（@dnd-kit、含觸控與鍵盤），系統必填欄位固定最上方。</div>
+      <div style="display:flex;gap:10px;margin-bottom:10px"><i class="ri-checkbox-circle-fill" style="color:var(--confirm-color)"></i> 報名者審核狀態機：待審核→已通過→已付款／已拒絕，且 status 只由後端轉換。</div>
+      <div style="display:flex;gap:10px;margin-bottom:10px"><i class="ri-checkbox-circle-fill" style="color:var(--confirm-color)"></i> 金流平台代收代付：通過後自動通知、線上繳費、自動回寫已付款，主辦方不對帳。</div>
+      <div style="display:flex;gap:10px;margin-bottom:10px"><i class="ri-checkbox-circle-fill" style="color:var(--confirm-color)"></i> 審核 / 繳費 / 退款各觸發對應通知（Email + 站內）。</div>
+      <div style="display:flex;gap:10px;margin-bottom:10px"><i class="ri-checkbox-circle-fill" style="color:var(--confirm-color)"></i> 認證並行：事後申請與註冊時選兩入口共用同一套審核；通過才解鎖辦活動 / 發文。</div>
+      <div style="display:flex;gap:10px;margin-bottom:10px"><i class="ri-checkbox-circle-fill" style="color:var(--confirm-color)"></i> 活動上架後在對應行業話題牆建立 / 連結話題；話題頁顯示行業認證專家。</div>
       <div style="display:flex;gap:10px;margin-bottom:10px"><i class="ri-checkbox-circle-fill" style="color:var(--confirm-color)"></i> 編輯器分四步、欄位固定寬度，輸入時版面不跳動。</div>
       <div style="display:flex;gap:10px"><i class="ri-checkbox-circle-fill" style="color:var(--confirm-color)"></i> 視覺沿用既有 InternX token（#0182fd / Poppins + Noto Sans TC）。</div>
     </div>
