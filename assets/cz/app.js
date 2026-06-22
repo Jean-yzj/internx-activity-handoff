@@ -272,7 +272,10 @@
     document.body.appendChild(buildMobileMenu());
     document.body.appendChild(buildBottomBar());
     document.body.appendChild(buildFooter());
-    document.body.appendChild(h(`<div class="demoFlag"><i class="ri-flask-line"></i> 前端 Demo・假資料</div>`));
+    // 交接文件／說明頁不是 Demo，不掛「前端 Demo」標記
+    if (["handoff","integration","spec"].indexOf(document.body.getAttribute("data-page")) === -1) {
+      document.body.appendChild(h(`<div class="demoFlag"><i class="ri-flask-line"></i> 前端 Demo・假資料</div>`));
+    }
 
     // 使用者下拉
     const umb = document.getElementById("userMenuBtn");

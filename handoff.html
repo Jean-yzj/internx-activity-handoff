@@ -24,6 +24,15 @@
   #docBody code { background: #eef2f7; color: #11243f; padding: 1px 6px; border-radius: 5px; font-size: 12.5px; }
   #docBody table { margin: 12px 0; }
   #docBody h2 { margin-top: 26px; }
+  /* Demo vs 文件 標示 */
+  .kindLegend { font-size: 13px; color: #5c6675; background: #f7faff; border: 1px solid #e7eaf0; border-radius: 12px; padding: 11px 15px; margin: 8px 0 2px; line-height: 1.8; }
+  .kindTag { display: inline-block; font-weight: 700; font-size: 12px; padding: 2px 10px; border-radius: 999px; }
+  .kindDemo, .tagDemo { background: var(--theme-white); color: var(--theme-color-black); }
+  .kindDoc, .tagDoc { background: #fff4d6; color: #8a6a10; }
+  .groupHead { display: flex; align-items: baseline; gap: 8px; margin: 22px 0 2px; }
+  .groupHead .muted { font-size: 13px; font-weight: 400; color: #8a94a3; }
+  .tagKind { font-size: 11px; font-weight: 700; padding: 2px 9px; border-radius: 999px; float: right; }
+  .docCard .ic { background: #fff4d6; color: #8a6a10; }
 </style>
 </head>
 <body data-page="handoff">
@@ -38,64 +47,103 @@
   </section>
 
   <div class="cz-container">
-    <h2 style="margin:8px 0 2px">可直接點開的 Demo</h2>
-    <p class="sectionLead" style="margin:0 0 4px">這些是介面示意（mockup），點進去可實際操作。視覺沿用實習通設計系統。</p>
+    <div class="kindLegend">
+      這頁有兩種東西，已分開標示：
+      <span class="kindTag kindDemo"><i class="ri-cursor-line"></i> Demo 畫面</span> ＝ 可點開操作的前端示意（假資料、不接後端、右下角有「前端 Demo」標記）
+      　·
+      <span class="kindTag kindDoc"><i class="ri-file-text-line"></i> 交接文件</span> ＝ 給工程師的串接規格、說明與架構圖（不是產品畫面）
+    </div>
+
+    <div class="groupHead"><h2 style="margin:0"><i class="ri-cursor-line" style="color:var(--theme-color)"></i> Demo 畫面</h2><span class="muted">前端假資料，點進去可實際操作</span></div>
     <div class="demoGrid">
       <a class="demoCard" href="/host">
+        <span class="tagKind tagDemo">Demo</span>
         <div class="ic"><i class="ri-store-2-line"></i></div>
         <h3>主辦單位入口 <span class="tag">從這裡開始</span></h3>
         <p>怎麼取得主辦單位身份（＝認證帳號）、怎麼發佈活動，兩條動線一頁看完，並連到各 Demo。</p>
         <span class="go">看入口 →</span>
       </a>
       <a class="demoCard" href="/editor">
+        <span class="tagKind tagDemo">Demo</span>
         <div class="ic"><i class="ri-edit-box-line"></i></div>
         <h3>建立活動・編輯器</h3>
         <p>四步驟：活動內容 / 票券（販售時間×數量）/ 報名表單（拖曳排序、欄位設定）/ 進階。</p>
         <span class="go">開啟 Demo →</span>
       </a>
       <a class="demoCard" href="/backstage">
+        <span class="tagKind tagDemo">Demo</span>
         <div class="ic"><i class="ri-store-2-line"></i></div>
         <h3>認證帳號後臺 <span class="tag">官方帳號</span></h3>
         <p>活動管理、報名名單＋審核、創作內容（部落格），長在官方帳號底下。</p>
         <span class="go">開啟 Demo →</span>
       </a>
       <a class="demoCard" href="/attendee">
+        <span class="tagKind tagDemo">Demo</span>
         <div class="ic"><i class="ri-smartphone-line"></i></div>
         <h3>報名者畫面</h3>
         <p>活動介紹 → 報名表單 → 選擇票券。內容由編輯器帶入，票券狀態自動判斷。</p>
         <span class="go">開啟 Demo →</span>
       </a>
       <a class="demoCard" href="/creator">
+        <span class="tagKind tagDemo">Demo</span>
         <div class="ic"><i class="ri-user-star-line"></i></div>
         <h3>創作者主頁</h3>
         <p>關於我 / 專長 / 部落格 / 主辦活動 / 活動紀錄。主辦活動連到報名頁。</p>
         <span class="go">開啟 Demo →</span>
       </a>
-      <a class="demoCard" href="/blog">
-        <div class="ic"><i class="ri-article-line"></i></div>
-        <h3>部落格</h3>
-        <p>認證創作者發佈職涯／求職內容；發佈權對應 verified-creator 標章。</p>
-        <span class="go">開啟 Demo →</span>
-      </a>
       <a class="demoCard" href="/creators">
+        <span class="tagKind tagDemo">Demo</span>
         <div class="ic"><i class="ri-quill-pen-line"></i></div>
         <h3>創作者專區・介紹</h3>
         <p>價值主張、精選創作者、能做什麼、三步驟成為認證創作者（流程介紹）。</p>
         <span class="go">看介紹 →</span>
       </a>
-      <a class="demoCard" href="/integration">
+      <a class="demoCard" href="/blog">
+        <span class="tagKind tagDemo">Demo</span>
+        <div class="ic"><i class="ri-article-line"></i></div>
+        <h3>部落格</h3>
+        <p>認證創作者發佈職涯／求職內容；發佈權對應 verified-creator 標章。</p>
+        <span class="go">開啟 Demo →</span>
+      </a>
+    </div>
+
+    <div class="groupHead"><h2 style="margin:0"><i class="ri-file-text-line" style="color:#b58a14"></i> 交接文件 / 說明</h2><span class="muted">給工程師：規格、說明、架構圖（非產品畫面）</span></div>
+    <div class="demoGrid">
+      <a class="demoCard docCard" href="#doc">
+        <span class="tagKind tagDoc">文件</span>
+        <div class="ic"><i class="ri-git-merge-line"></i></div>
+        <h3>串接規格文件</h3>
+        <p>活動報名＋創作者：逐頁對比「原本平臺 vs 這個 mockup」、資料模型、API、狀態機。本頁下方可讀／下載。</p>
+        <span class="go">往下看文件 →</span>
+      </a>
+      <a class="demoCard docCard" href="/integration">
+        <span class="tagKind tagDoc">說明</span>
         <div class="ic"><i class="ri-route-line"></i></div>
         <h3>整合動線</h3>
-        <p>對應原平台後台（professional/home）的位置與點擊路徑、兩種審核的差異。</p>
+        <p>對應原平台後台（professional/home）的位置與點擊路徑、兩種審核的差異（圖解）。</p>
         <span class="go">看動線 →</span>
+      </a>
+      <a class="demoCard docCard" href="/spec">
+        <span class="tagKind tagDoc">文件</span>
+        <div class="ic"><i class="ri-file-code-line"></i></div>
+        <h3>工程規格速查</h3>
+        <p>速查表：資料模型、欄位、API、Firestore 規則、驗收標準，實作時快速對照。</p>
+        <span class="go">看規格 →</span>
+      </a>
+      <a class="demoCard docCard" href="https://internx-creator-zone.zeabur.app/flow" target="_blank" rel="noopener">
+        <span class="tagKind tagDoc">流程圖</span>
+        <div class="ic"><i class="ri-flow-chart"></i></div>
+        <h3>創作者使用流程 <span class="tag">creator-zone</span></h3>
+        <p>創作者專區那站的「完整流程圖」：申請認證 → 審核 → 發標章 → 主頁串接。另開分頁。</p>
+        <span class="go">到 creator-zone →</span>
       </a>
     </div>
   </div>
 
-  <div class="doc">
+  <div class="doc" id="doc">
     <figure class="archFig">
-      <img src="/assets/cz/img/architecture.svg" alt="認證帳號整體架構：申請 → 審核 → 發標章 → 帳號中樞 → 串接既有系統" />
-      <figcaption>認證帳號整體架構：申請 → 審核 → 發 <code>verified-creator</code> 標章 → 帳號中樞 → 串接部落格／活動／論壇／人脈／心得。金色虛線框＝待補。活動票券與報名金流的串接見下方「活動報名串接」。</figcaption>
+      <img id="archImg" src="/assets/cz/img/activity-architecture.svg" alt="活動報名整體串接架構" />
+      <figcaption id="archCap">活動報名・整體串接架構：建立活動 → 票券（販售時間×數量）→ 上架（approvalStatus）→ 公開頁報名 → 報名者審核（待審核→已通過→待繳費→已付款）→ 平台代收代付。藍＝既有、金色虛線＝待補。切換下方分頁可看創作者版架構。</figcaption>
     </figure>
     <div class="docToolbar" style="gap:8px;flex-wrap:wrap">
       <button class="btn btn-small docTab" data-doc="/INTEGRATION.md"><i class="ri-ticket-2-line"></i> 活動報名串接</button>
@@ -148,9 +196,14 @@
     }
     return html;
   }
+  var ARCH = {
+    "/INTEGRATION.md": ["/assets/cz/img/activity-architecture.svg", "活動報名・整體串接架構：建立活動 → 票券（販售時間×數量）→ 上架（approvalStatus）→ 公開頁報名 → 報名者審核（待審核→已通過→待繳費→已付款）→ 平台代收代付。藍＝既有、金色虛線＝待補。"],
+    "/CREATOR-HANDOFF.md": ["/assets/cz/img/architecture.svg", "創作者專區・整體串接架構：申請 → 審核 → 發 verified-creator 標章 → 創作者主頁 → 串接部落格／主辦活動／專長／社群／論壇。藍＝既有、金色虛線＝待補。"]
+  };
   function loadDoc(path){
     document.querySelectorAll(".docTab").forEach(b=>{ b.classList.toggle("btn-white", b.dataset.doc !== path); });
     var dl = document.getElementById("dlMd"); if (dl) dl.href = path;
+    var a = ARCH[path]; if (a){ var im=document.getElementById("archImg"); var cp=document.getElementById("archCap"); if(im) im.src=a[0]; if(cp) cp.textContent=a[1]; }
     document.getElementById("docBody").innerHTML = '<p class="muted">載入中⋯</p>';
     fetch(path + (path.includes("?") ? "&" : "?") + "v=" + Date.now()).then(r=>r.text()).then(md=>{
       md = md.replace(/^#\s+.*\n/, ""); // drop first H1 (hero already shows the title)
