@@ -30,7 +30,8 @@
     <div class="eyebrow">主辦方視角 · 後臺</div>
     <h1 style="font-size:30px">主辦方後臺：長在「官方帳號」裡</h1>
     <p class="lead">主辦方不需要另一個系統。活動管理、報名名單與審核，直接掛在實習通既有的
-      <b>官方帳號（主辦專區）</b> 底下 —— 跟「回應評價、發布資訊」並列為官方帳號的一個分頁。</p>
+      <b>官方帳號（主辦專區）</b> 底下。同一個認證帳號<b>既是主辦單位、也是創作者</b>：
+      辦活動（活動管理／報名名單）與發內容（創作內容）整合在同一個後臺。</p>
   </div>
 
   <!-- InternX shell with the backstage inside 官方帳號 -->
@@ -55,8 +56,10 @@
         <div class="oa-header">
           <div class="oa-logo">X</div>
           <div style="flex:1;min-width:0">
-            <div class="oa-name">實習通 InternX <span class="badge badge-info verified"><i class="ri-verified-badge-fill"></i> 已驗證官方帳號</span></div>
-            <div class="oa-sub">教育 / 求職平台 · 12 場活動 · 1,240 追蹤</div>
+            <div class="oa-name">實習通 InternX
+              <span class="badge badge-info verified"><i class="ri-verified-badge-fill"></i> 已驗證官方帳號</span>
+              <span class="badge" style="background:var(--complementary-white);color:#9a7400"><i class="ri-quill-pen-line"></i> 認證創作者</span></div>
+            <div class="oa-sub">教育 / 求職平台 · 12 場活動 · 8 篇文章 · 1,240 追蹤</div>
           </div>
           <button class="btn btn-ghost btn-sm"><i class="ri-settings-3-line"></i> 帳號設定</button>
         </div>
@@ -65,6 +68,7 @@
         <div class="oa-tabs">
           <button class="oa-tab active" data-tab="manage" onclick="oaTab('manage')">活動管理</button>
           <button class="oa-tab" data-tab="regs" onclick="oaTab('regs')">報名名單 <span class="pill" id="pendingPill">8</span></button>
+          <button class="oa-tab" data-tab="content" onclick="oaTab('content')">創作內容</button>
           <button class="oa-tab" data-tab="showcase" onclick="oaTab('showcase')">成果展示</button>
           <button class="oa-tab" data-tab="reviews" onclick="oaTab('reviews')">回應評價</button>
         </div>
@@ -134,6 +138,34 @@
           </div>
         </section>
 
+        <!-- TAB: 創作內容 (creator function — 部落格/文章，與主辦活動共用同一認證帳號) -->
+        <section class="oa-pane" data-pane="content" style="display:none">
+          <div class="callout callout-info" style="margin:0 0 16px"><i class="ri-quill-pen-line"></i>
+            <p style="margin:0"><b>同一個帳號，也是創作者。</b>發部落格、累積追蹤，與「辦活動」共用同一個認證帳號（實習通既有 <code class="coderef">verified-creator</code> 標章）。內容與活動互相導流。</p>
+          </div>
+          <div class="stat-row" style="grid-template-columns:repeat(3,1fr)">
+            <div class="stat ok"><div class="n">8</div><div class="l">已發佈文章</div></div>
+            <div class="stat"><div class="n">12,400</div><div class="l">總瀏覽</div></div>
+            <div class="stat"><div class="n">1,240</div><div class="l">追蹤者</div></div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+            <b style="font-size:15px">我的內容</b>
+            <button class="btn btn-primary btn-sm" onclick="toast('（示意）開啟文章編輯器 BlockEditor')"><i class="ri-add-line"></i> 撰寫文章</button>
+          </div>
+          <div class="reg-wrap">
+            <table class="reg">
+              <thead><tr><th>標題</th><th>分類</th><th>瀏覽</th><th>狀態</th><th style="text-align:right">操作</th></tr></thead>
+              <tbody>
+                <tr><td><b>外商求職實戰：履歷這樣寫才會被看見</b></td><td>履歷技巧</td><td>3,210</td><td><span class="badge badge-live"><i class="ri-checkbox-circle-line"></i> 已發佈</span></td><td style="text-align:right"><button class="btn btn-ghost btn-sm">編輯</button></td></tr>
+                <tr><td><b>給大三生的暑期實習時間軸</b></td><td>職涯規劃</td><td>2,540</td><td><span class="badge badge-live"><i class="ri-checkbox-circle-line"></i> 已發佈</span></td><td style="text-align:right"><button class="btn btn-ghost btn-sm">編輯</button></td></tr>
+                <tr><td>外商面試的 5 個地雷問題</td><td>面試技巧</td><td style="color:var(--text-faint)">—</td><td><span class="badge badge-soon"><i class="ri-draft-line"></i> 草稿</span></td><td style="text-align:right"><button class="btn btn-soft btn-sm">繼續編輯</button></td></tr>
+                <tr><td>實習通辦過的活動，都在這裡回顧</td><td>活動花絮</td><td style="color:var(--text-faint)">—</td><td><span class="badge badge-soon"><i class="ri-draft-line"></i> 草稿</span></td><td style="text-align:right"><button class="btn btn-soft btn-sm">繼續編輯</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="font-size:12.5px;color:var(--text-faint);margin-top:10px"><i class="ri-information-line"></i> 對應實習通既有部落格系統（<code class="coderef">data/blog.ts</code> + <code class="coderef">BlockEditor</code>）；發佈權放寬給帶 <code>verified-creator</code> 標章的帳號。詳見 <a href="https://internx-creator-zone.zeabur.app">創作者專區交接</a>。</p>
+        </section>
+
         <!-- TAB: 成果展示 (existing 官方帳號 feature, stub) -->
         <section class="oa-pane" data-pane="showcase" style="display:none">
           <div class="callout callout-info" style="margin:0"><i class="ri-image-2-line"></i>
@@ -162,6 +194,12 @@
     <p class="lead">前端畫面已示意完整。要真的上線，以下是需要補齊的串接點（對照現有程式碼）。</p>
 
     <div class="card card-pad" style="margin-top:18px">
+      <div class="gap-item">
+        <span class="gi" style="background:var(--complementary-white);color:#9a7400"><i class="ri-quill-pen-line"></i></span>
+        <div style="flex:1"><div class="gt">主辦單位 ＝ 創作者（同一認證帳號）</div>
+          <div class="gd">辦活動與發內容共用同一帳號：<code>verified-creator</code> 標章 + <code class="coderef">Activity.createdBy</code> 已關聯，後臺把兩者整合在一處。詳見創作者專區交接 <a href="https://internx-creator-zone.zeabur.app">internx-creator-zone</a>（含 <code class="coderef">data/blog.ts</code>、verifiedRoleApplications 審核流）。</div></div>
+        <span class="gstatus partial">部分已有</span>
+      </div>
       <div class="gap-item">
         <span class="gi"><i class="ri-link"></i></span>
         <div style="flex:1"><div class="gt">官方帳號連結與權限</div>
