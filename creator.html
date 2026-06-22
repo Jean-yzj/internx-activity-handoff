@@ -134,7 +134,10 @@
     // 主辦活動
     const ev = arr(c.hostedEvents);
     document.getElementById("paneEvents").innerHTML = `
-      <div class="sectionHeader"><div class="sectionHeaderLeft"><i class="ri-calendar-event-line"></i> 過往辦過的活動</div></div>
+      <div class="sectionHeader" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+        <div class="sectionHeaderLeft"><i class="ri-calendar-event-line"></i> 過往辦過的活動</div>
+        ${forSelf ? `<a class="btn btn-small" href="/host"><i class="ri-add-circle-line"></i> 建立活動・主辦單位入口</a>` : ""}
+      </div>
       ${ev.length ? `<div class="activityGrid">${ev.map(eid => CZ.activityCard(D.events[eid])).join("")}</div>`
         : CZ.emptyState({ icon: "calendar-event-line", title: "還沒有主辦活動", desc: forSelf ? "辦一場講座或工作坊，會顯示在這裡。" : "這位創作者尚未主辦活動。", ctaText: forSelf ? "建立活動" : "", ctaIcon: "add-line" })}`;
 

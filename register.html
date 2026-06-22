@@ -215,9 +215,10 @@
         $("#statusCard").innerHTML = `
           <div class="statusIcon approved"><i class="ri-checkbox-circle-line"></i></div>
           <h2>恭喜！您已成為認證創作者</h2>
-          <p>您的名字旁已顯示 <span class="profileBadgePill profileBadgePillGold profileBadgePillCompact"><span class="pillEmoji"><i class="ri-quill-pen-line"></i></span><span class="pillLabel">認證創作者</span></span> 標章，並已解鎖創作者主頁與部落格發佈權限。</p>
+          <p>您的名字旁已顯示 <span class="profileBadgePill profileBadgePillGold profileBadgePillCompact"><span class="pillEmoji"><i class="ri-quill-pen-line"></i></span><span class="pillLabel">認證創作者</span></span> 標章，並已<strong>解鎖建立活動</strong>、創作者主頁與部落格發佈權限 —— 同一個認證帳號即可當主辦單位。</p>
           <div style="margin-top:24px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
-            <a class="btn" href="/creator?id=${D_FEATURED}">查看我的創作者主頁</a>
+            <a class="btn" href="/editor"><i class="ri-add-circle-line"></i> 建立第一場活動</a>
+            <a class="btn btn-white" href="/creator?id=${D_FEATURED}">查看我的創作者主頁</a>
             <a class="btn btn-white" href="/blog-editor">撰寫第一篇文章</a>
           </div>`;
       });

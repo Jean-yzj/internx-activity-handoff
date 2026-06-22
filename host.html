@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>主辦單位入口 · 在實習通辦活動｜InternX</title>
+<link rel="icon" href="/assets/cz/favicon.png" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" />
+<link rel="stylesheet" href="/assets/cz/app.css" />
+<style>
+  .cz-hero-inner { grid-template-columns: 1fr !important; }
+  .cz-hero-inner > div { max-width: 820px; }
+  .hostStep { position: relative; }
+  .hostStep .sNum { width:44px;height:44px;border-radius:50%;background:var(--theme-color);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700; }
+  .hostStep .sNum.gold { background:var(--complementary-color); }
+  .hostLinks { display:flex;gap:10px;flex-wrap:wrap;margin-top:14px }
+  .hostLinks a { font-size:13px;font-weight:600;color:var(--theme-color);text-decoration:none;display:inline-flex;align-items:center;gap:4px }
+  .hostLinks a:hover { text-decoration:underline }
+</style>
+</head>
+<body data-page="host">
+
+<main>
+  <!-- HERO -->
+  <section class="cz-hero">
+    <div class="cz-container cz-hero-inner">
+      <div>
+        <span class="cz-eyebrow"><i class="ri-store-2-line"></i> 主辦單位入口</span>
+        <h1>在實習通辦活動，<span class="accent">從這裡開始</span></h1>
+        <p>主辦單位 ＝ <strong>認證帳號</strong>。取得認證後，你就能發佈活動、線上收費、管理報名名單，還能擁有創作者主頁與部落格 —— 同一個身份，全部打通，不是另一條註冊線。</p>
+        <div class="cz-hero-cta">
+          <a class="btn" href="#identity"><i class="ri-verified-badge-line"></i> 如何取得主辦單位身份</a>
+          <a class="btn btn-white" href="#publish"><i class="ri-add-circle-line"></i> 如何發佈活動</a>
+        </div>
+        <div class="cz-stat-row">
+          <div class="cz-stat"><b>3–5 天</b><span>認證審核</span></div>
+          <div class="cz-stat"><b>0 對帳</b><span>平台代收代付</span></div>
+          <div class="cz-stat"><b>1 個帳號</b><span>辦活動＋發內容</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 取得身份 -->
+  <section class="cz-section" id="identity">
+    <div class="cz-container">
+      <div class="cz-section-head center" style="margin:0 auto 10px">
+        <span class="cz-eyebrow"><i class="ri-verified-badge-line"></i> 第一步</span>
+        <h2 class="cz-section-title">如何取得主辦單位身份</h2>
+        <p class="cz-section-sub" style="margin:6px auto 0">主辦單位不是獨立的註冊流程。一般帳號申請「認證」，拿到 <code>verified-creator</code> 標章後即可辦活動 —— 與「認證創作者」共用同一個帳號與審核機制。</p>
+      </div>
+      <div class="cz-creator-grid" id="identitySteps" style="max-width:980px;margin:24px auto 0"></div>
+      <div class="center" style="margin-top:26px"><a class="btn" href="/register"><i class="ri-arrow-right-line"></i> 前往申請認證</a></div>
+      <div class="infoBanner" style="max-width:760px;margin:22px auto 0">
+        <i class="ri-information-line"></i>
+        <span>建議實作採「<strong>事後申請</strong>」：一般註冊零阻力，想辦活動時再到「設定 → 申請認證」。完整身分流程見 <a href="/register">申請認證頁</a> 與 <a href="/creators">創作者專區介紹</a>。</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 發佈活動 -->
+  <section class="cz-section" id="publish" style="background:var(--background-color-gray)">
+    <div class="cz-container">
+      <div class="cz-section-head center" style="margin:0 auto 10px">
+        <span class="cz-eyebrow"><i class="ri-add-circle-line"></i> 第二步</span>
+        <h2 class="cz-section-title">如何發佈一場活動</h2>
+        <p class="cz-section-sub" style="margin:6px auto 0">取得認證後，從「認證帳號後台」建立活動。票券、報名表單、付款與審核都在同一個編輯器裡設定。</p>
+      </div>
+      <div class="cz-creator-grid" id="publishSteps" style="max-width:980px;margin:24px auto 0"></div>
+      <div class="center" style="margin-top:26px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+        <a class="btn" href="/editor"><i class="ri-edit-2-line"></i> 試用建立活動編輯器</a>
+        <a class="btn btn-white" href="/backstage"><i class="ri-dashboard-3-line"></i> 看認證帳號後台</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 認證後你會得到 -->
+  <section class="cz-section">
+    <div class="cz-container">
+      <div class="cz-section-head center" style="margin:0 auto 28px">
+        <h2 class="cz-section-title">認證後，你會得到</h2>
+        <p class="cz-section-sub" style="margin:0 auto">主辦能力與平台既有的後台、活動、部落格完全打通，全部掛在同一個認證帳號下。</p>
+      </div>
+      <div class="cz-creator-grid" id="perkGrid"></div>
+    </div>
+  </section>
+
+  <!-- 給工程師 -->
+  <section class="cz-section" style="background:linear-gradient(160deg,#eaf4ff,#fff6ef)">
+    <div class="cz-container center">
+      <h2 class="cz-section-title">這是前端 Demo · 假資料</h2>
+      <p class="cz-section-sub" style="margin:8px auto 22px;max-width:640px">主辦＝認證帳號的串接方式（申請認證 → 發標章 → 解鎖建立活動）、活動發布審核與報名者審核的差異、頁面對應的實際路由，都寫在交接文件裡。</p>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+        <a class="btn btn-white" href="/integration"><i class="ri-route-line"></i> 整合動線</a>
+        <a class="btn btn-white" href="/spec"><i class="ri-file-list-3-line"></i> 工程規格</a>
+        <a class="btn btn-white" href="/handoff"><i class="ri-home-4-line"></i> 交接總覽</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script src="/assets/cz/data.js"></script>
+<script src="/assets/cz/app.js"></script>
+<script>
+  const D = window.CZ_DATA;
+
+  const identity = [
+    { n:"1", gold:false, icon:"ri-edit-box-line", title:"申請認證", desc:"在「設定 → 申請認證創作者」填寫所在產業／公司與相關經歷，可附作品連結。",
+      links:[["填寫認證表單","/register"]] },
+    { n:"2", gold:false, icon:"ri-time-line", title:"平台審核", desc:"團隊於 3–5 個工作天內審核；審核期間你仍可正常使用平台。對應後端 verifiedRoleApplications。", links:[] },
+    { n:"3", gold:true, icon:"ri-verified-badge-line", title:"取得標章 · 解鎖", desc:"通過後名字旁出現認證標章，並解鎖「建立活動」與認證帳號後台。",
+      links:[["看認證帳號後台","/backstage"]] },
+  ];
+  document.getElementById("identitySteps").innerHTML = identity.map(s=>`
+    <div class="cz-creator-card hostStep" style="cursor:default;text-align:left">
+      <div class="sNum ${s.gold?'gold':''}">${s.n}</div>
+      <h4 style="font-size:17px;color:#11243f;margin:12px 0 6px"><i class="${s.icon}" style="color:${s.gold?'var(--complementary-color)':'var(--theme-color)'};margin-right:6px"></i>${s.title}</h4>
+      <p style="font-size:14px;color:#667;line-height:1.65;margin:0">${s.desc}</p>
+      ${s.links.length?`<div class="hostLinks">${s.links.map(l=>`<a href="${l[1]}">${l[0]} <i class="ri-arrow-right-line"></i></a>`).join("")}</div>`:""}
+    </div>`).join("");
+
+  const publish = [
+    { n:"1", icon:"ri-dashboard-3-line", title:"進入認證帳號後台", desc:"在「主辦專區 / 認證帳號」點「建立活動」。後台同時管理你所有活動與報名名單。",
+      links:[["認證帳號後台","/backstage"]] },
+    { n:"2", icon:"ri-edit-2-line", title:"用編輯器設定", desc:"活動內容、票券（售價／數量／販售起訖時間）、拖曳排序的報名表單、付款與審核方式。",
+      links:[["試用建立活動編輯器","/editor"]] },
+    { n:"3", icon:"ri-send-plane-line", title:"送審 · 上架", desc:"送出後由平台審核活動可否上架；上架後報名者即可在活動頁報名、線上繳費。",
+      links:[["看報名者活動頁","/attendee"]] },
+  ];
+  document.getElementById("publishSteps").innerHTML = publish.map(s=>`
+    <div class="cz-creator-card hostStep" style="cursor:default;text-align:left">
+      <div class="sNum">${s.n}</div>
+      <h4 style="font-size:17px;color:#11243f;margin:12px 0 6px"><i class="${s.icon}" style="color:var(--theme-color);margin-right:6px"></i>${s.title}</h4>
+      <p style="font-size:14px;color:#667;line-height:1.65;margin:0">${s.desc}</p>
+      <div class="hostLinks">${s.links.map(l=>`<a href="${l[1]}">${l[0]} <i class="ri-arrow-right-line"></i></a>`).join("")}</div>
+    </div>`).join("");
+
+  const perks = [
+    { icon:"edit-2-line", title:"建立活動編輯器", desc:"票券可設販售時間與數量、報名表單拖曳排序、原地編輯。", href:"/editor" },
+    { icon:"dashboard-3-line", title:"認證帳號後台", desc:"活動管理＋報名名單審核，全部掛在官方／認證帳號下。", href:"/backstage" },
+    { icon:"bank-card-line", title:"平台代收代付", desc:"審核通過 → 平台寄信通知繳費 → 報名者線上付款 → 自動標記已繳，主辦不用自己對帳。", href:"/attendee" },
+    { icon:"calendar-event-line", title:"報名者活動頁", desc:"活動介紹＋報名表單＋票券狀態，版型對齊原站活動詳情頁。", href:"/attendee" },
+    { icon:"profile-line", title:"創作者主頁", desc:"主辦過的活動與成果回顧，集中在你的個人主頁。", href:"/creator?id="+D.featured+"#events" },
+    { icon:"quill-pen-line", title:"部落格發佈", desc:"同一個認證帳號就能寫文章、累積追蹤、經營個人品牌。", href:"/blog" },
+  ];
+  document.getElementById("perkGrid").innerHTML = perks.map(v=>`
+    <a class="cz-creator-card" href="${v.href}">
+      <div class="roleCard" style="border:none;padding:0;text-align:left">
+        <div class="ricon" style="margin:0 0 12px"><i class="ri-${v.icon}"></i></div>
+        <h4 style="font-size:17px">${v.title}</h4>
+        <p style="margin-top:6px;font-size:14px;line-height:1.6">${v.desc}</p>
+      </div>
+    </a>`).join("");
+</script>
+</body>
+</html>
