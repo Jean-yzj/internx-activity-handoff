@@ -3,300 +3,216 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>主辦方後臺 — 實習通官方帳號</title>
-<link rel="stylesheet" href="assets/style.css" />
+<title>官方帳號後臺｜InternX 實習通</title>
+<link rel="icon" href="/assets/cz/favicon.png" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" />
+<link rel="stylesheet" href="/assets/cz/app.css" />
+<style>
+  .oaHead { display: flex; align-items: center; gap: 16px; padding: 26px 0 8px; }
+  .oaName { font-size: 22px; font-weight: 700; color: #11243f; display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+  .oaSub { font-size: 13.5px; color: #667; margin-top: 4px; }
+  .oaPill { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 999px; }
+  .oaPill.blue { background: var(--theme-white); color: var(--theme-color-black); }
+  .oaPill.gold { background: #fff4d6; color: #9a7400; }
+  .statRow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 8px 0 20px; }
+  .statBox { background: #fff; border: 1px solid #e7eaf0; border-radius: 14px; padding: 15px 17px; }
+  .statBox.warn { background: #fff8f3; border-color: #f3d9c0; }
+  .statBox b { display: block; font-size: 23px; font-weight: 700; color: var(--theme-color); font-family: "Poppins"; }
+  .statBox.warn b { color: #c35500; }
+  .statBox span { font-size: 12.5px; color: #667; }
+  .mRow { display: flex; gap: 14px; align-items: center; background: #fff; border: 1px solid #e7eaf0; border-radius: 14px; padding: 14px; margin-bottom: 12px; }
+  .mRow .thumb { width: 64px; height: 64px; border-radius: 11px; flex-shrink: 0; background: linear-gradient(135deg, var(--theme-light), var(--theme-color)); }
+  .mRow .meta { flex: 1; min-width: 0; }
+  .mRow .t { font-weight: 600; font-size: 15px; color: #11243f; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .mRow .s { font-size: 12.5px; color: #889; margin-top: 3px; }
+  .mRow .bars { font-size: 12.5px; color: #556; margin-top: 6px; display: flex; gap: 14px; flex-wrap: wrap; }
+  .mRow .bars b { color: #11243f; }
+  .mRow .acts { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tg { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: 999px; }
+  .tg.live { background: #e4f9e8; color: #1a8a35; } .tg.soon { background: #fff4d6; color: #9a7400; }
+  .tg.review { background: var(--theme-white); color: var(--theme-color-black); }
+  .tg.paid { background: #e4f9e8; color: #1a8a35; } .tg.rej { background: #f0f1f4; color: #6b7585; }
+  .gapItem { display: flex; gap: 12px; padding: 13px 0; border-bottom: 1px solid #eef0f4; }
+  .gapItem:last-child { border-bottom: none; }
+  .gapItem .gi { width: 34px; height: 34px; border-radius: 9px; background: #fff4d6; color: #9a7400; display: grid; place-items: center; font-size: 17px; flex-shrink: 0; }
+  .gapItem .gt { font-weight: 600; font-size: 14px; color: #11243f; }
+  .gapItem .gd { font-size: 13px; color: #667; margin-top: 2px; }
+  .gapItem .gs { font-size: 11.5px; font-weight: 600; padding: 2px 8px; border-radius: 999px; height: fit-content; white-space: nowrap; }
+  .gs.have { background: #e4f9e8; color: #1a8a35; } .gs.partial { background: #fff4d6; color: #9a7400; } .gs.todo { background: #fdeaea; color: #d80f0f; }
+  .regActs { display: flex; gap: 6px; justify-content: flex-end; }
+  @media (max-width: 760px) { .statRow { grid-template-columns: repeat(2, 1fr); } .mRow { flex-wrap: wrap; } }
+</style>
 </head>
-<body data-embed="主辦">
+<body data-page="backstage">
 
-<header class="topbar">
-  <a href="index.html" class="brand" style="text-decoration:none">
-    <span class="logo">X</span><span>實習通</span>
-    <span class="sub">主辦方後臺</span>
-  </a>
-  <span class="spacer"></span>
-  <nav class="topnav">
-    <a href="/">總覽</a>
-    <a href="/backstage">認證帳號後臺</a>
-    <a href="/editor">建立活動</a>
-    <a href="/attendee">報名頁</a>
-    <a href="/creator">創作者主頁</a>
-    <a href="/blog">部落格</a>
-    <a href="/integration">整合動線</a>
-    <a href="/spec">工程規格</a>
-  </nav>
-  <span class="mockup-pill">介面示意 Mockup</span>
-</header>
+<main>
+  <div class="cz-container">
 
-<main class="wrap">
-  <div class="section" style="margin-bottom:20px">
-    <div class="eyebrow">主辦方視角 · 後臺</div>
-    <h1 style="font-size:30px">主辦方後臺：長在「官方帳號」裡</h1>
-    <p class="lead">主辦方不需要另一個系統。活動管理、報名名單與審核，直接掛在實習通既有的
-      <b>官方帳號（主辦專區）</b> 底下。同一個認證帳號<b>既是主辦單位、也是創作者</b>：
-      辦活動（活動管理／報名名單）與發內容（創作內容）整合在同一個後臺。</p>
+    <!-- official account header -->
+    <div class="oaHead">
+      <div id="oaAvatar"></div>
+      <div style="flex:1;min-width:0">
+        <div class="oaName">實習通 InternX
+          <span class="oaPill blue"><i class="ri-verified-badge-fill"></i> 已驗證官方帳號</span>
+          <span class="oaPill gold"><i class="ri-quill-pen-line"></i> 認證創作者</span>
+        </div>
+        <div class="oaSub">教育 / 求職平台 · 12 場活動 · 8 篇文章 · 1,240 追蹤</div>
+      </div>
+      <button class="btn btn-white btn-small" onclick="CZ.toast('帳號設定為平台既有功能')"><i class="ri-settings-3-line"></i> 帳號設定</button>
+    </div>
+
+    <!-- tabs (auto-wired by app.js via data-tabs) -->
+    <div class="sectionTabs" data-tabs="oa">
+      <button class="sectionTab active" data-tab="manage">活動管理</button>
+      <button class="sectionTab" data-tab="regs">報名名單 <span id="pendPill" style="background:#d80f0f;color:#fff;font-size:11px;font-weight:700;border-radius:999px;padding:0 6px;margin-left:4px">3</span></button>
+      <button class="sectionTab" data-tab="content">創作內容</button>
+      <button class="sectionTab" data-tab="showcase">成果展示</button>
+      <button class="sectionTab" data-tab="reviews">回應評價</button>
+    </div>
+
+    <!-- 活動管理 -->
+    <div class="tabPane active" data-pane="oa" data-pane-key="manage">
+      <div class="statRow">
+        <div class="statBox"><b>2</b><span>進行中活動</span></div>
+        <div class="statBox"><b>60</b><span>總報名人數</span></div>
+        <div class="statBox warn"><b id="statPend">3</b><span>待審核</span></div>
+        <div class="statBox"><b>NT$ 28,400</b><span>本月票券收入</span></div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <b style="font-size:15px;color:#11243f">我的活動</b>
+        <a class="btn btn-small" href="/editor"><i class="ri-add-line"></i> 建立活動</a>
+      </div>
+      <div class="mRow">
+        <div class="thumb"></div>
+        <div class="meta">
+          <div class="t">學生創業者小聚 <span class="tg live"><i class="ri-checkbox-circle-line"></i> 報名中</span> <span class="tg review">審核制</span></div>
+          <div class="s">6/28（日）· Garage+ 台北中山</div>
+          <div class="bars"><span>報名 <b>28 / 80</b></span><span>待審核 <b style="color:#c35500">3</b></span><span>票券收入 <b>NT$ 19,200</b></span></div>
+        </div>
+        <div class="acts">
+          <a class="btn btn-white btn-small" href="/editor"><i class="ri-edit-line"></i> 編輯</a>
+          <button class="btn btn-white btn-small" onclick="goTab('regs')"><i class="ri-list-check-2"></i> 報名名單</button>
+          <button class="btn btn-white btn-small" onclick="CZ.toast('已複製報名連結 internx.me/zh-tw/activity/…')"><i class="ri-share-line"></i> 分享</button>
+        </div>
+      </div>
+      <div class="mRow">
+        <div class="thumb" style="background:linear-gradient(135deg,#ffd16b,#e2a200)"></div>
+        <div class="meta">
+          <div class="t">職涯實戰營 <span class="tg live"><i class="ri-checkbox-circle-line"></i> 報名中</span></div>
+          <div class="s">7/12（日）· 信義區</div>
+          <div class="bars"><span>報名 <b>32 / 120</b></span><span>待審核 <b>0</b></span><span>票券收入 <b>NT$ 9,200</b></span></div>
+        </div>
+        <div class="acts">
+          <a class="btn btn-white btn-small" href="/editor"><i class="ri-edit-line"></i> 編輯</a>
+          <button class="btn btn-white btn-small" onclick="goTab('regs')"><i class="ri-list-check-2"></i> 報名名單</button>
+          <button class="btn btn-white btn-small" onclick="CZ.toast('已複製報名連結')"><i class="ri-share-line"></i> 分享</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 報名名單 + 審核 -->
+    <div class="tabPane" data-pane="oa" data-pane-key="regs">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+        <b style="font-size:15px;color:#11243f">學生創業者小聚 · 報名名單</b>
+        <span style="font-size:13px;color:#889">審核制：通過後系統通知繳費，繳費完成自動標記。匿名背景只給主辦方看。</span>
+      </div>
+      <div class="tableWrap">
+        <table>
+          <thead><tr><th>報名者</th><th>票種</th><th>匿名背景（過往經歷）</th><th>狀態</th><th style="text-align:right">操作</th></tr></thead>
+          <tbody id="regBody"></tbody>
+        </table>
+      </div>
+      <p style="font-size:12.5px;color:#889;margin-top:10px"><i class="ri-information-line"></i> 「通過」後實習通自動寄信通知報名者於平台繳費；繳費完成後此處<b>自動</b>顯示「已付款」，主辦方不需對帳。</p>
+    </div>
+
+    <!-- 創作內容 -->
+    <div class="tabPane" data-pane="oa" data-pane-key="content">
+      <div class="cz-info" style="background:#f0f7ff;border:1px solid #cfe6ff;border-radius:12px;padding:12px 14px;margin-bottom:16px;font-size:13.5px;color:#33506e">
+        <i class="ri-quill-pen-line"></i> 同一個帳號也是創作者：發部落格、累積追蹤，與「辦活動」共用同一個認證帳號（既有 <code>verified-creator</code> 標章）。
+      </div>
+      <div class="statRow" style="grid-template-columns:repeat(3,1fr)">
+        <div class="statBox"><b>8</b><span>已發佈文章</span></div>
+        <div class="statBox"><b>12,400</b><span>總瀏覽</span></div>
+        <div class="statBox"><b>1,240</b><span>追蹤者</span></div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <b style="font-size:15px;color:#11243f">我的內容</b>
+        <a class="btn btn-small" href="/blog-editor"><i class="ri-add-line"></i> 撰寫文章</a>
+      </div>
+      <div class="tableWrap">
+        <table>
+          <thead><tr><th>標題</th><th>分類</th><th>瀏覽</th><th>狀態</th><th style="text-align:right">操作</th></tr></thead>
+          <tbody>
+            <tr><td><b>外商求職實戰：履歷這樣寫才會被看見</b></td><td>履歷技巧</td><td>3,210</td><td><span class="tg live">已發佈</span></td><td style="text-align:right"><a class="btn btn-white btn-small" href="/blog-editor">編輯</a></td></tr>
+            <tr><td><b>給大三生的暑期實習時間軸</b></td><td>職涯規劃</td><td>2,540</td><td><span class="tg live">已發佈</span></td><td style="text-align:right"><a class="btn btn-white btn-small" href="/blog-editor">編輯</a></td></tr>
+            <tr><td>外商面試的 5 個地雷問題</td><td>面試技巧</td><td style="color:#aab">—</td><td><span class="tg soon">草稿</span></td><td style="text-align:right"><a class="btn btn-white btn-small" href="/blog-editor">繼續編輯</a></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:12.5px;color:#889;margin-top:10px"><i class="ri-information-line"></i> 對應既有部落格系統（<code>data/blog.ts</code> + BlockEditor）；發佈權放寬給帶 <code>verified-creator</code> 標章的帳號。詳見 <a href="/blog">部落格</a> / <a href="/creator">創作者主頁</a>。</p>
+    </div>
+
+    <!-- 成果展示 / 回應評價（既有功能） -->
+    <div class="tabPane" data-pane="oa" data-pane-key="showcase">
+      <div class="cz-info" style="background:#f0f7ff;border:1px solid #cfe6ff;border-radius:12px;padding:14px 16px;font-size:13.5px;color:#33506e"><i class="ri-image-2-line"></i> 「成果展示」是官方帳號既有功能（<code>professional/activity-showcase</code>）：活動結束後上傳花絮與回饋，前台活動卡顯示成果版本。此處沿用。</div>
+    </div>
+    <div class="tabPane" data-pane="oa" data-pane-key="reviews">
+      <div class="cz-info" style="background:#f0f7ff;border:1px solid #cfe6ff;border-radius:12px;padding:14px 16px;font-size:13.5px;color:#33506e"><i class="ri-chat-3-line"></i> 「回應評價」是官方帳號既有功能：代表公司回覆求職者評價、發布最新資訊。此處沿用。</div>
+    </div>
+
+    <!-- 給工程師：整合缺口 -->
+    <section class="cz-section" style="border-top:1px solid #eef0f4;margin-top:36px;padding-top:8px">
+      <span class="cz-eyebrow"><i class="ri-tools-line"></i> 給工程師 · 整合檢查</span>
+      <h2 class="cz-section-title" style="font-size:22px;margin:8px 0 4px">把這個後臺接進官方帳號，還缺什麼</h2>
+      <p style="color:#667;margin:0 0 14px">前端已示意完整，以下為需補齊的串接點（對照現有程式碼）。完整規格見 <a href="/handoff">交接首頁</a>。</p>
+      <div style="background:#fff;border:1px solid #e7eaf0;border-radius:14px;padding:6px 20px">
+        <div class="gapItem"><span class="gi"><i class="ri-quill-pen-line"></i></span><div style="flex:1"><div class="gt">主辦單位 ＝ 創作者（同一認證帳號）</div><div class="gd">辦活動與發內容共用同一帳號：<code>verified-creator</code> 標章 + <code>Activity.createdBy</code>。</div></div><span class="gs partial">部分已有</span></div>
+        <div class="gapItem"><span class="gi"><i class="ri-list-check-2"></i></span><div style="flex:1"><div class="gt">報名名單 + 審核狀態機</div><div class="gd"><code>data/registration.ts</code> 加 <code>status</code>：待審核→已通過→已付款／已拒絕 + 通過/拒絕 API。</div></div><span class="gs partial">部分已有</span></div>
+        <div class="gapItem"><span class="gi"><i class="ri-bank-card-line"></i></span><div style="flex:1"><div class="gt">金流：平台代收代付</div><div class="gd">通過→系統通知→平台繳費→自動回寫 paid，主辦方不對帳（<code>Payments.tsx</code>）。</div></div><span class="gs todo">待補</span></div>
+        <div class="gapItem"><span class="gi"><i class="ri-notification-3-line"></i></span><div style="flex:1"><div class="gt">通知</div><div class="gd">審核結果、待繳費提醒（Email + 站內）。</div></div><span class="gs todo">待補</span></div>
+        <div class="gapItem"><span class="gi" style="background:#e4f9e8;color:#1a8a35"><i class="ri-share-line"></i></span><div style="flex:1"><div class="gt">公開報名連結</div><div class="gd">活動公開頁 <code>activity/[activityId]</code> 已存在，分享即用。</div></div><span class="gs have">已有</span></div>
+      </div>
+    </section>
+
   </div>
-
-  <!-- InternX shell with the backstage inside 官方帳號 -->
-        <!-- official account header -->
-        <div class="oa-header">
-          <div class="oa-logo">X</div>
-          <div style="flex:1;min-width:0">
-            <div class="oa-name">實習通 InternX
-              <span class="badge badge-info verified"><i class="ri-verified-badge-fill"></i> 已驗證官方帳號</span>
-              <span class="badge" style="background:var(--complementary-white);color:#9a7400"><i class="ri-quill-pen-line"></i> 認證創作者</span></div>
-            <div class="oa-sub">教育 / 求職平台 · 12 場活動 · 8 篇文章 · 1,240 追蹤</div>
-          </div>
-          <button class="btn btn-ghost btn-sm"><i class="ri-settings-3-line"></i> 帳號設定</button>
-        </div>
-
-        <!-- official account tabs (活動管理 / 報名名單 are new; others are existing 官方帳號 features) -->
-        <div class="oa-tabs">
-          <button class="oa-tab active" data-tab="manage" onclick="oaTab('manage')">活動管理</button>
-          <button class="oa-tab" data-tab="regs" onclick="oaTab('regs')">報名名單 <span class="pill" id="pendingPill">8</span></button>
-          <button class="oa-tab" data-tab="content" onclick="oaTab('content')">創作內容</button>
-          <button class="oa-tab" data-tab="showcase" onclick="oaTab('showcase')">成果展示</button>
-          <button class="oa-tab" data-tab="reviews" onclick="oaTab('reviews')">回應評價</button>
-        </div>
-
-        <!-- TAB: 活動管理 -->
-        <section class="oa-pane" data-pane="manage">
-          <div class="stat-row">
-            <div class="stat ok"><div class="n">2</div><div class="l">進行中活動</div></div>
-            <div class="stat"><div class="n">60</div><div class="l">總報名人數</div></div>
-            <div class="stat warn"><div class="n" id="statPending">8</div><div class="l">待審核</div></div>
-            <div class="stat ok"><div class="n">NT$ 28,400</div><div class="l">本月票券收入</div></div>
-          </div>
-
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-            <b style="font-size:15px">我的活動</b>
-            <a href="editor.html" class="btn btn-primary btn-sm"><i class="ri-add-line"></i> 建立活動</a>
-          </div>
-
-          <div class="manage-card">
-            <div class="thumb"></div>
-            <div class="meta">
-              <div class="t">學生創業者小聚 <span class="badge badge-live"><i class="ri-checkbox-circle-line"></i> 報名中</span> <span class="badge badge-info">審核制</span></div>
-              <div class="s">6/28（日）· Garage+ 台北中山</div>
-              <div class="bars"><span>報名 <b>28 / 80</b></span><span>待審核 <b style="color:var(--link-color)">8</b></span><span>票券收入 <b>NT$ 19,200</b></span></div>
-            </div>
-            <div class="acts">
-              <a href="editor.html" class="btn btn-ghost btn-sm"><i class="ri-edit-line"></i> 編輯</a>
-              <button class="btn btn-soft btn-sm" onclick="oaTab('regs')"><i class="ri-list-check-2"></i> 報名名單</button>
-              <button class="btn btn-ghost btn-sm" onclick="toast('已複製報名連結 internx.me/zh-tw/activity/…')"><i class="ri-share-line"></i> 分享</button>
-            </div>
-          </div>
-
-          <div class="manage-card">
-            <div class="thumb" style="background:linear-gradient(135deg,#ffd16b,#e2a200)"></div>
-            <div class="meta">
-              <div class="t">職涯實戰營 <span class="badge badge-live"><i class="ri-checkbox-circle-line"></i> 報名中</span></div>
-              <div class="s">7/12（日）· 信義區</div>
-              <div class="bars"><span>報名 <b>32 / 120</b></span><span>待審核 <b>0</b></span><span>票券收入 <b>NT$ 9,200</b></span></div>
-            </div>
-            <div class="acts">
-              <a href="editor.html" class="btn btn-ghost btn-sm"><i class="ri-edit-line"></i> 編輯</a>
-              <button class="btn btn-soft btn-sm" onclick="oaTab('regs')"><i class="ri-list-check-2"></i> 報名名單</button>
-              <button class="btn btn-ghost btn-sm" onclick="toast('已複製報名連結')"><i class="ri-share-line"></i> 分享</button>
-            </div>
-          </div>
-        </section>
-
-        <!-- TAB: 報名名單 + 審核 -->
-        <section class="oa-pane" data-pane="regs" style="display:none">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
-            <b style="font-size:15px">學生創業者小聚 · 報名名單</b>
-            <span style="font-size:13px;color:var(--text-faint)">主辦方只負責審核；金流由實習通代收代付。</span>
-          </div>
-          <div class="callout callout-info" style="margin:0 0 14px">
-            <i class="ri-bank-card-line"></i>
-            <p style="margin:0"><b>繳費由實習通處理，主辦方不碰金流：</b>審核「通過」→ 實習通<b>自動寄信</b>通知報名者 → 報名者在<b>實習通線上繳費</b> → 此處<b>自動</b>顯示「已付款」。主辦方不需對帳、不需手動標記付款。</p>
-          </div>
-          <div class="reg-wrap">
-            <table class="reg">
-              <thead><tr><th>報名者</th><th>票種</th><th>匿名背景（過往經歷）</th><th>狀態</th><th style="text-align:right">審核操作</th></tr></thead>
-              <tbody id="regBody"></tbody>
-            </table>
-          </div>
-          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;flex-wrap:wrap">
-            <p style="font-size:12.5px;color:var(--text-faint);margin:0"><i class="ri-information-line"></i>「待付款」會在報名者於實習通完成繳費後，<b>自動</b>翻成「已付款」，主辦方不需動作。</p>
-            <button class="btn btn-ghost btn-sm" onclick="simulatePay()"><i class="ri-flask-line"></i>（示範）模擬一筆線上繳費</button>
-          </div>
-        </section>
-
-        <!-- TAB: 創作內容 (creator function — 部落格/文章，與主辦活動共用同一認證帳號) -->
-        <section class="oa-pane" data-pane="content" style="display:none">
-          <div class="callout callout-info" style="margin:0 0 16px"><i class="ri-quill-pen-line"></i>
-            <p style="margin:0"><b>同一個帳號，也是創作者。</b>發部落格、累積追蹤，與「辦活動」共用同一個認證帳號（實習通既有 <code class="coderef">verified-creator</code> 標章）。內容與活動互相導流。</p>
-          </div>
-          <div class="stat-row" style="grid-template-columns:repeat(3,1fr)">
-            <div class="stat ok"><div class="n">8</div><div class="l">已發佈文章</div></div>
-            <div class="stat"><div class="n">12,400</div><div class="l">總瀏覽</div></div>
-            <div class="stat"><div class="n">1,240</div><div class="l">追蹤者</div></div>
-          </div>
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-            <b style="font-size:15px">我的內容</b>
-            <button class="btn btn-primary btn-sm" onclick="location.href='/blog-editor'"><i class="ri-add-line"></i> 撰寫文章</button>
-          </div>
-          <div class="reg-wrap">
-            <table class="reg">
-              <thead><tr><th>標題</th><th>分類</th><th>瀏覽</th><th>狀態</th><th style="text-align:right">操作</th></tr></thead>
-              <tbody>
-                <tr><td><b>外商求職實戰：履歷這樣寫才會被看見</b></td><td>履歷技巧</td><td>3,210</td><td><span class="badge badge-live"><i class="ri-checkbox-circle-line"></i> 已發佈</span></td><td style="text-align:right"><a class="btn btn-ghost btn-sm" href="/blog-editor">編輯</a></td></tr>
-                <tr><td><b>給大三生的暑期實習時間軸</b></td><td>職涯規劃</td><td>2,540</td><td><span class="badge badge-live"><i class="ri-checkbox-circle-line"></i> 已發佈</span></td><td style="text-align:right"><a class="btn btn-ghost btn-sm" href="/blog-editor">編輯</a></td></tr>
-                <tr><td>外商面試的 5 個地雷問題</td><td>面試技巧</td><td style="color:var(--text-faint)">—</td><td><span class="badge badge-soon"><i class="ri-draft-line"></i> 草稿</span></td><td style="text-align:right"><a class="btn btn-soft btn-sm" href="/blog-editor">繼續編輯</a></td></tr>
-                <tr><td>實習通辦過的活動，都在這裡回顧</td><td>活動花絮</td><td style="color:var(--text-faint)">—</td><td><span class="badge badge-soon"><i class="ri-draft-line"></i> 草稿</span></td><td style="text-align:right"><a class="btn btn-soft btn-sm" href="/blog-editor">繼續編輯</a></td></tr>
-              </tbody>
-            </table>
-          </div>
-          <p style="font-size:12.5px;color:var(--text-faint);margin-top:10px"><i class="ri-information-line"></i> 對應實習通既有部落格系統（<code class="coderef">data/blog.ts</code> + <code class="coderef">BlockEditor</code>）；發佈權放寬給帶 <code>verified-creator</code> 標章的帳號。詳見站內 <a href="/blog">部落格</a>／<a href="/creator">創作者主頁</a>。</p>
-        </section>
-
-        <!-- TAB: 成果展示 (existing 官方帳號 feature, stub) -->
-        <section class="oa-pane" data-pane="showcase" style="display:none">
-          <div class="callout callout-info" style="margin:0"><i class="ri-image-2-line"></i>
-            <p style="margin:0">「成果展示」是官方帳號既有功能（<code class="coderef">professional/activity-showcase</code>）。活動結束後上傳花絮與回饋，前台活動卡會顯示成果版本。此處沿用，不重做。</p>
-          </div>
-        </section>
-
-        <!-- TAB: 回應評價 (existing 官方帳號 feature, stub) -->
-        <section class="oa-pane" data-pane="reviews" style="display:none">
-          <div class="callout callout-info" style="margin:0"><i class="ri-chat-3-line"></i>
-            <p style="margin:0">「回應評價」是官方帳號既有功能。代表公司回覆求職者評價、發布最新資訊。此處沿用，不重做。</p>
-          </div>
-        </section>
-
-  <p style="text-align:center;color:var(--text-faint);font-size:13px;margin-top:14px">
-    <i class="ri-cursor-line"></i> 可實際操作：切換「活動管理 / 報名名單」分頁、在報名名單按「通過 / 拒絕」
-  </p>
-
-  <!-- WHAT'S MISSING TO INTEGRATE -->
-  <section class="section" style="margin-top:44px">
-    <div class="eyebrow">整合檢查</div>
-    <h2>把這個後臺接進「官方帳號」，還缺什麼</h2>
-    <p class="lead">前端畫面已示意完整。要真的上線，以下是需要補齊的串接點（對照現有程式碼）。</p>
-
-    <div class="card card-pad" style="margin-top:18px">
-      <div class="gap-item">
-        <span class="gi" style="background:var(--complementary-white);color:#9a7400"><i class="ri-quill-pen-line"></i></span>
-        <div style="flex:1"><div class="gt">主辦單位 ＝ 創作者（同一認證帳號）</div>
-          <div class="gd">辦活動與發內容共用同一帳號：<code>verified-creator</code> 標章 + <code class="coderef">Activity.createdBy</code> 已關聯，後臺把兩者整合在一處。詳見站內 <a href="/creator">創作者主頁</a>／<a href="/blog">部落格</a>（含 <code class="coderef">data/blog.ts</code>、verifiedRoleApplications 審核流）。</div></div>
-        <span class="gstatus partial">部分已有</span>
-      </div>
-      <div class="gap-item">
-        <span class="gi"><i class="ri-link"></i></span>
-        <div style="flex:1"><div class="gt">官方帳號連結與權限</div>
-          <div class="gd">活動的 <code>organizer</code> 綁定到官方帳號 ID；只有帳號成員（<code class="coderef">professional/members</code>）能管理其活動與看名單。</div></div>
-        <span class="gstatus partial">部分已有</span>
-      </div>
-      <div class="gap-item">
-        <span class="gi"><i class="ri-list-check-2"></i></span>
-        <div style="flex:1"><div class="gt">報名名單 + 審核狀態機</div>
-          <div class="gd"><code class="coderef">data/registration.ts</code> 已能取名單，但要加 <code>status</code>：待審核 → 已通過 → 已付款 / 已拒絕，與通過/拒絕的後端 API。</div></div>
-        <span class="gstatus partial">部分已有</span>
-      </div>
-      <div class="gap-item">
-        <span class="gi"><i class="ri-bank-card-line"></i></span>
-        <div style="flex:1"><div class="gt">金流代收代付（平台處理，主辦方不對帳）</div>
-          <div class="gd">審核通過 → 報名者在實習通<b>線上繳費</b>（點數 / 刷卡 / 轉帳，金額來自所選票券）→ 繳費完成<b>自動</b>回寫狀態為「已付款」。<code class="coderef">Payments.tsx</code> 為基礎，需接：通過後觸發繳費、付款完成 webhook 更新狀態、退款。主辦方端不需手動對帳或標記。</div></div>
-        <span class="gstatus partial">部分已有</span>
-      </div>
-      <div class="gap-item">
-        <span class="gi"><i class="ri-notification-3-line"></i></span>
-        <div style="flex:1"><div class="gt">系統通知（審核通過 → 自動寄信通知繳費）</div>
-          <div class="gd">審核通過時，實習通<b>自動寄信</b>通知報名者可線上繳費；另含拒絕通知、繳費提醒（Email + 站內）。</div></div>
-        <span class="gstatus todo">待補</span>
-      </div>
-      <div class="gap-item">
-        <span class="gi"><i class="ri-coupon-3-line"></i></span>
-        <div style="flex:1"><div class="gt">票券庫存即時扣減</div>
-          <div class="gd">售出計數 <code>sold</code> 與防超賣 transaction（見工程規格）。售完 / 截止狀態前後台一致。</div></div>
-        <span class="gstatus todo">待補</span>
-      </div>
-      <div class="gap-item">
-        <span class="gi"><i class="ri-bar-chart-2-line"></i></span>
-        <div style="flex:1"><div class="gt">後臺統計</div>
-          <div class="gd">報名數、票券收入、轉換率的儀表板數據（本頁上方四格的真實來源）。</div></div>
-        <span class="gstatus todo">待補</span>
-      </div>
-      <div class="gap-item">
-        <span class="gi" style="background:#e4f9e8;color:#1a8a35"><i class="ri-share-line"></i></span>
-        <div style="flex:1"><div class="gt">公開報名連結</div>
-          <div class="gd">活動公開頁 <code class="coderef">activity/[activityId]</code> 已存在，分享即用（見整合動線）。</div></div>
-        <span class="gstatus have">已有</span>
-      </div>
-    </div>
-
-    <div class="callout callout-info" style="margin-top:16px">
-      <i class="ri-git-branch-line"></i>
-      <p style="margin:0">資料模型與逐步做法見 <a href="spec.html">工程規格</a> 與
-      <a href="https://github.com/Jean-yzj/internx-activity-handoff/blob/main/INTEGRATION.md">INTEGRATION.md</a>；
-      串接位置與動線見 <a href="integration.html">整合動線</a>。</p>
-    </div>
-  </section>
-
 </main>
 
-<footer class="foot">實習通 InternX · 主辦方後臺示意（掛於官方帳號）· 不影響線上服務</footer>
-
-<script src="assets/app.js"></script>
+<script src="/assets/cz/data.js"></script>
+<script src="/assets/cz/app.js"></script>
 <script>
-function oaTab(t){
-  document.querySelectorAll('.oa-tab').forEach(b=>b.classList.toggle('active', b.dataset.tab===t));
-  document.querySelectorAll('.oa-pane').forEach(p=>p.style.display = p.dataset.pane===t ? 'block' : 'none');
-}
+  document.getElementById("oaAvatar").innerHTML = CZ.avatar("X", "#0182fd", 58);
+  function goTab(k){ document.querySelector(`.sectionTab[data-tab="${k}"]`)?.click(); }
 
-/* registrations for 學生創業者小聚 (審核制) */
-let regs = [
-  { name:'王＊明', ticket:'一般審核票', traits:['青年百億計畫','連續創業家','AppWorks'], status:'pending' },
-  { name:'林＊潔', ticket:'一般審核票', traits:['學生會長','社會創新競賽 第二名'], status:'pending' },
-  { name:'陳＊安', ticket:'學生團隊票（2 人）', traits:['校園黑客松','獨立接案'], status:'approved' },
-  { name:'李＊華', ticket:'早鳥審核票', traits:['系上創業社','電商側專案'], status:'paid' },
-  { name:'張＊婷', ticket:'一般審核票', traits:['NPO 實習','活動策展'], status:'pending' },
-];
-const ST = {
-  pending:  { label:'待審核', cls:'badge-soon', icon:'ri-time-line' },
-  approved: { label:'已通過 · 待付款', cls:'badge-info', icon:'ri-checkbox-circle-line' },
-  paid:     { label:'已付款', cls:'badge-live', icon:'ri-money-dollar-circle-line' },
-  rejected: { label:'已拒絕', cls:'badge-ended', icon:'ri-close-circle-line' },
-};
-function renderRegs(){
-  const b=document.getElementById('regBody'); b.innerHTML='';
-  regs.forEach((r,i)=>{
-    const s=ST[r.status];
-    const tr=document.createElement('tr');
-    tr.innerHTML=`
-      <td><b>${r.name}</b></td>
-      <td>${r.ticket}</td>
-      <td>${r.traits.map(t=>`<span class="badge badge-info" style="font-size:11px;margin:1px 2px">${t}</span>`).join('')}</td>
-      <td><span class="badge ${s.cls}"><i class="${s.icon}"></i> ${s.label}</span></td>
-      <td><div class="ra" style="justify-content:flex-end">
-        ${r.status==='pending'
-          ? `<button class="btn btn-primary btn-sm" onclick="setReg(${i},'approved')">通過</button>
-             <button class="btn btn-ghost btn-sm" onclick="setReg(${i},'rejected')">拒絕</button>`
-          : r.status==='approved'
-          ? `<span style="color:var(--text-faint);font-size:12px"><i class="ri-time-line"></i> 待報名者線上繳費</span>`
-          : `<span style="color:var(--text-faint);font-size:12px">—</span>`}
-      </div></td>`;
-    b.appendChild(tr);
-  });
-  const pending = regs.filter(r=>r.status==='pending').length;
-  document.getElementById('pendingPill').textContent = pending;
-  document.getElementById('pendingPill').style.display = pending? 'inline-block':'none';
-  document.getElementById('statPending').textContent = pending;
-}
-function setReg(i,status){
-  regs[i].status=status; renderRegs();
-  toast(status==='approved' ? '已通過，實習通將寄信通知報名者線上繳費'
-      : status==='rejected' ? '已拒絕，實習通將通知報名者'
-      : '報名者已於實習通完成繳費，狀態自動更新為已付款');
-}
-/* 示範：模擬報名者在實習通線上繳費 → 主辦方端自動顯示已付款（主辦方不需動作） */
-function simulatePay(){
-  const i = regs.findIndex(r=>r.status==='approved');
-  if(i<0){ toast('目前沒有「待付款」的報名'); return; }
-  setReg(i,'paid');
-}
-renderRegs();
+  let regs = [
+    { name:"王＊明", ticket:"一般審核票", traits:["青年百億計畫","連續創業家","AppWorks"], status:"pending" },
+    { name:"林＊潔", ticket:"一般審核票", traits:["學生會長","社會創新競賽 第二名"], status:"pending" },
+    { name:"陳＊安", ticket:"學生團隊票（2 人）", traits:["校園黑客松","獨立接案"], status:"approved" },
+    { name:"李＊華", ticket:"早鳥審核票", traits:["系上創業社","電商側專案"], status:"paid" },
+    { name:"張＊婷", ticket:"一般審核票", traits:["NPO 實習","活動策展"], status:"pending" },
+  ];
+  const ST = {
+    pending:  { label:"待審核", cls:"soon" },
+    approved: { label:"已通過 · 待繳費", cls:"review" },
+    paid:     { label:"已付款", cls:"paid" },
+    rejected: { label:"已拒絕", cls:"rej" },
+  };
+  function renderRegs(){
+    document.getElementById("regBody").innerHTML = regs.map((r,i)=>{
+      const s = ST[r.status];
+      const traits = r.traits.map(t=>`<span class="cz-tag-mini">${t}</span>`).join(" ");
+      let act = '<span style="color:#aab;font-size:12px">—</span>';
+      if (r.status==="pending") act = `<button class="btn btn-small" onclick="setReg(${i},'approved')">通過</button> <button class="btn btn-white btn-small" onclick="setReg(${i},'rejected')">拒絕</button>`;
+      else if (r.status==="approved") act = `<span style="color:#889;font-size:12px">系統已通知繳費</span> <button class="btn btn-white btn-small" onclick="setReg(${i},'paid')">模擬繳費</button>`;
+      return `<tr><td><b>${r.name}</b></td><td>${r.ticket}</td><td>${traits}</td><td><span class="tg ${s.cls}">${s.label}</span></td><td><div class="regActs">${act}</div></td></tr>`;
+    }).join("");
+    const pend = regs.filter(r=>r.status==="pending").length;
+    document.getElementById("statPend").textContent = pend;
+    const pill = document.getElementById("pendPill");
+    pill.textContent = pend; pill.style.display = pend ? "inline-block" : "none";
+  }
+  function setReg(i,s){ regs[i].status = s; renderRegs();
+    CZ.toast(s==="approved" ? "已通過，實習通將寄信通知報名者繳費" : s==="rejected" ? "已拒絕，已通知報名者" : "報名者已於平台繳費，自動標記已付款"); }
+  renderRegs();
 </script>
 </body>
 </html>
