@@ -7,6 +7,43 @@
 <link rel="icon" href="/assets/cz/favicon.png" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" />
 <link rel="stylesheet" href="/assets/cz/app.css" />
+<style>
+  /* 創作者主頁・側欄重新設計（只作用於本頁；後台等其他頁不受影響） */
+  .sidebarCard { padding: 24px 22px; }
+  .sbHead { display: flex; flex-direction: column; align-items: center; text-align: center; width: 100%; }
+  .sbIdentity { width: 100%; }
+  .sidebarAvatar { margin-bottom: 14px; box-shadow: 0 4px 14px rgba(1,130,253,.18); }
+  .profileName { font-size: 20px; font-weight: 700; color: #11243f; margin: 0 0 8px; line-height: 1.3; }
+  .sidebarBadgeStrip { margin: 0 0 10px; }
+  .profileHeadline { font-size: 14px; color: #5b6b7e; line-height: 1.55; margin: 0 0 12px; }
+  .profileMeta { display: flex; flex-direction: column; align-items: center; gap: 5px; width: 100%; font-size: 12.5px; color: #7a8699; }
+  .profileMeta span { display: inline-flex; align-items: center; gap: 6px; }
+  .profileMeta i { color: #9aa7b8; font-size: 14px; }
+  .sbStats { display: flex; width: 100%; margin: 18px 0; background: #f7faff; border: 1px solid #e6eef8; border-radius: 12px; }
+  .sbStats > div { flex: 1; text-align: center; padding: 11px 6px; }
+  .sbStats > div + div { border-left: 1px solid #e6eef8; }
+  .sbStats b { display: block; font-size: 19px; font-weight: 700; color: var(--theme-color); line-height: 1.25; }
+  .sbStats span { font-size: 11.5px; color: #7a8699; }
+  .sidebarButtons { margin-top: 0; }
+  .sbShare { display: inline-flex; align-items: center; justify-content: center; gap: 6px; margin: 14px auto 0; font-size: 12.5px; color: #7a8699; background: none; border: none; cursor: pointer; }
+  .sbShare:hover { color: var(--theme-color); }
+  /* 手機：身分改成水平標頭，內容更快觸及（原本整張卡會堆在內容上方） */
+  @media (max-width: 850px) {
+    .sidebarCard { padding: 16px; box-shadow: 0 2px 8px rgba(16,32,56,.07); }
+    .sbHead { flex-direction: row; align-items: center; text-align: left; gap: 14px; }
+    .sbIdentity { flex: 1; min-width: 0; width: auto; }
+    .sidebarAvatar { width: 56px !important; height: 56px !important; font-size: 21px !important; margin-bottom: 0; flex: 0 0 56px; }
+    .profileName { font-size: 17px; margin-bottom: 5px; }
+    .sidebarBadgeStrip { justify-content: flex-start; margin-bottom: 6px; }
+    .profileHeadline { font-size: 13px; margin-bottom: 6px; }
+    .profileMeta { flex-direction: row; flex-wrap: wrap; align-items: flex-start; gap: 3px 14px; }
+    .sbStats { margin: 14px 0 4px; }
+    .sidebarButtons { flex-direction: row; }
+    .sidebarButtons > .btn, .sidebarButtons > .moreMenu { flex: 1; }
+    .sidebarButtons .btn { font-size: 13px; padding: 11px 8px; white-space: nowrap; }
+    .sbShare { margin-top: 12px; }
+  }
+</style>
 </head>
 <body data-page="creator">
 
@@ -74,25 +111,25 @@
         </div>
       </div>`;
     document.getElementById("sidebar").innerHTML = `
-      ${CZ.avatar(c.initials, c.color, 96, "sidebarAvatar")}
-      <h2 class="profileName">${c.name}</h2>
-      <div class="sidebarBadgeStrip">${CZ.badgePill(c, { clickable: true })}</div>
-      <p class="profileHeadline">${c.headline}</p>
-      <p class="profileSchool"><i class="ri-school-line"></i> ${c.school}</p>
-      <p class="profileSchool"><i class="ri-map-pin-line"></i> ${c.location || "台灣"}</p>
-      <div class="sidebarButtons">${forSelf ? selfBtns : visitorBtns}</div>
-      <div class="sidebarDivider"></div>
-      <div class="statRow">
-        <div class="statBox"><b>${(c.followers || 0).toLocaleString()}</b><span>追蹤者</span></div>
-        <div class="statBox"><b>${arr(c.blogs).length}</b><span>文章</span></div>
-        <div class="statBox"><b>${arr(c.hostedEvents).length}</b><span>活動</span></div>
+      <div class="sbHead">
+        ${CZ.avatar(c.initials, c.color, 84, "sidebarAvatar")}
+        <div class="sbIdentity">
+          <h2 class="profileName">${c.name}</h2>
+          <div class="sidebarBadgeStrip">${CZ.badgePill(c, { clickable: true })}</div>
+          <p class="profileHeadline">${c.headline}</p>
+          <div class="profileMeta">
+            <span><i class="ri-school-line"></i> ${c.school}</span>
+            <span><i class="ri-map-pin-line"></i> ${c.location || "台灣"}</span>
+          </div>
+        </div>
       </div>
-      <div class="sidebarDivider"></div>
-      <div class="infoList">
-        <button class="pointsInfoRow" onclick="document.querySelector('[data-tab=blog]').click()"><i class="ri-article-line"></i> 部落格文章</button>
-        <button class="pointsInfoRow" onclick="document.querySelector('[data-tab=events]').click()"><i class="ri-calendar-event-line"></i> 主辦活動</button>
-        <button class="pointsInfoRow" onclick="CZ.toast('已複製創作者 ID：${c.id}')"><i class="ri-link"></i> 複製主頁連結</button>
-      </div>`;
+      <div class="sbStats">
+        <div><b>${(c.followers || 0).toLocaleString()}</b><span>追蹤者</span></div>
+        <div><b>${arr(c.blogs).length}</b><span>文章</span></div>
+        <div><b>${arr(c.hostedEvents).length}</b><span>活動</span></div>
+      </div>
+      <div class="sidebarButtons">${forSelf ? selfBtns : visitorBtns}</div>
+      ${forSelf ? `<button class="sbShare" onclick="CZ.toast('已複製主頁連結（創作者 ID：${c.id}）')"><i class="ri-link"></i> 複製主頁連結</button>` : ""}`;
   }
   let following = false;
   window.toggleFollow = function () {
