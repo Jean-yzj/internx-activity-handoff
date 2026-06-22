@@ -64,6 +64,12 @@
         <p>認證創作者發佈職涯／求職內容；發佈權對應 verified-creator 標章。</p>
         <span class="go">開啟 Demo →</span>
       </a>
+      <a class="demoCard" href="/creators">
+        <div class="ic"><i class="ri-quill-pen-line"></i></div>
+        <h3>創作者專區・介紹</h3>
+        <p>價值主張、精選創作者、能做什麼、三步驟成為認證創作者（流程介紹）。</p>
+        <span class="go">看介紹 →</span>
+      </a>
       <a class="demoCard" href="/integration">
         <div class="ic"><i class="ri-route-line"></i></div>
         <h3>整合動線</h3>
@@ -74,8 +80,14 @@
   </div>
 
   <div class="doc">
-    <div class="docToolbar">
-      <a class="btn btn-white btn-small" href="/INTEGRATION.md" download><i class="ri-download-line"></i> 下載 Markdown</a>
+    <figure class="archFig">
+      <img src="/assets/cz/img/architecture.svg" alt="認證帳號整體架構：申請 → 審核 → 發標章 → 帳號中樞 → 串接既有系統" />
+      <figcaption>認證帳號整體架構：申請 → 審核 → 發 <code>verified-creator</code> 標章 → 帳號中樞 → 串接部落格／活動／論壇／人脈／心得。金色虛線框＝待補。活動票券與報名金流的串接見下方「活動報名串接」。</figcaption>
+    </figure>
+    <div class="docToolbar" style="gap:8px;flex-wrap:wrap">
+      <button class="btn btn-small docTab" data-doc="/INTEGRATION.md"><i class="ri-ticket-2-line"></i> 活動報名串接</button>
+      <button class="btn btn-white btn-small docTab" data-doc="/CREATOR-HANDOFF.md"><i class="ri-quill-pen-line"></i> 創作者專區串接</button>
+      <a class="btn btn-white btn-small" id="dlMd" href="/INTEGRATION.md" download style="margin-left:auto"><i class="ri-download-line"></i> 下載 Markdown</a>
     </div>
     <div id="docBody"><p class="muted">載入串接說明中⋯</p></div>
   </div>
@@ -123,11 +135,17 @@
     }
     return html;
   }
-  fetch("/INTEGRATION.md").then(r=>r.text()).then(md=>{
-    // drop the first H1 (we already show a hero) to avoid duplication
-    md = md.replace(/^#\s+.*\n/, "");
-    document.getElementById("docBody").innerHTML = renderMd(md);
-  }).catch(()=>{ document.getElementById("docBody").innerHTML = '<p class="muted">無法載入 INTEGRATION.md，請見 <a href="https://github.com/Jean-yzj/internx-activity-handoff/blob/main/INTEGRATION.md">GitHub</a>。</p>'; });
+  function loadDoc(path){
+    document.querySelectorAll(".docTab").forEach(b=>{ b.classList.toggle("btn-white", b.dataset.doc !== path); });
+    var dl = document.getElementById("dlMd"); if (dl) dl.href = path;
+    document.getElementById("docBody").innerHTML = '<p class="muted">載入中⋯</p>';
+    fetch(path).then(r=>r.text()).then(md=>{
+      md = md.replace(/^#\s+.*\n/, ""); // drop first H1 (hero already shows the title)
+      document.getElementById("docBody").innerHTML = renderMd(md);
+    }).catch(()=>{ document.getElementById("docBody").innerHTML = '<p class="muted">無法載入，請見 <a href="https://github.com/Jean-yzj/internx-activity-handoff">GitHub</a>。</p>'; });
+  }
+  document.querySelectorAll(".docTab").forEach(b=>b.addEventListener("click",()=>loadDoc(b.dataset.doc)));
+  loadDoc("/INTEGRATION.md");
 </script>
 </body>
 </html>

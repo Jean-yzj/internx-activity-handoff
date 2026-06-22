@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>創作者專區｜InternX 實習通</title>
+<meta name="description" content="InternX 實習通創作者專區 — 認證創作者的個人主頁、部落格、活動與社群整合。" />
+<link rel="icon" href="/assets/cz/favicon.png" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" />
+<link rel="stylesheet" href="/assets/cz/app.css" />
+<style>
+  /* hero is single-column now that the right card is removed */
+  .cz-hero-inner { grid-template-columns: 1fr !important; }
+  .cz-hero-inner > div { max-width: 780px; }
+</style>
+</head>
+<body data-page="home">
+
+<main>
+  <!-- HERO -->
+  <section class="cz-hero">
+    <div class="cz-container cz-hero-inner">
+      <div>
+        <span class="cz-eyebrow"><i class="ri-quill-pen-line"></i> INTERNX 創作者專區</span>
+        <h1>讓你的專業，<span class="accent">被更多學生看見</span></h1>
+        <p>在實習通，學長姐、職場前輩與領域專家可以申請成為「認證創作者」：撰寫部落格、舉辦活動、累積追蹤，並把你在論壇、人脈、心得的足跡集結成一個專屬主頁。</p>
+        <div class="cz-hero-cta">
+          <a class="btn" href="/register"><i class="ri-verified-badge-line"></i> 成為認證創作者</a>
+          <a class="btn btn-white" href="/directory"><i class="ri-compass-3-line"></i> 探索創作者</a>
+        </div>
+        <div class="cz-stat-row">
+          <div class="cz-stat"><b>120+</b><span>認證創作者</span></div>
+          <div class="cz-stat"><b>860+</b><span>創作者文章</span></div>
+          <div class="cz-stat"><b>340+</b><span>創作者活動</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 價值主張 -->
+  <section class="cz-section">
+    <div class="cz-container">
+      <div class="cz-section-head center" style="margin:0 auto 28px">
+        <h2 class="cz-section-title">為什麼加入創作者專區</h2>
+        <p class="cz-section-sub" style="margin:0 auto">一個專區，整合你在實習通的所有內容與影響力。</p>
+      </div>
+      <div class="cz-creator-grid" id="valueGrid"></div>
+    </div>
+  </section>
+
+  <!-- 精選創作者 -->
+  <section class="cz-section" style="background:var(--background-color-gray)">
+    <div class="cz-container">
+      <div class="cz-section-head" style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px">
+        <div>
+          <h2 class="cz-section-title">本月精選創作者</h2>
+          <p class="cz-section-sub">名字旁的金色膠囊即為「認證創作者」標章，點擊可看認證說明。</p>
+        </div>
+        <a class="btn btn-white btn-small" href="/directory">查看全部 <i class="ri-arrow-right-line"></i></a>
+      </div>
+      <div class="cz-creator-grid" id="creatorGrid"></div>
+    </div>
+  </section>
+
+  <!-- 創作者能做什麼 -->
+  <section class="cz-section">
+    <div class="cz-container">
+      <div class="cz-section-head center" style="margin:0 auto 28px">
+        <h2 class="cz-section-title">認證創作者能做什麼</h2>
+        <p class="cz-section-sub" style="margin:0 auto">創作者專區與平台既有的部落格、活動、論壇、人脈、心得完全打通。</p>
+      </div>
+      <div class="cz-creator-grid" id="featureGrid"></div>
+    </div>
+  </section>
+
+  <!-- 成為創作者 -->
+  <section class="cz-section" style="background:linear-gradient(160deg,#eaf4ff,#fff6ef)">
+    <div class="cz-container center">
+      <h2 class="cz-section-title">三步驟，成為認證創作者</h2>
+      <p class="cz-section-sub" style="margin:8px auto 28px">沿用平台既有的身分驗證與審核機制，送出後即可繼續使用平台。</p>
+      <div class="cz-creator-grid" id="stepGrid" style="max-width:900px;margin:0 auto"></div>
+      <div style="margin-top:28px"><a class="btn" href="/register"><i class="ri-arrow-right-line"></i> 開始申請</a></div>
+    </div>
+  </section>
+</main>
+
+<script src="/assets/cz/data.js"></script>
+<script src="/assets/cz/render.js"></script>
+<script src="/assets/cz/app.js"></script>
+<script>
+  const D = window.CZ_DATA;
+  // （hero 右側卡片已移除，改為單欄）
+
+  // 價值卡
+  const values = [
+    { icon:"profile-line", title:"專屬創作者主頁", desc:"名字旁的認證標章、專長、活動紀錄、部落格與社群連結，集中在一個個人主頁。" },
+    { icon:"quill-pen-line", title:"部落格直接發佈", desc:"用平台內建編輯器撰寫文章，自動連結到你的主頁，並標記認證身分。" },
+    { icon:"line-chart-line", title:"累積你的影響力", desc:"追蹤數、文章瀏覽、活動回饋一目了然，把專業變成可被看見的數據。" },
+  ];
+  document.getElementById("valueGrid").innerHTML = values.map(v=>`
+    <div class="cz-creator-card" style="cursor:default">
+      <div class="roleCard" style="border:none;padding:0;text-align:left">
+        <div class="ricon" style="margin:0 0 12px"><i class="ri-${v.icon}"></i></div>
+        <h4 style="font-size:18px">${v.title}</h4>
+        <p style="margin-top:6px;font-size:14px;line-height:1.65">${v.desc}</p>
+      </div>
+    </div>`).join("");
+
+  // 精選創作者（取 4 位）
+  const ids = Object.keys(D.creators).slice(0,4);
+  document.getElementById("creatorGrid").innerHTML = ids.map(id=>CZ.creatorCard(D.creators[id])).join("");
+
+  // 功能卡（串接）
+  const features = [
+    { icon:"article-line", title:"部落格", desc:"撰寫並發佈文章，作者署名顯示認證標章。", href:"/blog" },
+    { icon:"calendar-event-line", title:"活動", desc:"顯示你主辦過的活動與成果回顧。", href:"/creator?id="+D.featured+"#events" },
+    { icon:"chat-1-line", title:"論壇", desc:"論壇發言旁同步出現你的認證標章。", href:"#" },
+    { icon:"group-2-line", title:"人脈", desc:"在人脈推薦中以認證創作者身分被看見。", href:"#" },
+    { icon:"sparkling-line", title:"心得", desc:"你分享的實習／面試心得集結在主頁。", href:"#" },
+    { icon:"links-line", title:"社群整合", desc:"一鍵連到你的 LinkedIn 與 Instagram。", href:"/creator?id="+D.featured },
+  ];
+  document.getElementById("featureGrid").innerHTML = features.map(v=>`
+    <a class="cz-creator-card" href="${v.href}" ${v.href==="#"?'onclick="CZ.toast(\'此為平台既有功能，創作者標章會自動帶入\');return false"':''}>
+      <div class="roleCard" style="border:none;padding:0;text-align:left">
+        <div class="ricon" style="margin:0 0 12px"><i class="ri-${v.icon}"></i></div>
+        <h4 style="font-size:17px">${v.title}</h4>
+        <p style="margin-top:6px;font-size:14px;line-height:1.6">${v.desc}</p>
+      </div>
+    </a>`).join("");
+
+  // 步驟
+  const steps = [
+    { n:"1", title:"註冊時選擇「創作者」身分", desc:"在登入後的引導流程選擇身分，沿用平台既有的學生信箱／身分驗證。" },
+    { n:"2", title:"填寫認證資訊送審", desc:"填寫所在產業／公司與相關經歷，可附上作品連結，送出後即進入審核。" },
+    { n:"3", title:"審核通過取得標章", desc:"通過後名字旁出現「認證創作者」金色標章，並解鎖創作者主頁。" },
+  ];
+  document.getElementById("stepGrid").innerHTML = steps.map(s=>`
+    <div class="cz-creator-card" style="cursor:default;text-align:left">
+      <div class="ricon" style="width:44px;height:44px;border-radius:50%;background:var(--theme-color);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700">${s.n}</div>
+      <h4 style="font-size:17px;color:#11243f;margin:12px 0 6px">${s.title}</h4>
+      <p style="font-size:14px;color:#667;line-height:1.6;margin:0">${s.desc}</p>
+    </div>`).join("");
+</script>
+</body>
+</html>
