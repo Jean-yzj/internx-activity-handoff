@@ -274,7 +274,33 @@ await runTransaction(db, async (tx) => {
 - 公開端 `/creator`：創作者主頁的「主辦活動」分頁連到報名頁 `/attendee`；`/blog` 為部落格列表。
 - 待補（彙整）：verifiedRoleApplications 審核佇列、blog 發佈 gating、單向 follow、發文通知扇出、檢舉（`reports` 集合）。
 
-## 11. 本機預覽 / 部署
+## 11. 對應原平台後台（`professional` / 官方帳號）
+
+這個 mockup 的「認證帳號後臺」不是新框架 —— 它直接對應 internx.me 既有的官方帳號後台。
+
+**原平台現況（已存在）：**
+- 框架 `components/PlatformFrame/ProfessionalPlatformFrame.jsx`：左側欄由 `PROFESSIONAL_SERVICES`（`lib/config.js`）產生，項目為 **官方帳號儀表板 `home` / 新增活動 `new-activity` / 活動成果展示 `activity-showcase` / 成員 `members` / 申請成為官方帳號 `join`**。
+- 儀表板 `pages/[lang]/professional/home.jsx`：`Activity.loadAllForAdmin(db)` → 以 `companyId === userData.admining` 過濾「我的活動」→ `TabsViewer` 分 **待審核 / 已批准 / 已拒絕**（`activity.approvalStatus`）→ `ActivityGrid editable`，點擊進 `/activity/{id}`。
+- 權限：需 `userData.admining`（官方帳號）或 `userData.admin`（平台管理員），否則導去 `professional/join`。
+
+> 重要：home.jsx 的「待審核/已批准/已拒絕」是**活動發布審核**（平台 admin 審活動能否上架），<b>不是</b>報名者審核。報名者審核是這次新增的概念，別混在一起。
+
+**mockup → 原平台位置 → 改動：**
+
+| 這份 mockup | 原平台位置 | 改動 |
+|---|---|---|
+| 認證帳號後臺（整個殼） | `ProfessionalPlatformFrame` | 沿用框架，側邊欄 `PROFESSIONAL_SERVICES` 新增「報名名單」「創作內容」兩個 key |
+| 活動管理 / 我的活動 | `professional/home.jsx`（已存在） | 沿用；票券改用新模型（§3），卡片顯示報名數/待審核數 |
+| 報名名單（報名者通過/拒絕） | **新增** `professional/registrations`（或活動詳情子頁） | 新增 `Registration.status`（§4.3、§5）+ 平台代收代付（§6） |
+| 建立活動 | `professional/new-activity.jsx` | 換成新編輯器：票券時間/數量、表單拖曳、進階設定 |
+| 活動成果展示 | `professional/activity-showcase.jsx` | 沿用 |
+| 成員權限 | `professional/members.jsx` | 沿用（決定誰能管理此官方帳號） |
+| 創作內容（部落格） | **新增** `professional/blog`（或重用 `BlockEditor`） | 發佈權 gated by `verified-creator` 標章（§10） |
+| 報名者公開頁 | `activity/[activityId]`（已存在） | 對齊版型；報名表單依 `formSchema` 渲染 |
+
+**權限整合（主辦 ＝ 創作 的關鍵）：** 目前 `professional/*` 只認 `admining`（官方帳號）。整合後，把進入條件放寬為 **`admining`（可辦活動）OR `verified-creator` 標章（可發內容）**：兩者都進同一個 `ProfessionalPlatformFrame` 後台，依擁有的能力顯示對應側邊欄項目。`PROFESSIONAL_SERVICES_REQUIRE_ADMINING`（目前 `["home","new-activity","activity-showcase"]`）據此調整。
+
+## 12. 本機預覽 / 部署
 
 ```bash
 # mockup 本機預覽（零依賴）

@@ -65,6 +65,58 @@
     </div>
   </section>
 
+  <!-- REAL BACKEND MAPPING -->
+  <section class="section">
+    <div class="eyebrow">對應原平台後台</div>
+    <h2>原本的官方帳號後台長這樣，我們在上面加兩塊</h2>
+    <p class="lead">實習通已有官方帳號後台 <code class="coderef">professional/home</code>（框架 <code class="coderef">ProfessionalPlatformFrame</code>）。下圖依<b>真實程式碼</b>重繪：左側是既有側邊欄、主區是既有「我的活動（待審核 / 已批准 / 已拒絕）」。我們只在側邊欄加「報名名單」「創作內容」。</p>
+
+    <div class="ix" style="margin-top:18px">
+      <div class="ix-top"><span class="l"><span class="lg">X</span> 實習通</span><span class="ix-search"><i class="ri-search-line"></i> 官方帳號平臺</span><span class="av"></span></div>
+      <div class="ix-main">
+        <div class="ix-side">
+          <div class="ix-nav active"><i class="ri-dashboard-line"></i> 官方帳號儀表板</div>
+          <div class="ix-nav"><i class="ri-add-circle-line"></i> 新增活動</div>
+          <div class="ix-nav"><i class="ri-image-line"></i> 活動成果展示</div>
+          <div class="ix-nav" style="background:var(--complementary-white)"><i class="ri-list-check-2"></i> 報名名單 <span class="new-tag" style="margin-left:auto">新</span></div>
+          <div class="ix-nav" style="background:var(--complementary-white)"><i class="ri-quill-pen-line"></i> 創作內容 <span class="new-tag" style="margin-left:auto">新</span></div>
+          <div class="ix-nav"><i class="ri-team-line"></i> 成員</div>
+        </div>
+        <div class="ix-content">
+          <div style="font-size:12px;color:var(--text-faint);margin-bottom:6px">pages/[lang]/professional/home.jsx</div>
+          <b style="font-size:15px">我的活動</b>
+          <div style="display:flex;gap:8px;margin:12px 0;flex-wrap:wrap;align-items:center">
+            <span class="badge badge-soon">待審核 1</span><span class="badge badge-live">已批准 2</span><span class="badge badge-ended">已拒絕 0</span>
+            <span style="font-size:12px;color:var(--text-faint)">← 這是「活動發布審核」（平台審活動能否上架）</span>
+          </div>
+          <div class="ix-actcard"><div class="thumb"></div><div class="meta"><div class="t">學生創業者小聚</div><div class="s">已批准 · 以 companyId 過濾「我的活動」</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout callout-problem" style="margin-top:14px">
+      <i class="ri-error-warning-line"></i>
+      <p style="margin:0"><b>兩種「審核」別混淆：</b>原後台的「待審核 / 已批准 / 已拒絕」是<b>活動發布審核</b>（平台 admin 審活動能否上架）。這次新增的「報名名單」是<b>報名者審核</b>（主辦方審個別報名者），是不同的東西。</p>
+    </div>
+
+    <h3 style="margin-top:22px;font-size:17px">怎麼串接（mockup → 原平台）</h3>
+    <table class="spec">
+      <thead><tr><th>這份 mockup</th><th>原平台位置</th><th>改動</th></tr></thead>
+      <tbody>
+        <tr><td>認證帳號後臺（殼）</td><td><code>ProfessionalPlatformFrame</code> + <code>PROFESSIONAL_SERVICES</code></td><td>沿用；側邊欄加「報名名單」「創作內容」</td></tr>
+        <tr><td>活動管理 / 我的活動</td><td><code>professional/home.jsx</code></td><td>已存在；票券改新模型、卡片顯示報名／待審核數</td></tr>
+        <tr><td>報名名單（報名者審核）</td><td class="tag-add">新增 <code>professional/registrations</code></td><td>Registration.status + 平台代收代付</td></tr>
+        <tr><td>建立活動</td><td><code>professional/new-activity.jsx</code></td><td>換成新編輯器</td></tr>
+        <tr><td>創作內容（部落格）</td><td class="tag-add">新增 <code>professional/blog</code></td><td>發佈權 gated by verified-creator</td></tr>
+        <tr><td>報名者公開頁</td><td><code>activity/[activityId]</code></td><td>對齊版型、表單依 formSchema 渲染</td></tr>
+      </tbody>
+    </table>
+    <div class="callout callout-fix" style="margin-top:14px">
+      <i class="ri-key-2-line"></i>
+      <p style="margin:0"><b>權限整合（主辦 ＝ 創作）：</b>原本 <code>professional/*</code> 只認 <code>admining</code>（官方帳號）。整合後放寬為 <b>admining（辦活動）或 verified-creator 標章（發內容）</b>，兩者進同一個後台、依能力顯示側邊欄。完整規格見 <a href="https://github.com/Jean-yzj/internx-activity-handoff/blob/main/INTEGRATION.md">INTEGRATION.md §11</a>。</p>
+    </div>
+  </section>
+
   <!-- ORGANIZER FLOW -->
   <section class="section">
     <div class="eyebrow">動線 A · 主辦方</div>
