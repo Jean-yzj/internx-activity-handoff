@@ -208,6 +208,26 @@
     <h2>創作者：申請認證 → 發內容 / 辦活動（同一帳號）</h2>
     <p class="lead">創作者不是另一條註冊線。一般帳號申請「認證創作者」，審核通過拿到 <code class="coderef">verified-creator</code> 標章後，就能發部落格、辦活動、擁有創作者主頁 —— 與「主辦」共用同一個認證帳號。</p>
 
+    <!-- 並行流程圖：註冊 → 認證 → 解鎖 -->
+    <div style="margin-top:18px;background:var(--bg-gray);border:1px solid var(--border);border-radius:14px;padding:18px 20px">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:14px"><i class="ri-git-merge-line" style="color:var(--theme-color)"></i> 註冊 → 認證 → 解鎖（兩個入口可並行，同一套審核）</div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:12.5px;color:var(--text)">
+        <span style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:8px 12px;line-height:1.4">一般註冊<br><small style="color:var(--text-faint)">Open Campus / Google</small></span>
+        <i class="ri-arrow-right-line" style="color:var(--text-faint)"></i>
+        <span style="display:flex;flex-direction:column;gap:8px">
+          <span style="background:var(--theme-white);border:1px solid #bcdcff;border-radius:10px;padding:8px 12px;line-height:1.4"><b>入口 A · 事後申請</b><br><small style="color:var(--text-soft)">設定 → 申請認證（建議）</small></span>
+          <span style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:8px 12px;line-height:1.4"><b>入口 B · 註冊時選</b><br><small style="color:var(--text-soft)">onboarding 選「認證創作者」</small></span>
+        </span>
+        <i class="ri-arrow-right-line" style="color:var(--text-faint)"></i>
+        <span style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:8px 12px;line-height:1.4">送出申請<br><small style="color:var(--text-faint)">verifiedRoleApplications · pending</small></span>
+        <i class="ri-arrow-right-line" style="color:var(--text-faint)"></i>
+        <span style="background:var(--complementary-white,#fff7e6);border:1px solid #f0dca8;border-radius:10px;padding:8px 12px;line-height:1.4">管理員審核<br><small style="color:var(--text-soft)">grantVerifiedBadgeToUser()</small></span>
+        <i class="ri-arrow-right-line" style="color:var(--text-faint)"></i>
+        <span style="background:#e4f9e8;border:1px solid #b8e6c2;border-radius:10px;padding:8px 12px;line-height:1.4"><b>+ verified-creator 標章</b><br><small style="color:#1a7a32">解鎖 辦活動 / 發文 / 主頁</small></span>
+      </div>
+      <p style="margin:12px 0 0;font-size:12px;color:var(--text-faint)">審核期間（pending）仍可正常使用平台；通過後才解鎖。主辦單位 ＝ 認證創作者 ＝ 同一個標章。完整並行邏輯見交接文件 §10.1。</p>
+    </div>
+
     <div class="grid grid-3" style="margin-top:20px">
       <a class="card card-pad feature" href="/register" style="text-decoration:none;color:inherit">
         <h3><span class="ico ico-blue"><i class="ri-verified-badge-line"></i></span> 1 · 申請認證</h3>

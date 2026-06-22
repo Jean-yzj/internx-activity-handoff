@@ -19,13 +19,13 @@
         <i class="ri-route-line"></i>
         <div>
           <h2>創作者註冊：走哪一條路？</h2>
-          <p>創作者<strong>不是</strong>一條獨立的註冊流程。所有人都用<strong>同一個註冊入口</strong>，差別只在「<strong>何時</strong>」取得「認證創作者」標章。下面兩種方案共用同一張認證表單與審核機制。</p>
+          <p>創作者<strong>不是</strong>一條獨立的註冊流程。所有人都用<strong>同一個註冊入口</strong>，差別只在「<strong>何時／何處</strong>」申請「認證創作者」標章。下面是兩個可並行的入口，共用同一張認證表單與審核機制（對應交接文件 §10.1 入口 A／B）。</p>
         </div>
       </div>
       <div class="flowCompare">
         <div class="flowOpt rec">
           <div class="foTag"><i class="ri-star-line"></i> 平台現況・建議</div>
-          <h3>方案 A — 事後申請</h3>
+          <h3>入口 A · 事後申請</h3>
           <ol class="foSteps">
             <li>一般註冊（Email／Google）→ 完成 onboarding → 正常使用</li>
             <li>想成為創作者時，到「設定 → 申請認證創作者」</li>
@@ -35,7 +35,7 @@
         </div>
         <div class="flowOpt">
           <div class="foTag alt"><i class="ri-cursor-line"></i> 本頁示範</div>
-          <h3>方案 B — 註冊時選身分</h3>
+          <h3>入口 B · 註冊時選身分</h3>
           <ol class="foSteps">
             <li>在 onboarding 插入一步「選擇身分」</li>
             <li>選「認證創作者」→ 直接進入下方認證表單</li>
@@ -44,7 +44,7 @@
           <p class="foNote"><i class="ri-error-warning-line"></i> 引導完整、創作者意圖明確；代價是拉長註冊漏斗。</p>
         </div>
       </div>
-      <div class="feFoot"><i class="ri-information-line"></i><span>下方示範的是<strong>方案 B 的選擇介面</strong>。無論哪一種，後端都走 <code>verifiedRoleApplications</code> 申請 → 管理員審核 → <code>grantVerifiedBadgeToUser</code> 發標章。建議實作採<strong>方案 A</strong>。</span></div>
+      <div class="feFoot"><i class="ri-information-line"></i><span>下方示範的是<strong>入口 B 的「選身分」介面</strong>。無論走哪個入口，後端都走 <code>verifiedRoleApplications</code> 申請 → 管理員審核 → <code>grantVerifiedBadgeToUser</code> 發標章（並行邏輯見交接文件 §10.1）。建議預設採<strong>入口 A（事後申請）</strong>。</span></div>
     </div>
 
     <!-- 步驟列 -->
