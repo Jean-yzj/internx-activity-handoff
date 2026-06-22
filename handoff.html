@@ -152,7 +152,7 @@
     document.querySelectorAll(".docTab").forEach(b=>{ b.classList.toggle("btn-white", b.dataset.doc !== path); });
     var dl = document.getElementById("dlMd"); if (dl) dl.href = path;
     document.getElementById("docBody").innerHTML = '<p class="muted">載入中⋯</p>';
-    fetch(path).then(r=>r.text()).then(md=>{
+    fetch(path + (path.includes("?") ? "&" : "?") + "v=" + Date.now()).then(r=>r.text()).then(md=>{
       md = md.replace(/^#\s+.*\n/, ""); // drop first H1 (hero already shows the title)
       document.getElementById("docBody").innerHTML = renderMd(md);
     }).catch(()=>{ document.getElementById("docBody").innerHTML = '<p class="muted">無法載入，請見 <a href="https://github.com/Jean-yzj/internx-activity-handoff">GitHub</a>。</p>'; });

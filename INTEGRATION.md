@@ -300,7 +300,181 @@ await runTransaction(db, async (tx) => {
 
 **權限整合（主辦 ＝ 創作 的關鍵）：** 目前 `professional/*` 只認 `admining`（官方帳號）。整合後，把進入條件放寬為 **`admining`（可辦活動）OR `verified-creator` 標章（可發內容）**：兩者都進同一個 `ProfessionalPlatformFrame` 後台，依擁有的能力顯示對應側邊欄項目。`PROFESSIONAL_SERVICES_REQUIRE_ADMINING`（目前 `["home","new-activity","activity-showcase"]`）據此調整。
 
-## 12. 本機預覽 / 部署
+## 12. 報名資料模型與狀態機（完整）
+
+### 12.1 `data/registration.ts`
+
+```ts
+export type RegistrationStatus =
+  | 'pending'    // 已送出，待主辦方審核
+  | 'approved'   // 已通過，待報名者繳費（系統已寄繳費通知）
+  | 'paid'       // 已繳費完成（由付款 webhook 回寫）
+  | 'rejected'   // 主辦方拒絕
+  | 'cancelled'  // 報名者自行取消 / 逾期未繳
+  | 'refunded';  // 已退款
+
+export interface Registration {
+  id: string;
+  activityId: string;
+  userUid: string;                   // 報名者
+  ticketId: string;                  // 對應 Ticket.id
+  qty: number;                       // 張數
+  amount: number;                    // 應繳金額 = ticket.price × qty（送出當下快照，之後票價變動不影響）
+  answers: Record<string, unknown>;  // 依 formSchema 的作答，key = FormField.id
+  status: RegistrationStatus;
+  createdAt: Timestamp;              // 送出時間
+  approvedAt?: Timestamp;            // 主辦方通過
+  paidAt?: Timestamp;               // 繳費完成（webhook 寫入）
+  rejectedAt?: Timestamp;
+  rejectReason?: string;             // 主辦方拒絕原因（選填）
+  paymentId?: string;                // 對應 payment 文件
+  reviewerUid?: string;              // 哪位主辦方成員審的（稽核用）
+}
+```
+
+免費 / 自動通過活動：送出即 `status='paid'`（或 `'approved'`，視是否仍需報名者確認），跳過審核與金流。
+
+### 12.2 狀態機
+
+```
+           送出報名               主辦方通過            報名者線上繳費
+ (報名者) ──────────▶ pending ──────────────▶ approved ──────────────▶ paid
+                       │ (主辦方)                  │ (逾期/取消)            │
+                       │ 拒絕                       ▼                  (平台退款)
+                       ▼                        cancelled                 ▼
+                    rejected                                          refunded
+```
+
+| 轉換 | 觸發者 | 後端動作 | 副作用 |
+|---|---|---|---|
+| → `pending` | 報名者送出 | 建 registration；`ticket.sold += qty`（佔位）| 通知主辦方有新報名 |
+| `pending` → `approved` | 主辦方按「通過」| 寫 `approvedAt` / `reviewerUid` | **寄信＋站內通知**報名者繳費連結 |
+| `pending` → `rejected` | 主辦方按「拒絕」| 寫 `rejectedAt`；`ticket.sold -= qty`（釋放佔位）| 通知報名者結果（含 reason）|
+| `approved` → `paid` | 付款 webhook | 寫 `paidAt` / `paymentId` | 後臺自動顯示「已付款」；寄收據 |
+| `approved` → `cancelled` | 逾期未繳 / 報名者取消 | `ticket.sold -= qty` | 通知 |
+| `paid` → `refunded` | 平台退款 | `ticket.sold -= qty`；建退款記錄 | 通知 |
+
+> **佔位策略**：上表採「`pending` 即扣 `sold`」，避免審核期間名額被別人搶光。若不希望待審就佔名額，可改成 `approved` 才扣 —— 但要在 `approved` 當下重驗 `ticketStatus==='live'` 且未超賣，否則可能審核通過卻已售完。
+
+---
+
+## 13. 報名表單欄位型別（`FormField` 完整）
+
+對應 `components/Activities/FormBuilder/types.ts`。報名者端依此 schema 渲染與驗證（mockup `attendee.html` 的 `renderForm()` 即照此分型別渲染）。
+
+```ts
+export type FieldType =
+  | 'text' | 'textarea' | 'email' | 'phone' | 'number'
+  | 'select' | 'radio' | 'checkbox' | 'date' | 'file' | 'agreement';
+
+export interface FormField {
+  id: string;
+  type: FieldType;
+  label: string;
+  required: boolean;
+  locked?: boolean;       // 系統必填（姓名/Email）：不可刪、不可拖、固定最上方
+  order: number;
+  placeholder?: string;
+  helperText?: string;
+  // 選項型（select / radio / checkbox）
+  options?: string[];
+  allowOther?: boolean;
+  // 檔案型（file）
+  accept?: string;        // 例 ".pdf, image/*"
+  maxFileSize?: number;   // bytes
+  maxFiles?: number;
+  // Email
+  allowedDomains?: string[]; // 例 [".edu.tw"]；空陣列 = 不限
+  // 數字（number）
+  min?: number; max?: number;
+  // 同意條款（agreement）
+  agreementText?: string;
+}
+```
+
+| 型別 | 前端驗證 | 後端必驗（前端可被繞過）|
+|---|---|---|
+| `file` | 副檔名 ∈ `accept`、大小 ≤ `maxFileSize`、數量 ≤ `maxFiles` | 同左 + 病毒/類型掃描 |
+| `email` | 格式 + 網域 ∈ `allowedDomains` | 同左 |
+| `number` | `min ≤ v ≤ max` | 同左 |
+| `select`/`radio`/`checkbox` | 值 ∈ `options`（或 `allowOther`）| 同左 |
+| 任意 `required` | 非空 | 非空 |
+
+---
+
+## 14. API / Cloud Functions 介面（建議）
+
+審核與金流一律走後端（Cloud Functions 或 API route），前端**只呼叫、不直接改 `status`**，避免被繞過。
+
+```ts
+// 主辦方審核（後端需驗 caller 是該 activity 的 admining 成員）
+approveRegistration(input: { registrationId: string }): Promise<{ ok: true }>
+//   pending → approved；寄繳費通知。非 pending 時回 409 NOT_PENDING
+rejectRegistration(input: { registrationId: string; reason?: string }): Promise<{ ok: true }>
+//   pending → rejected；釋放 sold；通知報名者
+
+// 報名者繳費（沿用既有 components/Payments/Payments.tsx）
+createPaymentSession(input: { registrationId: string }): Promise<{ paymentUrl: string }>
+//   金額取自 registration.amount；僅允許 status==='approved'
+
+// 付款回調（平台金流 → 後端；前端不可呼叫）
+onPaymentSucceeded(webhook): // approved → paid；寫 paidAt / paymentId；寄收據
+
+refundRegistration(input: { registrationId: string }): Promise<{ ok: true }>
+//   依退款政策；paid → refunded；釋放 sold
+
+// 報名送出（見 §5，務必用 transaction）
+submitRegistration(input: { activityId; ticketId; qty; answers }): Promise<{ registrationId }>
+```
+
+**錯誤碼**：`TICKET_NOT_ON_SALE`、`SOLD_OUT`（送出時）、`NOT_PENDING`（重複審核）、`NOT_APPROVED`（未通過就想繳費）、`FORBIDDEN`（非該活動主辦方）、`VALIDATION_FAILED`（答案不符 formSchema）。
+
+---
+
+## 15. 通知事件（Email + 站內）
+
+| 事件 | 對象 | 管道 | 內容重點 |
+|---|---|---|---|
+| 新報名待審 | 主辦方 | 站內（可選 Email）| 「X 報名了〈活動〉」+ 前往審核連結 |
+| 審核通過・待繳費 | 報名者 | **Email + 站內** | 你已通過，點此於實習通繳費（金額 / 期限）|
+| 審核未通過 | 報名者 | Email + 站內 | 結果說明（含 `rejectReason`）|
+| 繳費完成 | 報名者 | Email | 收據 / 報名確認 |
+| 繳費完成 | 主辦方 | 站內 | 「X 已完成繳費」（後臺自動轉「已付款」）|
+| 退款完成 | 報名者 | Email | 退款明細 |
+
+實作建議集中在 §14 各狀態轉換的後端動作裡發送，避免散落多處。
+
+---
+
+## 16. Firestore 安全規則（草稿）
+
+關鍵原則：**`sold` / `status` / `paidAt` 全部只由後端寫，前端唯讀**；報名者只能建立自己的 `pending` 報名。
+
+```
+match /activities/{aid} {
+  allow read: if true;                                   // 公開活動頁
+  allow write: if isActivityAdmin(aid);                  // 僅該官方帳號成員
+  match /tickets/{tid} {
+    allow read: if true;
+    allow write: if false;                               // sold 只由後端 transaction 改
+  }
+}
+match /registrations/{rid} {
+  allow create: if request.auth.uid == request.resource.data.userUid
+                && request.resource.data.status == 'pending';  // 報名者只能建 pending
+  allow read:   if isOwner(rid) || isActivityAdmin(resource.data.activityId);
+  allow update, delete: if false;   // status 轉換一律走 Cloud Functions
+}
+
+function isActivityAdmin(aid) {
+  return get(/databases/$(db)/documents/activities/$(aid)).data.companyId
+         == get(/databases/$(db)/documents/users/$(request.auth.uid)).data.admining;
+}
+```
+
+---
+
+## 17. 本機預覽 / 部署
 
 ```bash
 # mockup 本機預覽（零依賴）

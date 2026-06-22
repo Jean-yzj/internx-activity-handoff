@@ -112,7 +112,7 @@
         ${forSelf ? `<button class="pointsInfoRow" style="width:auto" onclick="openEdit()"><i class="ri-edit-line"></i> 編輯</button>` : ""}</div>
       ${c.pitch ? `
         <div class="pitchCard">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">${CZ.badgePill(c, { clickable: true })}<span style="font-size:13px;color:#9a7a14">已通過實習通官方審核</span></div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">${CZ.badgePill(c, { clickable: true })}<span style="font-size:13px;color:#5b6b7e"><i class="ri-checkbox-circle-fill" style="color:#1a8a35;margin-right:3px"></i>已通過實習通官方審核</span></div>
           <h4>所在產業或公司</h4><p>${c.pitch.organizationText}</p>
           <h4>相關經歷與說明</h4><p>${c.pitch.experienceText}</p>
         </div>` : ""}

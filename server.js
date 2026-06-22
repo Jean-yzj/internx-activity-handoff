@@ -26,7 +26,7 @@ http.createServer((req, res) => {
     const ext = path.extname(file);
     // HTML/CSS/JS change every deploy — force revalidation so visitors never see a stale mockup.
     // Images rarely change, so allow a short cache.
-    const cache = ['.html', '.css', '.js'].includes(ext)
+    const cache = ['.html', '.css', '.js', '.md'].includes(ext)
       ? 'no-cache, must-revalidate'
       : 'public, max-age=3600';
     res.writeHead(200, { 'Content-Type': TYPES[ext] || 'application/octet-stream', 'Cache-Control': cache });
