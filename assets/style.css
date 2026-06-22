@@ -66,8 +66,8 @@ a:hover { text-decoration: underline; }
 small { font-size: 12.5px; }
 code, .mono { font-family: "SFMono-Regular", "JetBrains Mono", Menlo, monospace; font-size: 12.5px; }
 
-/* ---------- Top bar ---------- */
-.topbar {
+/* ---------- Top bar (docs-style; suppressed on pages that mount the real cz chrome) ---------- */
+body:not([data-cz]) .topbar {
   position: sticky; top: 0; z-index: 50;
   height: var(--top-bar-height);
   display: flex; align-items: center; gap: 14px;
@@ -856,3 +856,10 @@ body[data-embed] { background: #f6f8fb; }
 .demo-pill { position: fixed; right: 18px; bottom: 18px; z-index: 80; background: #16202e; color: #fff; font-size: 12px; font-weight: 600; padding: 9px 15px; border-radius: 999px; text-decoration: none; box-shadow: 0 8px 24px rgba(0,0,0,.28); display: flex; align-items: center; gap: 7px; }
 .demo-pill:hover { background: #232f42; text-decoration: none; }
 @media (max-width: 760px) { .ixbar-nav { display: none; } }
+
+/* ===== Pages that mount the REAL creator-zone chrome (cz/app.js) via <body data-cz> =====
+   The cz top bar is position:fixed, so offset the content; keep the cz white background. */
+body[data-cz] { background: var(--background-color-blank, #fff); }
+body[data-cz] .topbar { display: flex; }            /* cz chrome's own top bar stays visible */
+body[data-cz] main.wrap { padding-top: calc(var(--top-bar-height) + 28px); }
+body[data-cz] .foot { display: none; }              /* cz footer replaces the docs footer */
