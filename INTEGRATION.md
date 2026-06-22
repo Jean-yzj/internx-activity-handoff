@@ -202,9 +202,17 @@ await runTransaction(db, async (tx) => {
 
 ---
 
-## 6. 金流串接（沿用現有 Payments）
+## 6. 金流：平台代收代付（主辦方不對帳）
 
-`components/Payments/Payments.tsx` 的點數折抵 + 銀行轉帳邏輯**不用改**，只把「應付金額」的來源從 `feeAmount` 換成「所選票券 × 數量的加總」。`data/registration.ts` 增加 `ticketId`、`qty` 欄位即可對帳。
+金流由實習通統一處理，主辦方端只審核、不碰錢。完整流程：
+
+1. 報名者送出 → `registration` 建為 `pending`（待審核）。
+2. 主辦方在後臺按「通過」→ 後端 status 轉 `approved`，並**自動寄信**通知報名者可繳費。
+3. 報名者在實習通**線上繳費**（沿用 `components/Payments/Payments.tsx`：點數折抵 / 轉帳，金額 = 所選票券 × 數量）。
+4. 繳費完成 → 付款 webhook 將 status 轉 `paid`，主辦方後臺**自動**顯示「已付款」（無人工標記、無末五碼對帳）。
+5. 退款同樣由平台處理。
+
+`data/registration.ts` 需存 `ticketId`、`qty`、`status`、`paidAt`；主辦方端對付款狀態**唯讀**。
 
 ---
 

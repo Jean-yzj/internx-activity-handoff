@@ -235,8 +235,8 @@ if(fromEditor) document.getElementById('editorBanner').style.display='flex';
       A.agenda.map(a=>`<li><span class="t">${esc(a.time)}</span><b>${esc(a.title)}</b><p>${esc(a.desc||'')}</p></li>`).join('') + `</ul>`;
   }
   const approvalNote = isReview
-    ? '<b>名額有限，採審核制。</b>送出報名後由主辦方審核，通過後再進行付款。'
-    : '<b>名額有限。</b>送出後即完成報名'+(flow.paymentMethods&&flow.paymentMethods.length?'，並依所選方式付款。':'。');
+    ? '<b>名額有限，採審核制。</b>送出報名後由主辦方審核；通過後<b>實習通會寄信通知</b>，於實習通線上完成繳費。'
+    : '<b>名額有限。</b>送出後即在實習通完成報名與線上繳費。';
   h += `<div class="callout callout-info" style="margin:18px 0 0"><i class="ri-information-line"></i>
     <p style="margin:0">${approvalNote}</p></div>`;
   if(A.faq && A.faq.length){

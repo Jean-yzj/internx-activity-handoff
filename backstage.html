@@ -116,15 +116,22 @@
         <section class="oa-pane" data-pane="regs" style="display:none">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
             <b style="font-size:15px">學生創業者小聚 · 報名名單</b>
-            <span style="font-size:13px;color:var(--text-faint)">審核制：通過後才進付款。匿名背景只給主辦方看，不公開。</span>
+            <span style="font-size:13px;color:var(--text-faint)">主辦方只負責審核；金流由實習通代收代付。</span>
+          </div>
+          <div class="callout callout-info" style="margin:0 0 14px">
+            <i class="ri-bank-card-line"></i>
+            <p style="margin:0"><b>繳費由實習通處理，主辦方不碰金流：</b>審核「通過」→ 實習通<b>自動寄信</b>通知報名者 → 報名者在<b>實習通線上繳費</b> → 此處<b>自動</b>顯示「已付款」。主辦方不需對帳、不需手動標記付款。</p>
           </div>
           <div class="reg-wrap">
             <table class="reg">
-              <thead><tr><th>報名者</th><th>票種</th><th>匿名背景（過往經歷）</th><th>狀態</th><th style="text-align:right">操作</th></tr></thead>
+              <thead><tr><th>報名者</th><th>票種</th><th>匿名背景（過往經歷）</th><th>狀態</th><th style="text-align:right">審核操作</th></tr></thead>
               <tbody id="regBody"></tbody>
             </table>
           </div>
-          <p style="font-size:12.5px;color:var(--text-faint);margin-top:10px"><i class="ri-information-line"></i> 「通過」後系統通知報名者付款；銀行轉帳回報末五碼後，於此標記「已付款」。</p>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;flex-wrap:wrap">
+            <p style="font-size:12.5px;color:var(--text-faint);margin:0"><i class="ri-information-line"></i>「待付款」會在報名者於實習通完成繳費後，<b>自動</b>翻成「已付款」，主辦方不需動作。</p>
+            <button class="btn btn-ghost btn-sm" onclick="simulatePay()"><i class="ri-flask-line"></i>（示範）模擬一筆線上繳費</button>
+          </div>
         </section>
 
         <!-- TAB: 成果展示 (existing 官方帳號 feature, stub) -->
@@ -169,14 +176,14 @@
       </div>
       <div class="gap-item">
         <span class="gi"><i class="ri-bank-card-line"></i></span>
-        <div style="flex:1"><div class="gt">金流對帳與退款</div>
-          <div class="gd"><code class="coderef">Payments.tsx</code> 有點數 / 轉帳，需接票券模型（金額來自所選票券）、轉帳末五碼對帳、退款流程。</div></div>
+        <div style="flex:1"><div class="gt">金流代收代付（平台處理，主辦方不對帳）</div>
+          <div class="gd">審核通過 → 報名者在實習通<b>線上繳費</b>（點數 / 刷卡 / 轉帳，金額來自所選票券）→ 繳費完成<b>自動</b>回寫狀態為「已付款」。<code class="coderef">Payments.tsx</code> 為基礎，需接：通過後觸發繳費、付款完成 webhook 更新狀態、退款。主辦方端不需手動對帳或標記。</div></div>
         <span class="gstatus partial">部分已有</span>
       </div>
       <div class="gap-item">
         <span class="gi"><i class="ri-notification-3-line"></i></span>
-        <div style="flex:1"><div class="gt">通知</div>
-          <div class="gd">審核通過 / 拒絕、待付款提醒（Email + 站內通知）。報名者與主辦方雙向。</div></div>
+        <div style="flex:1"><div class="gt">系統通知（審核通過 → 自動寄信通知繳費）</div>
+          <div class="gd">審核通過時，實習通<b>自動寄信</b>通知報名者可線上繳費；另含拒絕通知、繳費提醒（Email + 站內）。</div></div>
         <span class="gstatus todo">待補</span>
       </div>
       <div class="gap-item">
@@ -247,7 +254,7 @@ function renderRegs(){
           ? `<button class="btn btn-primary btn-sm" onclick="setReg(${i},'approved')">通過</button>
              <button class="btn btn-ghost btn-sm" onclick="setReg(${i},'rejected')">拒絕</button>`
           : r.status==='approved'
-          ? `<button class="btn btn-soft btn-sm" onclick="setReg(${i},'paid')">標記已付款</button>`
+          ? `<span style="color:var(--text-faint);font-size:12px"><i class="ri-time-line"></i> 待報名者線上繳費</span>`
           : `<span style="color:var(--text-faint);font-size:12px">—</span>`}
       </div></td>`;
     b.appendChild(tr);
@@ -259,7 +266,15 @@ function renderRegs(){
 }
 function setReg(i,status){
   regs[i].status=status; renderRegs();
-  toast(status==='approved'?'已通過，已通知報名者付款':status==='rejected'?'已拒絕，已通知報名者':'已標記付款完成');
+  toast(status==='approved' ? '已通過，實習通將寄信通知報名者線上繳費'
+      : status==='rejected' ? '已拒絕，實習通將通知報名者'
+      : '報名者已於實習通完成繳費，狀態自動更新為已付款');
+}
+/* 示範：模擬報名者在實習通線上繳費 → 主辦方端自動顯示已付款（主辦方不需動作） */
+function simulatePay(){
+  const i = regs.findIndex(r=>r.status==='approved');
+  if(i<0){ toast('目前沒有「待付款」的報名'); return; }
+  setReg(i,'paid');
 }
 renderRegs();
 </script>

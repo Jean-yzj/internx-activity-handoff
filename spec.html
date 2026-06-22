@@ -126,7 +126,7 @@
         <tr><td><code>lib/form-schema/activity-form-schema.ts</code></td><td class="tag-add">改</td><td>feeItems 改為票券物件、新增驗證（:328、:371）</td></tr>
         <tr><td><code>components/Activities/AddActivity.tsx</code></td><td class="tag-keep">沿用</td><td>維持步驟式結構；票券步驟換成新的編輯器卡片</td></tr>
         <tr><td><code>components/Activities/FormBuilder/FormPreview.tsx</code></td><td class="tag-add">改</td><td>每列加上 ↑ ↓ 按鈕（呼叫既有 reorder）</td></tr>
-        <tr><td><code>components/Payments/Payments.tsx</code></td><td class="tag-keep">沿用</td><td>金流邏輯不變，僅金額來源改自所選票券</td></tr>
+        <tr><td><code>components/Payments/Payments.tsx</code></td><td class="tag-keep">沿用</td><td>平台代收代付：審核通過→自動通知→線上繳費→自動回寫 paid；金額來自所選票券，主辦方不對帳</td></tr>
         <tr><td><code>data/registration.ts</code></td><td class="tag-add">擴充</td><td>報名記錄需存 ticketId 與張數</td></tr>
       </tbody>
     </table>
