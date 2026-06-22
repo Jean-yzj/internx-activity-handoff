@@ -1,18 +1,19 @@
-# 實習通 · 活動報名改版 — 工程交接文件
+# 活動報名改版｜工程交接文件（詳細版）
 
-> 這份文件說明 **mockup 的每個前端頁面**，以及 **如何把它串接進現有的 `internx-me/frontend`（internx.me）**。
-> Mockup 本身是純靜態示意檔，不引用也不修改任何現有程式碼。
->
-> 線上 mockup：https://jean-yzj.github.io/internx-activity-handoff/
+> InternX 實習通 — 活動報名（票券 / 報名表單 / 報名者審核 / 平台金流 / 話題牆）前端 Demo 與後端串接規格
+> 對象：接手實作的前端 / 後端工程師
+> 版本：v2（2026-06）｜對齊 `staging.internx.me` 與真實資料模型；含票券時間數量引擎、報名狀態機、平台代收代付、表單拖曳、帳號認證並行、話題牆串接
+> 本文既有程式碼摘自 `internx-me/frontend` 並標 `檔案:行號`；標「**新做 / 待補**」者為建議新增（彙整於文末 §19「待補彙整」）
+> 配套 Demo：本 repo（純前端、假資料、無後端）｜線上：https://internx-activity-handoff.zeabur.app
 
 ---
 
 ## 目錄
 
 **先讀（總覽）**
-- ★ 先對齊：正式站已有 vs 這次新增
+- ★ TL;DR（先看這段）：沿用什麼 vs 新做什麼
 - ★★ 整合全貌：全部怎麼串（end-to-end 總圖）
-- §0 怎麼用這份文件
+- §0 怎麼用這份文件 · §19 待補彙整（新做 / 待補總表）
 
 **前端頁面怎麼畫**
 - §1 前端頁面總覽（頁面 → 檔案對照）
@@ -41,7 +42,7 @@
 
 ---
 
-## ★ 先對齊：正式站已有 vs 這次要新增（給工程師）
+## ★ TL;DR（先看這段）：沿用什麼 vs 新做什麼
 
 > 參考站：**https://staging.internx.me**（論壇 / 人脈 / 活動 / 心得）。
 > 這份 mockup 只示意「**這次才要新增、串接的部分**」。下表左欄是正式站**已經有**的（沿用），右欄是**目前沒有、要新做**的。對照真實資料模型 `data/activity.ts`、`data/needs-wall-live.js`、`data/chat.ts`、`data/verified-role-application.ts`。
@@ -701,3 +702,29 @@ node server.js   # http://localhost:4178
 ```
 
 mockup 以 GitHub Pages 部署（main 分支 / 根目錄）。這份 repo 與 internx.me 完全分離，可當作 PR 描述與設計依據附在工程任務上。
+
+---
+
+## 19. 待補彙整（新做 / 待補總表）
+
+把全文標「**新做 / 待補**」的項目集中成一張清單；標「沿用」者為既有系統、不需新發明。對應節次與檔案見右欄。
+
+| # | 新做 / 待補 | 沿用 / 已有 | 對應節 | 主要檔案 / 備註 |
+|---|---|---|---|---|
+| 1 | **Ticket 模型 + `ticketStatus()`**（販售時間 / 數量 / 售完狀態引擎）| `feeType` / `feeItems{name,price}` | §3 | 新增 `data/ticket.ts`；`activity.ts` 加 `tickets[]` |
+| 2 | 票券驗證（saleStart<saleEnd、quantity≥1）| feeItems 既有驗證 | §3.2 / §4.2 | `lib/form-schema/activity-form-schema.ts:328 / :371` |
+| 3 | 報名表單**拖曳排序**（@dnd-kit）| `handleReorderFields` 既有 | §4.3 | `FormBuilder/FormPreview.tsx`（沿用 `FormBuilder.tsx:88`）|
+| 4 | **`Registration.status` 狀態機（報名者審核）** | `internx_form` 報名既有 | §12 | `data/registration.ts`；**≠ 活動發布審核 `approvalStatus`** |
+| 5 | **平台代收代付**（通過→通知→繳費→自動 paid）| `Payments.tsx` 金流元件 | §6 / §14 | 主辦方對付款唯讀、不對帳 |
+| 6 | 審核 / 金流 **Cloud Functions**（approve/reject/pay webhook/refund/submit）| — | §14 | status 只由後端改 |
+| 7 | **通知事件**（審核/繳費/退款，Email+站內）| 站內通知基建 | §15 | 接既有通知服務 |
+| 8 | **Firestore 安全規則**（sold/status 只後端寫）| — | §16 | rules |
+| 9 | professional 後台側欄加「報名名單/創作內容」+ 進入條件放寬 `admining OR verified-creator` | `ProfessionalPlatformFrame` 框架 | §11 | `lib/config.js` PROFESSIONAL_SERVICES |
+| 10 | 報名名單 + 審核 UI | — | §1.1 / §5 | 新增 `pages/[lang]/professional/registrations` |
+| 11 | 創作者主頁 3 分頁 + blog 發佈權放寬 | `Profile.tsx` activeSectionTab、`data/blog.ts`+BlockEditor | §10 | 一行條件 gating |
+| 12 | 認證**入口 B**（onboarding 選身分）| **入口 A 事後申請＝現況**；`verifiedRoleApplications` | §10.1 | 兩入口並行、共用審核 |
+| 13 | 話題牆串接（活動上架自動建話題 / 專屬討論區）| **NeedsWall / ChatRoom 既有** | §17 | 新增 `activity.needsWallTopicId` / `chatRoomId`；`data/needs-wall-live.js`、`data/chat.ts` |
+| 14 | 話題頁「行業認證專家」 | **純查詢、無新欄位** | §17 | `verifiedRolePitch.expertiseForumIds` 命中 `forumId` |
+| 15 | 標章顯示（論壇/心得/部落格作者列）| **`MergedSenderBadges` 已顯示 `verified-creator`** | §10 / §17 | 部落格 byline 補上即可 |
+
+**一句話：** 真正「新發明」的後端只有票券引擎、報名者審核狀態機、平台金流串接、相關 Cloud Functions 與規則；其餘（活動本體、報名表單、發布審核、professional 後台、部落格、話題牆、標章顯示）都是**把既有系統接起來**。
