@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>實習通 · 活動報名＋創作者 串接交接</title>
+<link rel="icon" href="/assets/cz/favicon.png" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" />
+<link rel="stylesheet" href="/assets/cz/app.css" />
+<style>
+  .demoGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; margin: 14px 0 8px; }
+  .demoCard { display: block; background: #fff; border: 1px solid #e7eaf0; border-radius: 14px; padding: 18px; text-decoration: none; color: inherit; transition: box-shadow .15s, transform .06s, border-color .15s; }
+  .demoCard:hover { box-shadow: 0 10px 28px rgba(16,32,56,.10); border-color: var(--theme-color); transform: translateY(-2px); }
+  .demoCard .ic { width: 40px; height: 40px; border-radius: 11px; background: var(--theme-white); color: var(--theme-color); display: grid; place-items: center; font-size: 21px; margin-bottom: 12px; }
+  .demoCard h3 { margin: 0 0 4px; font-size: 16px; }
+  .demoCard p { margin: 0 0 10px; font-size: 13px; color: #5c6675; line-height: 1.55; }
+  .demoCard .go { font-size: 13px; font-weight: 600; color: var(--theme-color); }
+  .demoCard .tag { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: var(--theme-white); color: var(--theme-color-black); margin-left: 6px; }
+  .sectionLead { color: #5c6675; max-width: 760px; }
+</style>
+</head>
+<body data-page="handoff">
+
+<main>
+  <section class="cz-hero" style="padding:36px 0 26px">
+    <div class="cz-container">
+      <span class="cz-eyebrow"><i class="ri-file-list-3-line"></i> 工程交接</span>
+      <h1 style="font-size:calc(var(--font-size)/3.2);margin:10px 0 8px">活動報名 ＋ 創作者・串接規格文件</h1>
+      <p class="sectionLead" style="margin:0">同一個實習通認證帳號：辦活動、收報名與審核、發內容。下面可<b>直接點開 Demo</b>，再往下是<b>完整串接說明</b>（資料模型、路由、對應原平台後台）。</p>
+    </div>
+  </section>
+
+  <div class="cz-container">
+    <h2 style="margin:8px 0 2px">可直接點開的 Demo</h2>
+    <p class="sectionLead" style="margin:0 0 4px">這些是介面示意（mockup），點進去可實際操作。視覺沿用實習通設計系統。</p>
+    <div class="demoGrid">
+      <a class="demoCard" href="/editor">
+        <div class="ic"><i class="ri-edit-box-line"></i></div>
+        <h3>建立活動・編輯器</h3>
+        <p>四步驟：活動內容 / 票券（販售時間×數量）/ 報名表單（拖曳排序、欄位設定）/ 進階。</p>
+        <span class="go">開啟 Demo →</span>
+      </a>
+      <a class="demoCard" href="/backstage">
+        <div class="ic"><i class="ri-store-2-line"></i></div>
+        <h3>認證帳號後臺 <span class="tag">官方帳號</span></h3>
+        <p>活動管理、報名名單＋審核、創作內容（部落格），長在官方帳號底下。</p>
+        <span class="go">開啟 Demo →</span>
+      </a>
+      <a class="demoCard" href="/attendee">
+        <div class="ic"><i class="ri-smartphone-line"></i></div>
+        <h3>報名者畫面</h3>
+        <p>活動介紹 → 報名表單 → 選擇票券。內容由編輯器帶入，票券狀態自動判斷。</p>
+        <span class="go">開啟 Demo →</span>
+      </a>
+      <a class="demoCard" href="/creator">
+        <div class="ic"><i class="ri-user-star-line"></i></div>
+        <h3>創作者主頁</h3>
+        <p>關於我 / 專長 / 部落格 / 主辦活動 / 活動紀錄。主辦活動連到報名頁。</p>
+        <span class="go">開啟 Demo →</span>
+      </a>
+      <a class="demoCard" href="/blog">
+        <div class="ic"><i class="ri-article-line"></i></div>
+        <h3>部落格</h3>
+        <p>認證創作者發佈職涯／求職內容；發佈權對應 verified-creator 標章。</p>
+        <span class="go">開啟 Demo →</span>
+      </a>
+      <a class="demoCard" href="/integration">
+        <div class="ic"><i class="ri-route-line"></i></div>
+        <h3>整合動線</h3>
+        <p>對應原平台後台（professional/home）的位置與點擊路徑、兩種審核的差異。</p>
+        <span class="go">看動線 →</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="doc">
+    <div class="docToolbar">
+      <a class="btn btn-white btn-small" href="/INTEGRATION.md" download><i class="ri-download-line"></i> 下載 Markdown</a>
+    </div>
+    <div id="docBody"><p class="muted">載入串接說明中⋯</p></div>
+  </div>
+</main>
+
+<script src="/assets/cz/data.js"></script>
+<script src="/assets/cz/app.js"></script>
+<script>
+  /* minimal Markdown renderer (headings / tables / code / lists / quote / hr / inline) — mirrors creator-zone handoff */
+  function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+  function inline(s){
+    return esc(s)
+      .replace(/`([^`]+)`/g,'<code>$1</code>')
+      .replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2">$1</a>');
+  }
+  function renderMd(md){
+    const lines = md.split("\n"); let html = ""; let i = 0;
+    while (i < lines.length){
+      let line = lines[i];
+      if (line.trim().startsWith("```")){
+        let code = ""; i++;
+        while (i < lines.length && !lines[i].trim().startsWith("```")){ code += lines[i] + "\n"; i++; }
+        i++; html += "<pre><code>" + esc(code.replace(/\n$/,"")) + "</code></pre>"; continue;
+      }
+      if (line.includes("|") && i+1 < lines.length && /^\s*\|?[\s:|-]+\|/.test(lines[i+1]) && lines[i+1].includes("-")){
+        const head = line.split("|").filter(c=>c.trim()!=="").map(c=>"<th>"+inline(c.trim())+"</th>").join("");
+        i += 2; let rows = "";
+        while (i < lines.length && lines[i].includes("|")){
+          const cells = lines[i].split("|").filter((c,idx,arr)=> !(idx===0&&c.trim()==="") && !(idx===arr.length-1&&c.trim()==="")).map(c=>"<td>"+inline(c.trim())+"</td>").join("");
+          rows += "<tr>"+cells+"</tr>"; i++;
+        }
+        html += "<div class=\"tableWrap\"><table><thead><tr>"+head+"</tr></thead><tbody>"+rows+"</tbody></table></div>"; continue;
+      }
+      let m;
+      if ((m = line.match(/^(#{1,6})\s+(.*)/))){ const l = m[1].length; html += `<h${l}>${inline(m[2])}</h${l}>`; i++; continue; }
+      if (/^---+\s*$/.test(line)){ html += "<hr>"; i++; continue; }
+      if (line.startsWith(">")){ let q=""; while(i<lines.length && lines[i].startsWith(">")){ q+=lines[i].replace(/^>\s?/,"")+" "; i++; } html += "<blockquote>"+inline(q.trim())+"</blockquote>"; continue; }
+      if (/^\s*[-*]\s+/.test(line)){ let items=""; while(i<lines.length && /^\s*[-*]\s+/.test(lines[i])){ let t=lines[i].replace(/^\s*[-*]\s+/,""); t=t.replace(/^\[ \]\s*/,'☐ ').replace(/^\[x\]\s*/i,'☑ '); items+="<li>"+inline(t)+"</li>"; i++; } html += "<ul>"+items+"</ul>"; continue; }
+      if (/^\s*\d+\.\s+/.test(line)){ let items=""; while(i<lines.length && /^\s*\d+\.\s+/.test(lines[i])){ items+="<li>"+inline(lines[i].replace(/^\s*\d+\.\s+/,""))+"</li>"; i++; } html += "<ol>"+items+"</ol>"; continue; }
+      if (line.trim()===""){ i++; continue; }
+      let para = inline(line); i++;
+      while (i<lines.length && lines[i].trim()!=="" && !/^(#{1,6}\s|[-*]\s|\d+\.\s|>|```|---)/.test(lines[i]) && !lines[i].includes("|")){ para += " " + inline(lines[i]); i++; }
+      html += "<p>"+para+"</p>";
+    }
+    return html;
+  }
+  fetch("/INTEGRATION.md").then(r=>r.text()).then(md=>{
+    // drop the first H1 (we already show a hero) to avoid duplication
+    md = md.replace(/^#\s+.*\n/, "");
+    document.getElementById("docBody").innerHTML = renderMd(md);
+  }).catch(()=>{ document.getElementById("docBody").innerHTML = '<p class="muted">無法載入 INTEGRATION.md，請見 <a href="https://github.com/Jean-yzj/internx-activity-handoff/blob/main/INTEGRATION.md">GitHub</a>。</p>'; });
+</script>
+</body>
+</html>

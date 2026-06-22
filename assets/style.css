@@ -834,7 +834,7 @@ body[data-embed] .topbar, body[data-strip] .topbar { display: none; }   /* hide 
 .handoff-strip a.on { background: var(--theme-color); color: #fff; }
 .ix.ix-page { border: none; border-radius: 0; box-shadow: none; }
 .ix.ix-page .ix-main { min-height: calc(100vh - 84px); }
-.ix.ix-page .ix-content { padding: 26px 30px; }
+.ix.ix-page .ix-content { padding: 26px 30px; background: #f6f8fb; }   /* real-app light background, not the warm marketing bg */
 .ix.ix-page .ix-content > .wrap { max-width: none; padding: 0; }
 .ix.ix-page .ix-content > main.wrap { max-width: none; padding: 0; }
 .ix-top .bell { width: 32px; height: 32px; border-radius: 50%; background: var(--bg-gray); display: grid; place-items: center; color: var(--text-soft); font-size: 16px; flex-shrink: 0; }
