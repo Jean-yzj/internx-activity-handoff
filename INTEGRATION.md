@@ -37,6 +37,47 @@
 
 ---
 
+## ★★ 整合全貌：全部怎麼串（end-to-end）
+
+一張圖看懂所有東西怎麼接。`(新)` ＝ 這次新增/要串；其餘為沿用既有。各區塊細節見對應節次。
+
+```
+[一般註冊 Open Campus / Google]
+       │   ※ 只有一種帳號、一個註冊入口（§10.1 兩個申請入口可並行）
+       ▼
+[一個帳號] ──申請認證──▶ verifiedRoleApplications ──管理員審核──▶ + verified-creator 標章
+       │                                                            │
+       │ 公司官方帳號 = admining                       個人創作者/主辦 = 標章
+       ▼                                                            ▼
+[認證帳號後台 professional/*]  ◀── 進入條件 = admining OR verified-creator（§11）
+   ├─ 活動管理 ─▶ [建立活動編輯器]  (新)票券:販售時間/數量/售完(§3) + (新)報名表單拖曳(§4.3/§13)
+   │                    │ 送審上架（approvalStatus，沿用＝活動發布審核）
+   │                    ▼
+   │             [活動公開頁 activity/[id]] ◀── 報名者送出報名（依 formSchema）
+   │                    │
+   ├─ 報名名單 ─▶ (新)Registration.status: pending→approved→paid/rejected（§12＝報名者審核）
+   │                    │ 主辦通過        │ 報名者線上繳費 (新)平台代收代付(§6/§14)
+   │                    ▼               ▼
+   │             (新)通知事件(§15)    後台自動顯示「已付款」
+   │
+   └─ 創作內容 ─▶ [部落格 BlogPost / BlockEditor]（發佈權放寬給帶標章者，沿用系統）
+        │
+        ▼
+[創作者主頁 /creator]（主辦活動 / 部落格 / 活動紀錄；沿用 Profile activeSectionTab）
+
+[話題牆 NeedsWall：依行業 forumId 分版] §17
+   ├─ 活動上架 ─▶ (新)自動建/連該行業話題（activity.needsWallTopicId）
+   ├─ (新)活動專屬討論區（activity.chatRoomId → ChatRoom）
+   └─ 話題頁顯示「行業認證專家」（沿用：verifiedRolePitch.expertiseForumIds 命中 forumId）
+
+[論壇 Forum / Post]：作者 senderBadges 已顯示 verified-creator（沿用）
+```
+
+**沿用**：帳號/註冊、活動本體（`internx_form`/`feeType`）、活動發布審核、`professional` 後台框架、部落格系統、話題牆/論壇、標章顯示。
+**新做**：票券時間/數量引擎、報名者審核＋平台金流＋通知、表單拖曳、創作者主頁分頁、活動↔話題牆關聯欄位。
+
+---
+
 ## 1. 前端頁面總覽
 
 | Mockup 頁面 | 真實對應畫面 | 對應現有檔案（frontend） |
@@ -276,6 +317,57 @@ await runTransaction(db, async (tx) => {
 
 主辦單位與創作者是同一種認證帳號，不是兩套系統。判斷依據是 `profiles.badges` 是否含 `verified-creator`（不是獨立的 userRole）。同一帳號能辦活動（`Activity.createdBy`）也能發內容（`data/blog.ts`）。
 
+### 10.1 帳號與身分：一個帳號、一個標章、兩個申請入口（並行）
+
+**先回答最常見的疑問：「是同一個註冊流程，還是創作者註冊時就能選創作者身分？」**
+→ **沒有「創作者帳號」這種東西。** 所有人都是同一種帳號、同一個註冊入口（Open Campus / Google）。「創作者 / 主辦單位」只是帳號上的一個 `verified-creator` **標章**，由 `verifiedRoleApplications` 申請 → 管理員審核 → 發標章取得。
+
+所以「同一註冊流程」與「註冊時就選創作者」**不是二選一，而是同一條 pipeline 的兩個入口，可同時並行**：
+
+```
+                       ┌─ 入口 B：註冊時就選（onboarding 多一步「選身分」）
+一般註冊 (Open Campus) ─┤        選「認證創作者」→ 直接進認證表單
+                       └─ 入口 A：事後申請（建議預設）
+                                設定 → 申請認證，或想辦活動/發文時才申請
+                                         │
+                                         ▼   （兩入口共用同一後端）
+                         submitVerifiedRoleApplication(payload)
+                         → verifiedRoleApplications { status: 'pending' }
+                                         │  管理員審核
+                                         ▼
+                         approved → grantVerifiedBadgeToUser()
+                                  → profiles.badges += 'verified-creator'
+                                         │
+                                         ▼
+                         解鎖：創作者主頁 / 部落格發佈 / 辦活動（professional 後台）
+```
+
+```ts
+// 入口 B：onboarding 選身分（要新增的那一步）
+function onOnboardingIdentitySelected(role) {
+  createBasicAccount();                          // 一律先建「一般帳號」
+  if (role === 'creator') goTo('/dashboard/verified-role-apply'); // 直接進認證表單
+  else finishOnboarding();                       // 學生 / 一般 → 直接開始用
+}
+
+// 入口 A：事後任意時間（設定頁、或點「建立活動」/「撰寫文章」時觸發）
+function onClickApplyVerification() { goTo('/dashboard/verified-role-apply'); }
+
+// 兩入口都送到同一支 → 同一個申請集合、同一套審核
+submitVerifiedRoleApplication(payload);          // → verifiedRoleApplications(pending)
+
+// 能力判斷：到處都只看「標章/admining」，不看「是不是創作者帳號」
+const isCreator       = profile.badges.includes('verified-creator');
+const canHostActivity = profile.admining /* 公司官方帳號 */ || isCreator;
+const canPublishBlog  = isCreator;
+```
+
+規則（並行邏輯的關鍵）：
+- **審核期間（pending）仍可正常使用平台**（學生功能不受影響）；創作者/主辦能力（主頁、發文、辦活動）**通過後才解鎖**。
+- **主辦單位 ＝ 認證創作者 ＝ 同一個 `verified-creator` 標章**；「取得主辦單位身份」就是拿到這個標章（走 A 或 B 皆可）。
+- 公司「官方帳號」另有 `admining` 路徑（`professional/join`）；個人創作者走標章。後台進入條件 = `admining` **OR** `verified-creator`。
+- **建議預設走入口 A（事後申請）**：一般註冊零阻力、不擋學生；入口 B 適合「明確要當創作者」的人，引導完整但會拉長註冊漏斗。**兩者可同時存在**，差別只在「何時、何處」送出同一份申請。
+
 | 創作者需求 | 既有可重用 | 檔案 |
 |---|---|---|
 | 認證標章 | `verified-creator`（金色膠囊 + quill-pen）+ VerifiedRolePitchModal | `components/Badge/ProfileBadge.tsx`、`lib/config.js` |
@@ -285,7 +377,7 @@ await runTransaction(db, async (tx) => {
 | 追蹤 / 通知 | `Connection`（雙向）；單向 follow 與發文扇出待補 | `data/connection.ts` |
 
 **三件主要工作（摘自創作者專區交接）：**
-1. 註冊：不另開創作者註冊線；一般註冊後於 `/dashboard/verified-role-apply` 申請，接 `submitVerifiedRoleApplication()`。
+1. 註冊與身分：見 §10.1 —— 不另開創作者註冊線，一個帳號＋一個 `verified-creator` 標章，兩個申請入口（事後申請 / 註冊時選）並行，共用 `verifiedRoleApplications` + `submitVerifiedRoleApplication()`。
 2. 創作者主頁：在 `Profile.tsx` 用既有 `activeSectionTab` 加 3 分頁（部落格 / 主辦活動 / 活動紀錄），分別以 `userId` / `createdBy` / `userUid` 撈取。
 3. 發佈權：把目前 admin-only 的部落格發佈權，放寬給帶 `verified-creator` 標章者（一行條件）。
 
