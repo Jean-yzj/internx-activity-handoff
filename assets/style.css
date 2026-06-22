@@ -822,3 +822,21 @@ table.reg .ra { display: flex; gap: 6px; }
   .editor-main { padding: 20px 16px; }
   .wrap { padding: 24px 16px 70px; }
 }
+
+/* ===== Embed pages inside reconstructed internx.me chrome (so it reads as "inside the platform", not a new site) ===== */
+body[data-embed] .topbar, body[data-strip] .topbar { display: none; }   /* hide the docs-style top nav */
+.handoff-strip { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 6px 16px; background: #16202e; color: #c7cfdc; font-size: 12px; position: sticky; top: 0; z-index: 60; }
+.handoff-strip .hl { font-weight: 600; color: #fff; display: flex; align-items: center; gap: 6px; }
+.handoff-strip .hl .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--complementary-color); display: inline-block; }
+.handoff-strip nav { display: flex; gap: 2px; flex-wrap: wrap; margin-left: auto; }
+.handoff-strip a { color: #c7cfdc; text-decoration: none; padding: 3px 9px; border-radius: 6px; white-space: nowrap; }
+.handoff-strip a:hover { background: rgba(255,255,255,.12); color: #fff; }
+.handoff-strip a.on { background: var(--theme-color); color: #fff; }
+.ix.ix-page { border: none; border-radius: 0; box-shadow: none; }
+.ix.ix-page .ix-main { min-height: calc(100vh - 84px); }
+.ix.ix-page .ix-content { padding: 26px 30px; }
+.ix.ix-page .ix-content > .wrap { max-width: none; padding: 0; }
+.ix.ix-page .ix-content > main.wrap { max-width: none; padding: 0; }
+.ix-top .bell { width: 32px; height: 32px; border-radius: 50%; background: var(--bg-gray); display: grid; place-items: center; color: var(--text-soft); font-size: 16px; flex-shrink: 0; }
+.ix-side a.ix-nav { text-decoration: none; }
+@media (max-width: 920px) { .ix.ix-page .ix-side { display: none; } .ix.ix-page .ix-content { padding: 18px 16px; } }

@@ -139,3 +139,62 @@ document.addEventListener('DOMContentLoaded', () => {
     if (norm(a.getAttribute('href')) === here) a.classList.add('active');
   });
 });
+
+/* ---- Embed a page inside reconstructed internx.me chrome ----
+   Opt in with <body data-embed="主辦"> (or "活動"). Hides the docs top nav,
+   wraps <main> inside the real-style top bar + left SideNav, and adds a thin
+   "交接示意" strip so the handoff pages are still navigable. Makes the mockup
+   read as "inside internx.me", not a standalone site. */
+function embedInPlatform() {
+  const key = document.body.dataset.embed;                       // product pages → full chrome
+  const stripOnly = !key && document.body.dataset.strip !== undefined; // docs pages → thin strip only
+  if (!key && !stripOnly) return;
+
+  const PAGES = [
+    ['/', '總覽'], ['/backstage', '後臺'], ['/editor', '建立活動'], ['/attendee', '報名頁'],
+    ['/creator', '創作者主頁'], ['/blog', '部落格'], ['/integration', '整合動線'], ['/spec', '工程規格'],
+  ];
+  const cur = (location.pathname.replace(/\.html$/, '').replace(/\/+$/, '')) || '/';
+  const links = PAGES.map(([h, t]) => {
+    const on = h === '/' ? cur === '/' : cur.startsWith(h);
+    return `<a href="${h}" class="${on ? 'on' : ''}">${t}</a>`;
+  }).join('');
+
+  const strip = document.createElement('div');
+  strip.className = 'handoff-strip';
+  strip.innerHTML = `<span class="hl"><span class="dot"></span> 實習通 · 交接示意</span><nav>${links}</nav>`;
+
+  const docbar = document.querySelector('.topbar');
+  if (docbar) docbar.remove();
+  document.body.insertBefore(strip, document.body.firstChild);
+
+  if (!key) return; // docs page: strip only, leave content as-is
+
+  const main = document.querySelector('main');
+  if (!main) return;
+  const SIDE = [
+    ['ri-home-5-line', '實習通首頁', false],
+    ['ri-team-line', '人脈與小夥伴們', false],
+    ['ri-calendar-event-line', '職涯活動媒人婆', key === '活動'],
+    ['ri-store-2-line', '主辦專區（官方帳號）', key === '主辦'],
+    ['ri-cup-line', '人生飲料店', false],
+    ['ri-coin-line', '賺取及使用點數', false],
+  ];
+  const side = SIDE.map(([i, t, on]) => `<div class="ix-nav ${on ? 'active' : ''}"><i class="${i}"></i> ${t}</div>`).join('');
+  const ixpage = document.createElement('div');
+  ixpage.className = 'ix ix-page';
+  ixpage.innerHTML = `
+    <div class="ix-top">
+      <span class="l"><span class="lg">X</span> 實習通</span>
+      <span class="ix-search"><i class="ri-search-line"></i> 搜尋公司、活動、夥伴</span>
+      <span class="bell"><i class="ri-notification-3-line"></i></span>
+      <span class="av"></span>
+    </div>
+    <div class="ix-main">
+      <div class="ix-side">${side}</div>
+      <div class="ix-content"></div>
+    </div>`;
+  strip.after(ixpage);
+  ixpage.querySelector('.ix-content').appendChild(main); // move page content inside the chrome
+}
+document.addEventListener('DOMContentLoaded', embedInPlatform);
