@@ -1,0 +1,120 @@
+<svg viewBox="0 0 1000 720" xmlns="http://www.w3.org/2000/svg" font-family="'Noto Sans TC','PingFang TC',system-ui,sans-serif">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#1861a8"/>
+    </marker>
+    <marker id="arrowGray" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#8aa0bd"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1000" height="720" fill="#ffffff"/>
+  <text x="500" y="34" text-anchor="middle" font-size="22" font-weight="700" fill="#11243f">創作者專區・整體串接架構</text>
+  <text x="500" y="56" text-anchor="middle" font-size="13" fill="#6b7c93">藍色＝平台既有、可直接重用；金色虛線＝需新增（待補）。所有作者點擊一律導向 /user/[uid]</text>
+
+  <!-- ===== 註冊與審核 pipeline ===== -->
+  <text x="16" y="86" font-size="13" font-weight="700" fill="#1861a8">① 註冊與審核流程</text>
+
+  <!-- step boxes -->
+  <g font-size="13" fill="#11243f" text-anchor="middle">
+    <!-- 1 -->
+    <rect x="12" y="96" width="180" height="56" rx="10" fill="#eaf4ff" stroke="#bcdcff"/>
+    <text x="102" y="120" font-weight="600">使用者註冊</text>
+    <text x="102" y="139" font-size="11" fill="#6b7c93">一般 onboarding 流程</text>
+    <!-- 2 -->
+    <rect x="208" y="96" width="180" height="56" rx="10" fill="#eaf4ff" stroke="#bcdcff"/>
+    <text x="298" y="120" font-weight="600">身分選擇</text>
+    <text x="298" y="139" font-size="11" fill="#6b7c93">選「認證創作者」</text>
+    <!-- 3 -->
+    <rect x="404" y="96" width="180" height="56" rx="10" fill="#eaf4ff" stroke="#bcdcff"/>
+    <text x="494" y="120" font-weight="600">填認證表單</text>
+    <text x="494" y="139" font-size="11" fill="#6b7c93">submitVerifiedRoleApplication</text>
+    <!-- 4 data store -->
+    <rect x="600" y="96" width="180" height="56" rx="10" fill="#fff8e7" stroke="#f0d488"/>
+    <text x="690" y="120" font-weight="600">verifiedRoleApplications</text>
+    <text x="690" y="139" font-size="11" fill="#9a7a14">status: pending</text>
+    <!-- 5 -->
+    <rect x="796" y="96" width="192" height="56" rx="10" fill="#eaf4ff" stroke="#bcdcff"/>
+    <text x="892" y="120" font-weight="600">管理員審核</text>
+    <text x="892" y="139" font-size="11" fill="#6b7c93">approve / reject</text>
+  </g>
+  <!-- arrows between steps -->
+  <g stroke="#1861a8" stroke-width="2" fill="none" marker-end="url(#arrow)">
+    <line x1="193" y1="124" x2="206" y2="124"/>
+    <line x1="389" y1="124" x2="402" y2="124"/>
+    <line x1="585" y1="124" x2="598" y2="124"/>
+    <line x1="781" y1="124" x2="794" y2="124"/>
+  </g>
+
+  <!-- approve -> grant box (elbow) -->
+  <path d="M892,152 L892,176 L770,176" stroke="#1861a8" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+
+  <!-- grant / badge write box -->
+  <rect x="230" y="170" width="540" height="54" rx="10" fill="#0182fd" stroke="#0166cc"/>
+  <text x="500" y="192" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff">grantVerifiedBadgeToUser</text>
+  <text x="500" y="211" text-anchor="middle" font-size="11.5" fill="#dCEBFF">profiles.badges += "verified-creator"　·　寫入 profiles.verifiedRolePitch</text>
+
+  <!-- down to hub -->
+  <line x1="500" y1="224" x2="500" y2="332" stroke="#1861a8" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+
+  <!-- ===== HUB ===== -->
+  <rect x="358" y="335" width="284" height="132" rx="14" fill="#11243f"/>
+  <text x="500" y="372" text-anchor="middle" font-size="16" font-weight="700" fill="#ffffff">創作者主頁</text>
+  <text x="500" y="393" text-anchor="middle" font-size="12.5" fill="#9fc3ff">/[lang]/user/[uid]　·　Profile.tsx</text>
+  <!-- gold pill -->
+  <rect x="406" y="410" width="188" height="34" rx="17" fill="#fffdf5" stroke="#ffd700" stroke-width="2"/>
+  <text x="500" y="432" text-anchor="middle" font-size="13" font-weight="700" fill="#1f2937">✍ 認證創作者</text>
+
+  <!-- ===== spokes ===== -->
+  <!-- connectors -->
+  <g stroke="#9bb4d4" stroke-width="1.6" fill="none">
+    <line x1="358" y1="401" x2="324" y2="305"/>
+    <line x1="358" y1="401" x2="324" y2="425"/>
+    <line x1="358" y1="430" x2="324" y2="545"/>
+    <line x1="642" y1="401" x2="676" y2="305"/>
+    <line x1="642" y1="401" x2="676" y2="425"/>
+    <line x1="642" y1="430" x2="676" y2="545"/>
+  </g>
+
+  <!-- LEFT cards -->
+  <g>
+    <rect x="20" y="270" width="304" height="70" rx="11" fill="#f7faff" stroke="#bcdcff"/>
+    <text x="38" y="298" font-size="14.5" font-weight="700" fill="#11243f">部落格</text>
+    <text x="38" y="320" font-size="11.5" fill="#6b7c93">BlogPost.fetchUserPosts</text>
+    <text x="306" y="320" text-anchor="end" font-size="11" fill="#9aa7b8">authorId 連回</text>
+
+    <rect x="20" y="390" width="304" height="70" rx="11" fill="#f7faff" stroke="#bcdcff"/>
+    <text x="38" y="418" font-size="14.5" font-weight="700" fill="#11243f">主辦活動</text>
+    <text x="38" y="440" font-size="11.5" fill="#6b7c93">Activity.fetchUserActivities</text>
+    <text x="306" y="440" text-anchor="end" font-size="11" fill="#9aa7b8">createdBy</text>
+
+    <rect x="20" y="510" width="304" height="70" rx="11" fill="#fffdf5" stroke="#f0d488" stroke-dasharray="5 4"/>
+    <text x="38" y="538" font-size="14.5" font-weight="700" fill="#11243f">活動紀錄</text>
+    <text x="38" y="560" font-size="11.5" fill="#9a7a14">Registration（userUid）</text>
+    <text x="306" y="560" text-anchor="end" font-size="11" fill="#b58a14">待補方法</text>
+  </g>
+
+  <!-- RIGHT cards -->
+  <g>
+    <rect x="676" y="270" width="304" height="70" rx="11" fill="#f7faff" stroke="#bcdcff"/>
+    <text x="694" y="298" font-size="14.5" font-weight="700" fill="#11243f">專長</text>
+    <text x="694" y="320" font-size="11.5" fill="#6b7c93">currentSkills → SkillGroup</text>
+
+    <rect x="676" y="390" width="304" height="70" rx="11" fill="#f7faff" stroke="#bcdcff"/>
+    <text x="694" y="418" font-size="14.5" font-weight="700" fill="#11243f">社群　LinkedIn / IG</text>
+    <text x="694" y="440" font-size="11.5" fill="#6b7c93">socialLinks → SocialLinkChip</text>
+
+    <rect x="676" y="510" width="304" height="70" rx="11" fill="#f7faff" stroke="#bcdcff"/>
+    <text x="694" y="538" font-size="14.5" font-weight="700" fill="#11243f">論壇 / 心得</text>
+    <text x="694" y="560" font-size="11.5" fill="#6b7c93">MergedSenderBadges（senderId）</text>
+  </g>
+
+  <!-- ===== legend ===== -->
+  <g font-size="12" fill="#5b6b7f">
+    <rect x="300" y="628" width="22" height="14" rx="4" fill="#eaf4ff" stroke="#bcdcff"/>
+    <text x="330" y="639">既有系統，可直接重用</text>
+    <rect x="520" y="628" width="22" height="14" rx="4" fill="#fffdf5" stroke="#f0d488" stroke-dasharray="5 4"/>
+    <text x="550" y="639">待補（需新增欄位／方法／規則）</text>
+  </g>
+  <text x="500" y="680" text-anchor="middle" font-size="11.5" fill="#9aa7b8">檢舉、個人頁編輯、追蹤、通知等流程詳見 HANDOFF.md 對應章節</text>
+</svg>

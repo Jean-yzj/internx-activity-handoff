@@ -16,12 +16,14 @@
   </a>
   <span class="spacer"></span>
   <nav class="topnav">
-    <a href="index.html">總覽</a>
-    <a href="editor.html">主辦方編輯器</a>
-    <a href="backstage.html">主辦方後臺</a>
-    <a href="attendee.html">報名者畫面</a>
-    <a href="integration.html">整合動線</a>
-    <a href="spec.html">工程規格</a>
+    <a href="/">總覽</a>
+    <a href="/backstage">認證帳號後臺</a>
+    <a href="/editor">建立活動</a>
+    <a href="/attendee">報名頁</a>
+    <a href="/creator">創作者主頁</a>
+    <a href="/blog">部落格</a>
+    <a href="/integration">整合動線</a>
+    <a href="/spec">工程規格</a>
   </nav>
   <span class="mockup-pill">介面示意 Mockup</span>
 </header>
@@ -38,10 +40,10 @@
       <b>不會動到 internx.me 現有的任何程式碼</b>，僅作為介面規格與交接依據。
     </p>
     <div class="hero-actions">
-      <a href="editor.html" class="btn btn-primary"><i class="ri-edit-box-line"></i> 看主辦方編輯器</a>
-      <a href="attendee.html" class="btn btn-ghost"><i class="ri-smartphone-line"></i> 看報名者畫面</a>
-      <a href="spec.html" class="btn btn-ghost"><i class="ri-code-s-slash-line"></i> 看資料模型規格</a>
-      <a href="https://github.com/Jean-yzj/internx-activity-handoff/blob/main/INTEGRATION.md" class="btn btn-ghost"><i class="ri-file-text-line"></i> 交接文件（串接步驟）</a>
+      <a href="/backstage" class="btn btn-primary"><i class="ri-store-2-line"></i> 認證帳號後臺（活動＋創作）</a>
+      <a href="/editor" class="btn btn-ghost"><i class="ri-edit-box-line"></i> 建立活動</a>
+      <a href="/creator" class="btn btn-ghost"><i class="ri-user-star-line"></i> 創作者主頁</a>
+      <a href="/spec" class="btn btn-ghost"><i class="ri-code-s-slash-line"></i> 工程規格</a>
     </div>
     <div class="kpi">
       <div class="k"><div class="n">4</div><div class="l">編輯步驟，不再一頁塞爆</div></div>
@@ -128,6 +130,27 @@
         <h3><span class="ico ico-blue"><i class="ri-checkbox-circle-line"></i></span> 4 · 進階與送出</h3>
         <p>付款方式、退款規則、審核設定，最後預覽整頁再送審上架。</p>
       </div>
+    </div>
+  </section>
+
+  <!-- UNIFIED ACCOUNT (主辦 + 創作) -->
+  <section class="section">
+    <div class="eyebrow">一個認證帳號</div>
+    <h2>主辦 ＋ 創作，整合在同一個帳號</h2>
+    <p class="lead">實習通的認證帳號（<code class="coderef">verified-creator</code> 標章）同時能辦活動、也能發內容。這份交接把活動報名與創作者專區<b>合併成一份</b>，工程師看到的是同一個帳號模型，不是兩個各看一半的 demo。</p>
+    <div class="grid grid-3" style="margin-top:22px">
+      <a class="card card-pad feature" href="/backstage" style="text-decoration:none;color:inherit">
+        <h3><span class="ico ico-blue"><i class="ri-store-2-line"></i></span> 認證帳號後臺</h3>
+        <p>活動管理、報名名單／審核、創作內容（部落格）並列在官方帳號底下。</p>
+      </a>
+      <a class="card card-pad feature" href="/creator" style="text-decoration:none;color:inherit">
+        <h3><span class="ico ico-gold"><i class="ri-user-star-line"></i></span> 創作者主頁</h3>
+        <p>公開頁：關於我、專長、部落格、主辦活動、活動紀錄。主辦活動連到報名頁。</p>
+      </a>
+      <a class="card card-pad feature" href="/blog" style="text-decoration:none;color:inherit">
+        <h3><span class="ico ico-orange"><i class="ri-article-line"></i></span> 部落格</h3>
+        <p>認證創作者發佈職涯／求職內容；發佈權對應 <code>verified-creator</code> 標章。</p>
+      </a>
     </div>
   </section>
 

@@ -252,7 +252,29 @@ await runTransaction(db, async (tx) => {
 
 ---
 
-## 10. 本機預覽 / 部署
+## 10. 創作者整合（主辦 ＝ 創作，同一認證帳號）
+
+主辦單位與創作者是同一種認證帳號，不是兩套系統。判斷依據是 `profiles.badges` 是否含 `verified-creator`（不是獨立的 userRole）。同一帳號能辦活動（`Activity.createdBy`）也能發內容（`data/blog.ts`）。
+
+| 創作者需求 | 既有可重用 | 檔案 |
+|---|---|---|
+| 認證標章 | `verified-creator`（金色膠囊 + quill-pen）+ VerifiedRolePitchModal | `components/Badge/ProfileBadge.tsx`、`lib/config.js` |
+| 身分送審 | `verifiedRoleApplications` 申請集合 + 管理員審核 | `data/verified-role-application.ts` |
+| 撰寫部落格 | `BlogPost` + `BlockEditor`；發佈權放寬給帶標章者 | `data/blog.ts`、`components/Blog/*` |
+| 主辦活動（在創作者主頁） | `Activity.createdBy` + `Registration.userUid` | `data/activity.ts`、`data/registration.ts` |
+| 追蹤 / 通知 | `Connection`（雙向）；單向 follow 與發文扇出待補 | `data/connection.ts` |
+
+**三件主要工作（摘自創作者專區交接）：**
+1. 註冊：不另開創作者註冊線；一般註冊後於 `/dashboard/verified-role-apply` 申請，接 `submitVerifiedRoleApplication()`。
+2. 創作者主頁：在 `Profile.tsx` 用既有 `activeSectionTab` 加 3 分頁（部落格 / 主辦活動 / 活動紀錄），分別以 `userId` / `createdBy` / `userUid` 撈取。
+3. 發佈權：把目前 admin-only 的部落格發佈權，放寬給帶 `verified-creator` 標章者（一行條件）。
+
+**整合到本交接的呈現（站內頁面）：**
+- 後臺 `/backstage`：官方帳號分頁同時有「活動管理 / 報名名單 / 創作內容」；創作內容＝部落格管理，連到 `/blog-editor`。
+- 公開端 `/creator`：創作者主頁的「主辦活動」分頁連到報名頁 `/attendee`；`/blog` 為部落格列表。
+- 待補（彙整）：verifiedRoleApplications 審核佇列、blog 發佈 gating、單向 follow、發文通知扇出、檢舉（`reports` 集合）。
+
+## 11. 本機預覽 / 部署
 
 ```bash
 # mockup 本機預覽（零依賴）

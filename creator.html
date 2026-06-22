@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>創作者主頁｜InternX 創作者專區</title>
+<link rel="icon" href="/assets/cz/favicon.png" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" />
+<link rel="stylesheet" href="/assets/cz/app.css" />
+</head>
+<body data-page="creator">
+
+<main>
+  <div class="cz-container profile">
+    <div class="layout">
+      <aside class="sidebar"><div class="sidebarCard" id="sidebar"></div></aside>
+      <div class="main">
+        <div class="sectionTabs" data-tabs="profile" id="tabs">
+          <button class="sectionTab active" data-tab="about">關於我</button>
+          <button class="sectionTab" data-tab="skills">專長</button>
+          <button class="sectionTab" data-tab="blog">部落格</button>
+          <button class="sectionTab" data-tab="events">主辦活動</button>
+          <button class="sectionTab" data-tab="log">活動紀錄</button>
+          <button class="sectionTab" data-tab="featured">心得 / 論壇</button>
+        </div>
+        <div class="mainCard">
+          <div class="tabPane active" data-pane="profile" data-pane-key="about" id="paneAbout"></div>
+          <div class="tabPane" data-pane="profile" data-pane-key="skills" id="paneSkills"></div>
+          <div class="tabPane" data-pane="profile" data-pane-key="blog" id="paneBlog"></div>
+          <div class="tabPane" data-pane="profile" data-pane-key="events" id="paneEvents"></div>
+          <div class="tabPane" data-pane="profile" data-pane-key="log" id="paneLog"></div>
+          <div class="tabPane" data-pane="profile" data-pane-key="featured" id="paneFeatured"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="/assets/cz/data.js"></script>
+<script src="/assets/cz/render.js"></script>
+<script src="/assets/cz/app.js"></script>
+<script>
+  const D = window.CZ_DATA;
+  const qs = new URLSearchParams(location.search);
+  const id = qs.get("id") || D.featured;
+  const c = D.creators[id] || D.creators[D.featured];
+  const forSelf = (c.id === D.featured) && qs.get("as") !== "visitor";   // 精選創作者＝登入者本人
+  const forceEmpty = qs.get("empty") === "1";                            // 預覽空狀態
+  const arr = (x) => forceEmpty ? [] : (x || []);
+
+  const PLATFORMS = {
+    linkedin:  { label: "LinkedIn",  icon: "linkedin-fill" },
+    instagram: { label: "Instagram", icon: "instagram-line" },
+    website:   { label: "個人網站",  icon: "global-line" },
+    facebook:  { label: "Facebook",  icon: "facebook-circle-line" },
+    line:      { label: "LINE",      icon: "line-line" },
+    email:     { label: "Email",     icon: "mail-line" },
+  };
+
+  /* ============ 側欄 ============ */
+  function renderSidebar() {
+    const selfBtns = `
+      <button class="btn btn-block" onclick="openEdit()"><i class="ri-edit-line"></i> 編輯主頁</button>
+      <a class="btn btn-white btn-block" href="/creator?id=${c.id}&as=visitor"><i class="ri-eye-line"></i> 預覽訪客視角</a>`;
+    const visitorBtns = `
+      <button class="btn btn-block" id="followBtn" onclick="toggleFollow()"><i class="ri-user-add-line"></i> 追蹤</button>
+      <button class="btn btn-white btn-block" onclick="CZ.toast('開啟私訊（平台既有功能）')"><i class="ri-message-3-line"></i> 私訊</button>
+      <div class="moreMenu">
+        <button class="btn btn-white btn-block moreBtn" onclick="document.getElementById('morePop').classList.toggle('show')"><i class="ri-more-line"></i> 更多</button>
+        <div class="morePop" id="morePop">
+          <button onclick="CZ.toast('主頁連結已複製');document.getElementById('morePop').classList.remove('show')"><i class="ri-link"></i> 分享主頁</button>
+          <button class="danger" onclick="document.getElementById('morePop').classList.remove('show');CZ.reportModal('profile','${c.name}')"><i class="ri-flag-2-line"></i> 檢舉這位創作者</button>
+          <button class="danger" onclick="CZ.toast('已封鎖（示意）');document.getElementById('morePop').classList.remove('show')"><i class="ri-forbid-line"></i> 封鎖</button>
+        </div>
+      </div>`;
+    document.getElementById("sidebar").innerHTML = `
+      ${CZ.avatar(c.initials, c.color, 96, "sidebarAvatar")}
+      <h2 class="profileName">${c.name}</h2>
+      <div class="sidebarBadgeStrip">${CZ.badgePill(c, { clickable: true })}</div>
+      <p class="profileHeadline">${c.headline}</p>
+      <p class="profileSchool"><i class="ri-school-line"></i> ${c.school}</p>
+      <p class="profileSchool"><i class="ri-map-pin-line"></i> ${c.location || "台灣"}</p>
+      <div class="sidebarButtons">${forSelf ? selfBtns : visitorBtns}</div>
+      <div class="sidebarDivider"></div>
+      <div class="statRow">
+        <div class="statBox"><b>${(c.followers || 0).toLocaleString()}</b><span>追蹤者</span></div>
+        <div class="statBox"><b>${arr(c.blogs).length}</b><span>文章</span></div>
+        <div class="statBox"><b>${arr(c.hostedEvents).length}</b><span>活動</span></div>
+      </div>
+      <div class="sidebarDivider"></div>
+      <div class="infoList">
+        <button class="pointsInfoRow" onclick="document.querySelector('[data-tab=blog]').click()"><i class="ri-article-line"></i> 部落格文章</button>
+        <button class="pointsInfoRow" onclick="document.querySelector('[data-tab=events]').click()"><i class="ri-calendar-event-line"></i> 主辦活動</button>
+        <button class="pointsInfoRow" onclick="CZ.toast('已複製創作者 ID：${c.id}')"><i class="ri-link"></i> 複製主頁連結</button>
+      </div>`;
+  }
+  let following = false;
+  window.toggleFollow = function () {
+    following = !following;
+    const b = document.getElementById("followBtn");
+    b.classList.toggle("btn-white", following);
+    b.innerHTML = following ? `<i class="ri-user-follow-line"></i> 已追蹤` : `<i class="ri-user-add-line"></i> 追蹤`;
+    CZ.toast(following ? `已追蹤 ${c.name}` : "已取消追蹤");
+  };
+
+  /* ============ 各分頁 ============ */
+  function renderPanes() {
+    // 關於我
+    const social = arr(c.socialLinks).map(CZ.socialChip).join("");
+    document.getElementById("paneAbout").innerHTML = `
+      <div class="sectionHeader"><div class="sectionHeaderLeft"><i class="ri-user-heart-line"></i> 關於我</div>
+        ${forSelf ? `<button class="pointsInfoRow" style="width:auto" onclick="openEdit()"><i class="ri-edit-line"></i> 編輯</button>` : ""}</div>
+      ${c.pitch ? `
+        <div class="pitchCard">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">${CZ.badgePill(c, { clickable: true })}<span style="font-size:13px;color:#9a7a14">已通過實習通官方審核</span></div>
+          <h4>所在產業或公司</h4><p>${c.pitch.organizationText}</p>
+          <h4>相關經歷與說明</h4><p>${c.pitch.experienceText}</p>
+        </div>` : ""}
+      <div class="aboutBlock"><div class="aboutBlockTitle">讓我介紹自己⋯</div><p class="aboutText">${c.bio}</p></div>
+      <div class="aboutBlock"><div class="aboutBlockTitle">社群連結</div>
+        <div style="display:flex;flex-wrap:wrap">${social || CZ.emptyState({ icon: "links-line", title: "尚未連結社群", desc: forSelf ? "在「編輯主頁」加入你的 LinkedIn、Instagram。" : "這位創作者尚未提供社群連結。", ctaText: forSelf ? "編輯主頁" : "", ctaHref: "javascript:openEdit()", ctaIcon: "edit-line" })}</div>
+      </div>`;
+
+    // 專長
+    const sp = arr(c.specialties);
+    document.getElementById("paneSkills").innerHTML = `
+      <div class="sectionHeader"><div class="sectionHeaderLeft"><i class="ri-medal-line"></i> 專長領域</div>
+        ${forSelf ? `<button class="pointsInfoRow" style="width:auto" onclick="openEdit('skills')"><i class="ri-edit-line"></i> 編輯</button>` : ""}</div>
+      ${sp.length ? CZ.skillGroups(sp) : CZ.emptyState({ icon: "medal-line", title: "尚未填寫專長", desc: forSelf ? "讓學生知道你能幫上什麼忙。" : "這位創作者尚未填寫專長。", ctaText: forSelf ? "新增專長" : "", ctaHref: "javascript:openEdit('skills')", ctaIcon: "add-line" })}`;
+
+    // 部落格
+    renderBlogPane();
+
+    // 主辦活動
+    const ev = arr(c.hostedEvents);
+    document.getElementById("paneEvents").innerHTML = `
+      <div class="sectionHeader"><div class="sectionHeaderLeft"><i class="ri-calendar-event-line"></i> 過往辦過的活動</div></div>
+      ${ev.length ? `<div class="activityGrid">${ev.map(eid => CZ.activityCard(D.events[eid])).join("")}</div>`
+        : CZ.emptyState({ icon: "calendar-event-line", title: "還沒有主辦活動", desc: forSelf ? "辦一場講座或工作坊，會顯示在這裡。" : "這位創作者尚未主辦活動。", ctaText: forSelf ? "建立活動" : "", ctaIcon: "add-line" })}`;
+
+    // 活動紀錄
+    const log = arr(c.activityLog);
+    document.getElementById("paneLog").innerHTML = `
+      <div class="sectionHeader"><div class="sectionHeaderLeft"><i class="ri-history-line"></i> 活動紀錄</div></div>
+      ${log.length ? `<div class="timeline">${log.map(l => `
+        <div class="timelineItem"><div class="tdate">${l.date}</div><div class="ttitle">${l.title}</div>
+          <div class="tdesc">${l.desc}</div><span class="trole ${l.role}">${l.role === "host" ? "主辦" : "參與"}</span></div>`).join("")}</div>`
+        : CZ.emptyState({ icon: "history-line", title: "尚無活動紀錄", desc: "報名或主辦活動後，紀錄會集中在這裡。" })}`;
+
+    // 心得 / 論壇
+    const fp = arr(c.featuredPosts), forum = arr(c.forumPosts);
+    document.getElementById("paneFeatured").innerHTML = `
+      <div class="sectionHeader"><div class="sectionHeaderLeft"><i class="ri-sparkling-line"></i> 心得分享</div></div>
+      ${fp.length ? fp.map(p => `
+        <div class="featuredCard" style="margin-bottom:14px">
+          <div style="display:flex;justify-content:space-between;align-items:center"><span class="company">${p.company}</span>
+            <span style="color:#e2a200;font-weight:700"><i class="ri-star-fill"></i> ${p.rating}</span></div>
+          <p class="summary">${p.summary}</p>
+          <div class="postBottom">${CZ.avatar(c.initials, c.color, 28)}<span class="postBottomSenderName">${c.name} ${CZ.badgePill(c, { compact: true })}</span><span class="postBottomTimestamp">發表於 ${p.time}</span></div>
+        </div>`).join("") : CZ.emptyState({ icon: "sparkling-line", title: "尚無心得", desc: "分享實習或面試心得，會集結在這裡。" })}
+      <div class="sectionHeader" style="margin-top:28px"><div class="sectionHeaderLeft"><i class="ri-chat-1-line"></i> 論壇足跡</div></div>
+      ${forum.length ? forum.map(p => `
+        <div class="forumMsg">
+          <div class="postBottom">${CZ.avatar(c.initials, c.color, 32)}<span class="postBottomSenderName">${c.name} ${CZ.badgePill(c, { compact: true })}</span><span class="postBottomTimestamp">・${p.room}・${p.time}</span></div>
+          <div class="bubble">${p.content}</div>
+          <div style="margin-top:8px;font-size:12.5px;color:#999"><i class="ri-thumb-up-line"></i> ${p.reactions} 個回應</div>
+        </div>`).join("") : CZ.emptyState({ icon: "chat-1-line", title: "尚無論壇發言", desc: "在論壇分享觀點，會同步顯示你的認證標章。" })}`;
+  }
+
+  // 部落格分頁：本人＝內容管理；訪客＝已發佈卡片
+  function renderBlogPane() {
+    const pane = document.getElementById("paneBlog");
+    const blogIds = arr(c.blogs);
+    if (forSelf) {
+      const drafts = arr(c.drafts);
+      const rows = blogIds.map(bid => {
+        const b = D.blogs[bid];
+        return manageRow(b.title, "published", `${b.category}・${b.date}・${(b.views || 0).toLocaleString()} 次瀏覽`, `/blog-article?id=${b.id}`);
+      }).concat(drafts.map(d => manageRow(d.title, "draft", `${d.category}・最後編輯 ${d.date}`, "/blog-editor")));
+      pane.innerHTML = `
+        <div class="sectionHeader"><div class="sectionHeaderLeft"><i class="ri-quill-pen-line"></i> 我的文章</div>
+          <a class="btn btn-small" href="/blog-editor"><i class="ri-add-line"></i> 撰寫文章</a></div>
+        ${(blogIds.length || drafts.length) ? rows.join("")
+          : CZ.emptyState({ icon: "quill-pen-line", title: "還沒有文章", desc: "寫下你的求職心法，發佈後會出現在你的主頁與部落格。", ctaText: "撰寫第一篇", ctaHref: "/blog-editor", ctaIcon: "quill-pen-line" })}
+        <p class="muted" style="font-size:12.5px;margin-top:14px"><i class="ri-information-line"></i> 草稿僅自己可見；發佈後同步到 <a href="/blog" style="color:var(--theme-color)">部落格列表</a>。完整管理對應平台 <code>/blog/manage</code>。</p>`;
+    } else {
+      pane.innerHTML = `
+        <div class="sectionHeader"><div class="sectionHeaderLeft"><i class="ri-quill-pen-line"></i> 部落格文章</div></div>
+        ${blogIds.length ? `<div class="blogGrid">${blogIds.map(bid => CZ.blogCard(D.blogs[bid])).join("")}</div>`
+          : CZ.emptyState({ icon: "quill-pen-line", title: "尚未發佈文章", desc: "這位創作者還沒有發佈文章。" })}`;
+    }
+  }
+  function manageRow(title, status, meta, viewHref) {
+    const sLabel = { published: "已發佈", draft: "草稿", archived: "已封存" }[status];
+    return `<div class="manageRow">
+      <span class="statusTag ${status}">${sLabel}</span>
+      <div class="mInfo"><div class="mTitle">${title}</div><div class="mMeta">${meta}</div></div>
+      <div class="mActions">
+        <button title="檢視" onclick="location.href='${viewHref}'"><i class="ri-eye-line"></i></button>
+        <button title="編輯" onclick="location.href='/blog-editor'"><i class="ri-edit-line"></i></button>
+        <button title="${status === 'published' ? '封存' : '發佈'}" onclick="CZ.toast('${status === 'published' ? '已封存（archived）' : '已發佈（published）'}')"><i class="ri-${status === 'published' ? 'archive-line' : 'send-plane-line'}"></i></button>
+      </div>
+    </div>`;
+  }
+
+  /* ============ 編輯主頁（對齊 ProfileEditPopup / SkillsEditPopup / LinksEditPopup）============ */
+  let edit = null;
+  window.openEdit = function (focus) {
+    edit = JSON.parse(JSON.stringify({
+      name: c.name, headline: c.headline, school: c.school, bio: c.bio,
+      specialties: c.specialties || [], socialLinks: c.socialLinks || [],
+    }));
+    CZ.modal(`<div id="editBody"></div>`);
+    renderEditBody(focus || "basic");
+  };
+  function renderEditBody(tab) {
+    const tabBtn = (k, t) => `<button class="tabSwitch-btn ${tab === k ? 'on' : ''}" onclick="renderEditBody('${k}')">${t}</button>`;
+    document.getElementById("editBody").innerHTML = `
+      <h3 style="text-align:left;margin-bottom:4px">編輯我的頁面</h3>
+      <p class="muted" style="margin:0 0 14px;font-size:13px">對應平台的 ProfileEdit／SkillsEdit／LinksEdit 編輯彈窗。</p>
+      <div class="editTabs">${tabBtn('basic', '基本資料')}${tabBtn('skills', '專長')}${tabBtn('links', '社群連結')}${tabBtn('verify', '認證資訊')}</div>
+      <div style="margin-top:16px">${editSection(tab)}</div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;border-top:1px solid #eee;padding-top:16px">
+        <button class="btn btn-white btn-small" onclick="CZ.closeModal()">取消</button>
+        <button class="btn btn-small" onclick="saveEdit()"><i class="ri-save-line"></i> 儲存變更</button>
+      </div>`;
+  }
+  function editSection(tab) {
+    if (tab === "basic") return `
+      <label class="formLabel">顯示名稱</label><input class="input" oninput="edit.name=this.value" value="${edit.name}">
+      <label class="formLabel" style="margin-top:10px">一句話介紹（headline）</label><input class="input" oninput="edit.headline=this.value" value="${edit.headline}">
+      <label class="formLabel" style="margin-top:10px">學校</label><input class="input" oninput="edit.school=this.value" value="${edit.school}">
+      <label class="formLabel" style="margin-top:10px">自我介紹</label><textarea class="textArea" rows="4" oninput="edit.bio=this.value">${edit.bio}</textarea>`;
+    if (tab === "skills") return `
+      <p class="muted" style="font-size:13px;margin-top:0">每個分類可新增／移除技能（對應 currentSkills）。</p>
+      ${edit.specialties.map((g, gi) => `
+        <div class="skillGroup">
+          <input class="input" style="font-weight:600;margin-bottom:8px" value="${g.category}" oninput="edit.specialties[${gi}].category=this.value">
+          <div class="skillTags">${g.skills.map((s, si) => `<span class="chip" style="display:inline-flex;align-items:center;gap:6px">${s}<i class="ri-close-line" style="cursor:pointer" onclick="edit.specialties[${gi}].skills.splice(${si},1);renderEditBody('skills')"></i></span>`).join("")}
+            <button class="chip chip-ghost" style="cursor:pointer" onclick="addSkill(${gi})">＋ 新增</button></div>
+        </div>`).join("")}
+      <button class="btn btn-white btn-small" onclick="edit.specialties.push({category:'新分類',skills:[]});renderEditBody('skills')"><i class="ri-add-line"></i> 新增分類</button>`;
+    if (tab === "links") return `
+      <p class="muted" style="font-size:13px;margin-top:0">對應 socialLinks（LinkedIn／IG 等，網址由 getSocialLinkUrl 產生）。</p>
+      ${edit.socialLinks.map((l, i) => `
+        <div style="display:flex;gap:8px;margin-bottom:8px;align-items:center">
+          <select class="input" style="flex:0 0 130px" onchange="setPlatform(${i},this.value)">${Object.keys(PLATFORMS).map(p => `<option value="${p}" ${l.platform === p ? 'selected' : ''}>${PLATFORMS[p].label}</option>`).join("")}</select>
+          <input class="input" style="flex:1" placeholder="帳號／網址" value="${l.username}" oninput="edit.socialLinks[${i}].username=this.value">
+          <button class="mActions" style="border:1px solid #eee;border-radius:8px;width:38px;height:42px;background:white;color:#d8392b;cursor:pointer" onclick="edit.socialLinks.splice(${i},1);renderEditBody('links')"><i class="ri-delete-bin-line"></i></button>
+        </div>`).join("")}
+      <button class="btn btn-white btn-small" onclick="edit.socialLinks.push({platform:'linkedin',icon:'linkedin-fill',label:'LinkedIn',username:'',url:'#'});renderEditBody('links')"><i class="ri-add-line"></i> 新增連結</button>`;
+    // verify (read-only)
+    return `
+      <div class="infoBanner"><i class="ri-lock-line"></i><span>認證資訊（所在產業／經歷）由平台審核後填入，<b>無法自行編輯</b>。對應 <code>profiles.verifiedRolePitch</code>，僅後端可寫。要更新請重新送認證申請。</span></div>
+      ${c.pitch ? `<div class="pitchCard" style="margin-top:14px"><h4>所在產業或公司</h4><p>${c.pitch.organizationText}</p><h4>相關經歷與說明</h4><p>${c.pitch.experienceText}</p></div>` : `<p class="muted" style="margin-top:14px">尚未通過認證。</p>`}`;
+  }
+  window.addSkill = function (gi) {
+    const v = prompt("新增技能");
+    if (v && v.trim()) { edit.specialties[gi].skills.push(v.trim()); renderEditBody("skills"); }
+  };
+  window.setPlatform = function (i, p) {
+    edit.socialLinks[i].platform = p; edit.socialLinks[i].icon = PLATFORMS[p].icon; edit.socialLinks[i].label = PLATFORMS[p].label;
+  };
+  window.saveEdit = function () {
+    Object.assign(c, { name: edit.name, headline: edit.headline, school: edit.school, bio: edit.bio, specialties: edit.specialties, socialLinks: edit.socialLinks });
+    CZ.closeModal();
+    renderSidebar(); renderPanes();
+    CZ.toast("儲存完成！（對應 profile.save → profiles + subprofiles/realProfile）");
+  };
+
+  /* ============ init ============ */
+  renderSidebar();
+  renderPanes();
+  CZ.wireTabs(document);
+  // 支援 /creator#blog、#events 等深層連結（部落格發佈後導回此處）
+  if (location.hash) {
+    const t = document.querySelector('[data-tab="' + location.hash.slice(1) + '"]');
+    if (t) t.click();
+  }
+</script>
+</body>
+</html>

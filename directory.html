@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>探索創作者｜InternX 創作者專區</title>
+<link rel="icon" href="/assets/cz/favicon.png" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" />
+<link rel="stylesheet" href="/assets/cz/app.css" />
+</head>
+<body data-page="directory">
+
+<main>
+  <section class="cz-hero" style="padding:40px 0 32px">
+    <div class="cz-container">
+      <span class="cz-eyebrow"><i class="ri-compass-3-line"></i> 探索</span>
+      <h1 style="font-size:calc(var(--font-size)/3.4);margin:10px 0 8px">探索認證創作者</h1>
+      <p style="margin:0">依專長領域，找到能幫你準備求職、解答疑惑的學長姐與前輩。</p>
+    </div>
+  </section>
+
+  <section class="cz-section" style="padding-top:28px">
+    <div class="cz-container">
+      <!-- 搜尋與篩選 -->
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:22px">
+        <div style="flex:1;min-width:240px;position:relative">
+          <i class="ri-search-line" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#999"></i>
+          <input class="input" id="searchInput" placeholder="搜尋創作者姓名或專長（例：履歷、面試、行銷）" style="padding-left:42px" />
+        </div>
+      </div>
+      <div id="filterChips" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px"></div>
+
+      <div class="cz-creator-grid" id="grid"></div>
+      <div id="empty" style="display:none;text-align:center;color:#999;padding:48px 0">
+        <i class="ri-search-eye-line" style="font-size:40px"></i>
+        <p>找不到符合的創作者，試試其他關鍵字。</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script src="/assets/cz/data.js"></script>
+<script src="/assets/cz/render.js"></script>
+<script src="/assets/cz/app.js"></script>
+<script>
+  const D = window.CZ_DATA;
+  const all = Object.values(D.creators);
+  const filters = ["全部", "求職輔導", "顧問求職", "技術面試", "數位行銷", "設計", "創業", "金融求職", "個人品牌"];
+  let activeFilter = "全部";
+  let query = "";
+
+  function matches(c) {
+    const hay = (c.name + c.headline + c.bio + c.specialties.flatMap(s=>[s.category,...s.skills]).join("")).toLowerCase();
+    const okQ = !query || hay.includes(query.toLowerCase());
+    const okF = activeFilter === "全部" || c.specialties.some(s => s.category === activeFilter || s.skills.includes(activeFilter));
+    return okQ && okF;
+  }
+  function render() {
+    const list = all.filter(matches);
+    document.getElementById("grid").innerHTML = list.map(CZ.creatorCard).join("");
+    document.getElementById("empty").style.display = list.length ? "none" : "block";
+  }
+  function renderFilters() {
+    document.getElementById("filterChips").innerHTML = filters.map(f =>
+      `<button class="chip ${f===activeFilter?'chip-confirm':'chip-ghost'}" data-f="${f}" style="cursor:pointer">${f}</button>`).join("");
+    document.querySelectorAll("[data-f]").forEach(b => b.addEventListener("click", () => {
+      activeFilter = b.dataset.f; renderFilters(); render();
+    }));
+  }
+  document.getElementById("searchInput").addEventListener("input", e => { query = e.target.value; render(); });
+  renderFilters(); render();
+</script>
+</body>
+</html>

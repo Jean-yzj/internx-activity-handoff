@@ -15,12 +15,14 @@
   </a>
   <span class="spacer"></span>
   <nav class="topnav">
-    <a href="index.html">總覽</a>
-    <a href="editor.html">主辦方編輯器</a>
-    <a href="backstage.html">主辦方後臺</a>
-    <a href="attendee.html">報名者畫面</a>
-    <a href="integration.html">整合動線</a>
-    <a href="spec.html">工程規格</a>
+    <a href="/">總覽</a>
+    <a href="/backstage">認證帳號後臺</a>
+    <a href="/editor">建立活動</a>
+    <a href="/attendee">報名頁</a>
+    <a href="/creator">創作者主頁</a>
+    <a href="/blog">部落格</a>
+    <a href="/integration">整合動線</a>
+    <a href="/spec">工程規格</a>
   </nav>
   <span class="mockup-pill">介面示意 Mockup</span>
 </header>
@@ -150,20 +152,20 @@
           </div>
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
             <b style="font-size:15px">我的內容</b>
-            <button class="btn btn-primary btn-sm" onclick="toast('（示意）開啟文章編輯器 BlockEditor')"><i class="ri-add-line"></i> 撰寫文章</button>
+            <button class="btn btn-primary btn-sm" onclick="location.href='/blog-editor'"><i class="ri-add-line"></i> 撰寫文章</button>
           </div>
           <div class="reg-wrap">
             <table class="reg">
               <thead><tr><th>標題</th><th>分類</th><th>瀏覽</th><th>狀態</th><th style="text-align:right">操作</th></tr></thead>
               <tbody>
-                <tr><td><b>外商求職實戰：履歷這樣寫才會被看見</b></td><td>履歷技巧</td><td>3,210</td><td><span class="badge badge-live"><i class="ri-checkbox-circle-line"></i> 已發佈</span></td><td style="text-align:right"><button class="btn btn-ghost btn-sm">編輯</button></td></tr>
-                <tr><td><b>給大三生的暑期實習時間軸</b></td><td>職涯規劃</td><td>2,540</td><td><span class="badge badge-live"><i class="ri-checkbox-circle-line"></i> 已發佈</span></td><td style="text-align:right"><button class="btn btn-ghost btn-sm">編輯</button></td></tr>
-                <tr><td>外商面試的 5 個地雷問題</td><td>面試技巧</td><td style="color:var(--text-faint)">—</td><td><span class="badge badge-soon"><i class="ri-draft-line"></i> 草稿</span></td><td style="text-align:right"><button class="btn btn-soft btn-sm">繼續編輯</button></td></tr>
-                <tr><td>實習通辦過的活動，都在這裡回顧</td><td>活動花絮</td><td style="color:var(--text-faint)">—</td><td><span class="badge badge-soon"><i class="ri-draft-line"></i> 草稿</span></td><td style="text-align:right"><button class="btn btn-soft btn-sm">繼續編輯</button></td></tr>
+                <tr><td><b>外商求職實戰：履歷這樣寫才會被看見</b></td><td>履歷技巧</td><td>3,210</td><td><span class="badge badge-live"><i class="ri-checkbox-circle-line"></i> 已發佈</span></td><td style="text-align:right"><a class="btn btn-ghost btn-sm" href="/blog-editor">編輯</a></td></tr>
+                <tr><td><b>給大三生的暑期實習時間軸</b></td><td>職涯規劃</td><td>2,540</td><td><span class="badge badge-live"><i class="ri-checkbox-circle-line"></i> 已發佈</span></td><td style="text-align:right"><a class="btn btn-ghost btn-sm" href="/blog-editor">編輯</a></td></tr>
+                <tr><td>外商面試的 5 個地雷問題</td><td>面試技巧</td><td style="color:var(--text-faint)">—</td><td><span class="badge badge-soon"><i class="ri-draft-line"></i> 草稿</span></td><td style="text-align:right"><a class="btn btn-soft btn-sm" href="/blog-editor">繼續編輯</a></td></tr>
+                <tr><td>實習通辦過的活動，都在這裡回顧</td><td>活動花絮</td><td style="color:var(--text-faint)">—</td><td><span class="badge badge-soon"><i class="ri-draft-line"></i> 草稿</span></td><td style="text-align:right"><a class="btn btn-soft btn-sm" href="/blog-editor">繼續編輯</a></td></tr>
               </tbody>
             </table>
           </div>
-          <p style="font-size:12.5px;color:var(--text-faint);margin-top:10px"><i class="ri-information-line"></i> 對應實習通既有部落格系統（<code class="coderef">data/blog.ts</code> + <code class="coderef">BlockEditor</code>）；發佈權放寬給帶 <code>verified-creator</code> 標章的帳號。詳見 <a href="https://internx-creator-zone.zeabur.app">創作者專區交接</a>。</p>
+          <p style="font-size:12.5px;color:var(--text-faint);margin-top:10px"><i class="ri-information-line"></i> 對應實習通既有部落格系統（<code class="coderef">data/blog.ts</code> + <code class="coderef">BlockEditor</code>）；發佈權放寬給帶 <code>verified-creator</code> 標章的帳號。詳見站內 <a href="/blog">部落格</a>／<a href="/creator">創作者主頁</a>。</p>
         </section>
 
         <!-- TAB: 成果展示 (existing 官方帳號 feature, stub) -->
@@ -197,7 +199,7 @@
       <div class="gap-item">
         <span class="gi" style="background:var(--complementary-white);color:#9a7400"><i class="ri-quill-pen-line"></i></span>
         <div style="flex:1"><div class="gt">主辦單位 ＝ 創作者（同一認證帳號）</div>
-          <div class="gd">辦活動與發內容共用同一帳號：<code>verified-creator</code> 標章 + <code class="coderef">Activity.createdBy</code> 已關聯，後臺把兩者整合在一處。詳見創作者專區交接 <a href="https://internx-creator-zone.zeabur.app">internx-creator-zone</a>（含 <code class="coderef">data/blog.ts</code>、verifiedRoleApplications 審核流）。</div></div>
+          <div class="gd">辦活動與發內容共用同一帳號：<code>verified-creator</code> 標章 + <code class="coderef">Activity.createdBy</code> 已關聯，後臺把兩者整合在一處。詳見站內 <a href="/creator">創作者主頁</a>／<a href="/blog">部落格</a>（含 <code class="coderef">data/blog.ts</code>、verifiedRoleApplications 審核流）。</div></div>
         <span class="gstatus partial">部分已有</span>
       </div>
       <div class="gap-item">

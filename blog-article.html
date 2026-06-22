@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>文章｜InternX 創作者專區</title>
+<link rel="icon" href="/assets/cz/favicon.png" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" />
+<link rel="stylesheet" href="/assets/cz/app.css" />
+</head>
+<body data-page="blog">
+
+<main>
+  <article class="article" id="article"></article>
+  <div class="cz-container" style="max-width:760px;margin:0 auto 60px">
+    <div class="sidebarDivider"></div>
+    <h3 style="font-size:18px;color:#11243f;margin:0 0 16px">更多這位創作者的文章</h3>
+    <div class="blogGrid" id="more"></div>
+  </div>
+</main>
+
+<script src="/assets/cz/data.js"></script>
+<script src="/assets/cz/render.js"></script>
+<script src="/assets/cz/app.js"></script>
+<script>
+  const D = window.CZ_DATA;
+  const id = new URLSearchParams(location.search).get("id") || "b1";
+  const b = D.blogs[id] || D.blogs.b1;
+  const author = D.creators[b.author];
+
+  function block(blk) {
+    if (blk.t === "h2") return `<h2>${blk.v}</h2>`;
+    if (blk.t === "h3") return `<h3>${blk.v}</h3>`;
+    if (blk.t === "p") return `<p>${blk.v}</p>`;
+    if (blk.t === "quote") return `<blockquote>${blk.v}</blockquote>`;
+    if (blk.t === "ul") return `<ul>${blk.v.map(li => `<li>${li}</li>`).join("")}</ul>`;
+    return "";
+  }
+
+  document.getElementById("article").innerHTML = `
+    <a href="/blog" style="text-decoration:none;color:#888;font-size:14px"><i class="ri-arrow-left-line"></i> 返回部落格</a>
+    <div style="height:14px"></div>
+    <span class="articleCategory">${b.category}</span>
+    <h1 class="articleTitle">${b.title}</h1>
+    <div class="articleByline">
+      <a href="/creator?id=${author.id}" style="text-decoration:none">${CZ.avatar(author.initials, author.color, 46)}</a>
+      <div>
+        <div class="bylineName"><a href="/creator?id=${author.id}" style="text-decoration:none;color:inherit">${author.name}</a> ${CZ.badgePill(author,{compact:true,clickable:true})}</div>
+        <div class="bylineMeta">${b.date}・閱讀約 ${b.readTime} 分鐘</div>
+      </div>
+      <div class="spacer"></div>
+      <div class="postStats"><span class="stat"><i class="ri-eye-line"></i> ${(b.views||0).toLocaleString()}</span><span class="stat"><i class="ri-heart-line"></i> <span id="likeNum">${b.likes}</span></span></div>
+    </div>
+    <div class="articleHeroImg"><i class="ri-quill-pen-line"></i></div>
+    <div class="articleBody">${b.content.map(block).join("")}</div>
+    <div class="articleActions">
+      <button class="likeButton" id="likeBtn"><i class="ri-heart-line"></i> 喜歡此文章</button>
+      <button class="btn btn-white" onclick="CZ.toast('連結已複製')"><i class="ri-share-line"></i> 分享</button>
+      <button class="btn btn-ghost reportLink" onclick="CZ.reportModal('blog','${b.title.replace(/'/g, "\\'")}')"><i class="ri-flag-line"></i> 檢舉文章</button>
+    </div>`;
+
+  // 按讚互動
+  let liked = false, likes = b.likes;
+  const lb = document.getElementById("likeBtn");
+  lb.addEventListener("click", () => {
+    liked = !liked; likes += liked ? 1 : -1;
+    lb.classList.toggle("liked", liked);
+    lb.innerHTML = `<i class="ri-heart-${liked?'fill':'line'}"></i> ${liked?'已喜歡':'喜歡此文章'}`;
+    document.getElementById("likeNum").textContent = likes;
+  });
+
+  // 更多文章
+  const more = (author.blogs || []).filter(x => x !== id).map(x => CZ.blogCard(D.blogs[x]));
+  document.getElementById("more").innerHTML = more.join("") || '<p class="muted">沒有更多文章了。</p>';
+</script>
+</body>
+</html>

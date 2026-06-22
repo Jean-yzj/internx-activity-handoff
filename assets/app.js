@@ -131,10 +131,11 @@ const FIELD_META = {
   file: { icon: 'ri-attachment-2', label: '檔案上傳' }, agreement: { icon: 'ri-checkbox-circle-line', label: '同意條款' },
 };
 
-/* ---- mark active top-nav link by filename ---- */
+/* ---- mark active top-nav link (handles clean URLs /editor and /editor.html) ---- */
 document.addEventListener('DOMContentLoaded', () => {
-  const here = location.pathname.split('/').pop() || 'index.html';
+  const norm = s => (s || '').replace(/\.html$/, '').replace(/^\//, '').replace(/\/+$/, '').replace(/^index$/, '');
+  const here = norm(location.pathname);
   document.querySelectorAll('.topnav a').forEach(a => {
-    if (a.getAttribute('href') === here) a.classList.add('active');
+    if (norm(a.getAttribute('href')) === here) a.classList.add('active');
   });
 });

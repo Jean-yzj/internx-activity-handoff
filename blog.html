@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>部落格｜InternX 創作者專區</title>
+<link rel="icon" href="/assets/cz/favicon.png" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" />
+<link rel="stylesheet" href="/assets/cz/app.css" />
+</head>
+<body data-page="blog">
+
+<main>
+  <section class="cz-hero" style="padding:40px 0 32px">
+    <div class="cz-container" style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:14px">
+      <div>
+        <span class="cz-eyebrow"><i class="ri-article-line"></i> 部落格</span>
+        <h1 style="font-size:calc(var(--font-size)/3.4);margin:10px 0 8px">創作者部落格</h1>
+        <p style="margin:0">來自認證創作者的求職、職涯與實習實戰分享。</p>
+      </div>
+      <a class="btn" href="/blog-editor"><i class="ri-quill-pen-line"></i> 撰寫文章</a>
+    </div>
+  </section>
+
+  <section class="cz-section" style="padding-top:28px">
+    <div class="cz-container">
+      <div id="catChips" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px"></div>
+      <div class="blogGrid" id="grid"></div>
+    </div>
+  </section>
+</main>
+
+<script src="/assets/cz/data.js"></script>
+<script src="/assets/cz/render.js"></script>
+<script src="/assets/cz/app.js"></script>
+<script>
+  const D = window.CZ_DATA;
+  const blogs = Object.values(D.blogs);
+  const cats = ["全部", "實習心得", "職涯規劃", "面試技巧", "職場文化", "技能提升", "其他"];
+  let active = "全部";
+  function render() {
+    const list = blogs.filter(b => active === "全部" || b.category === active);
+    document.getElementById("grid").innerHTML = list.map(CZ.blogCard).join("");
+  }
+  function renderCats() {
+    document.getElementById("catChips").innerHTML = cats.map(c =>
+      `<button class="chip ${c===active?'chip-confirm':'chip-ghost'}" data-c="${c}" style="cursor:pointer">${c}</button>`).join("");
+    document.querySelectorAll("[data-c]").forEach(b => b.addEventListener("click", () => { active = b.dataset.c; renderCats(); render(); }));
+  }
+  renderCats(); render();
+</script>
+</body>
+</html>
