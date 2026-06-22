@@ -6,7 +6,7 @@
 <title>整合動線 — 它如何接進實習通</title>
 <link rel="stylesheet" href="assets/style.css" />
 </head>
-<body data-strip>
+<body data-embed>
 
 <header class="topbar">
   <a href="index.html" class="brand" style="text-decoration:none">
@@ -216,6 +216,42 @@
     <p style="color:var(--text-soft);font-size:14px;margin-top:14px">
       <i class="ri-corner-down-right-line"></i> 報名者在「職涯活動媒人婆」點任一活動 → 進入活動詳情頁（即新報名頁），由上到下：活動介紹 → 報名表單 → 選擇票券 → 送出。
     </p>
+  </section>
+
+  <!-- CREATOR FLOW -->
+  <section class="section">
+    <div class="eyebrow">動線 C · 創作者</div>
+    <h2>創作者：申請認證 → 發內容 / 辦活動（同一帳號）</h2>
+    <p class="lead">創作者不是另一條註冊線。一般帳號申請「認證創作者」，審核通過拿到 <code class="coderef">verified-creator</code> 標章後，就能發部落格、辦活動、擁有創作者主頁 —— 與「主辦」共用同一個認證帳號。</p>
+
+    <div class="grid grid-3" style="margin-top:20px">
+      <a class="card card-pad feature" href="/register" style="text-decoration:none;color:inherit">
+        <h3><span class="ico ico-blue"><i class="ri-verified-badge-line"></i></span> 1 · 申請認證</h3>
+        <p>一般註冊後於 <code class="coderef">/dashboard/verified-role-apply</code> 送出，接 <code>submitVerifiedRoleApplication()</code> → <code>verifiedRoleApplications</code>。</p>
+      </a>
+      <div class="card card-pad feature">
+        <h3><span class="ico ico-gold"><i class="ri-shield-check-line"></i></span> 2 · 審核發標章</h3>
+        <p>管理員 <code>approveVerifiedRoleApplication()</code> → <code>grantVerifiedBadgeToUser()</code> → <code>profiles.badges += verified-creator</code>。</p>
+      </div>
+      <a class="card card-pad feature" href="/creator" style="text-decoration:none;color:inherit">
+        <h3><span class="ico ico-orange"><i class="ri-user-star-line"></i></span> 3 · 主頁 + 發內容</h3>
+        <p>創作者主頁（<code class="coderef">Profile.tsx</code> activeSectionTab：部落格 / 主辦活動 / 活動紀錄）+ 部落格（<code class="coderef">data/blog.ts</code> + BlockEditor）。</p>
+      </a>
+    </div>
+
+    <table class="spec" style="margin-top:18px">
+      <thead><tr><th>創作者需求</th><th>既有可重用</th><th>檔案</th></tr></thead>
+      <tbody>
+        <tr><td>認證標章</td><td><code>verified-creator</code>（金色膠囊 + quill-pen）</td><td><code>components/Badge/ProfileBadge.tsx</code></td></tr>
+        <tr><td>身分送審 / 審核</td><td>verifiedRoleApplications 申請集合 + 管理員審核</td><td><code>data/verified-role-application.ts</code></td></tr>
+        <tr><td>撰寫部落格</td><td>BlogPost + BlockEditor（發佈權放寬給帶標章者）</td><td><code>data/blog.ts</code></td></tr>
+        <tr><td>主辦活動（在主頁）</td><td>Activity.createdBy + Registration.userUid</td><td><code>data/activity.ts</code></td></tr>
+      </tbody>
+    </table>
+    <div class="callout callout-fix" style="margin-top:14px">
+      <i class="ri-links-line"></i>
+      <p style="margin:0">完整創作者規格在 <a href="/handoff">交接首頁</a> 的「創作者專區串接」分頁（CREATOR-HANDOFF.md）。Demo：<a href="/creators">創作者專區介紹</a>・<a href="/creator">創作者主頁</a>・<a href="/blog">部落格</a>。</p>
+    </div>
   </section>
 
   <!-- HOW TO CONNECT -->

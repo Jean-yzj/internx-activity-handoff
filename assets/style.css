@@ -840,3 +840,19 @@ body[data-embed] .topbar, body[data-strip] .topbar { display: none; }   /* hide 
 .ix-top .bell { width: 32px; height: 32px; border-radius: 50%; background: var(--bg-gray); display: grid; place-items: center; color: var(--text-soft); font-size: 16px; flex-shrink: 0; }
 .ix-side a.ix-nav { text-decoration: none; }
 @media (max-width: 920px) { .ix.ix-page .ix-side { display: none; } .ix.ix-page .ix-content { padding: 18px 16px; } }
+
+/* ===== Clean internx top bar for activity/docs pages (matches creator-zone chrome, replaces the dark handoff strip) ===== */
+body[data-embed] .topbar, body[data-strip] .topbar { display: none; }
+body[data-embed] { background: #f6f8fb; }
+.ixbar { position: sticky; top: 0; z-index: 60; height: 60px; display: flex; align-items: center; gap: 16px; padding: 0 22px; background: #fff; border-bottom: 1px solid var(--border); }
+.ixbar-logo { height: 30px; width: 122px; background: url(/assets/cz/img/branding/internx-logo-long-black.svg) no-repeat left center / contain; flex-shrink: 0; text-indent: -9999px; overflow: hidden; }
+.ixbar-nav { display: flex; gap: 2px; flex-wrap: wrap; }
+.ixbar-nav a { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 500; color: var(--text-soft); padding: 7px 13px; border-radius: 999px; text-decoration: none; white-space: nowrap; }
+.ixbar-nav a:hover { background: var(--bg-gray); color: var(--text); }
+.ixbar-nav a.on { background: var(--theme-color); color: #fff; }
+.ixbar-right { margin-left: auto; display: flex; align-items: center; gap: 14px; color: var(--text-soft); flex-shrink: 0; }
+.ixbar-right i { font-size: 20px; cursor: pointer; }
+.ixbar-right .av { width: 32px; height: 32px; border-radius: 50%; background: var(--theme-white); }
+.demo-pill { position: fixed; right: 18px; bottom: 18px; z-index: 80; background: #16202e; color: #fff; font-size: 12px; font-weight: 600; padding: 9px 15px; border-radius: 999px; text-decoration: none; box-shadow: 0 8px 24px rgba(0,0,0,.28); display: flex; align-items: center; gap: 7px; }
+.demo-pill:hover { background: #232f42; text-decoration: none; }
+@media (max-width: 760px) { .ixbar-nav { display: none; } }

@@ -383,13 +383,10 @@ window.CZ_DATA = {
   },
 
   navTabs: [
-    { text: "總覽", icon: "home-5-line", href: "/" },
-    { text: "認證帳號後臺", icon: "store-2-line", href: "/backstage" },
-    { text: "建立活動", icon: "edit-box-line", href: "/editor" },
-    { text: "報名頁", icon: "smartphone-line", href: "/attendee" },
-    { text: "創作者主頁", icon: "user-star-line", href: "/creator" },
-    { text: "部落格", icon: "article-line", href: "/blog" },
-    { text: "整合動線", icon: "route-line", href: "/integration" },
-    { text: "工程規格", icon: "code-s-slash-line", href: "/spec" },
+    { text: "論壇", icon: "chat-1-line", href: "https://internx.me/zh-tw/dashboard/forum", external: true },
+    { text: "人脈", icon: "group-2-line", href: "https://internx.me/zh-tw/dashboard/connection", external: true },
+    { text: "活動", icon: "suitcase-line", href: "/attendee" },
+    { text: "心得", icon: "sparkling-line", href: "https://internx.me/zh-tw/dashboard/featured", external: true },
+    { text: "創作者", icon: "quill-pen-line", href: "/creators", key: "creator" },
   ],
 };
