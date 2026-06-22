@@ -498,6 +498,8 @@ function isActivityAdmin(aid) {
 
 話題牆＝正式站既有的 **NeedsWall**（`data/needs-wall-live.js`、`pages/[lang]/dashboard/needs-wall`），不是新做的。這次要做的是**把活動與創作者接上去**。
 
+**實際畫面（staging.internx.me/zh-tw/dashboard/needs-wall「需求話題牆」，公開可看）：** 標題「大家最近在關心什麼？」＋搜尋＋「開一個新話題」＋「調整追蹤的主題」；分頁 **熱門話題 / 最新話題**；下方「建議追蹤的行業」依五大類（商業金融 / 科技製造 / 醫療民生 / 創意服務 / 公共與教育）列出各行業版區卡片（金融業、管顧業、科技業、半導體…每張可「查看」進該行業話題）。也就是說，**話題牆是「依行業（`forumId`）分版的話題目錄」**。
+
 **現況（已有，沿用）：**
 
 ```ts
@@ -523,6 +525,8 @@ interface NeedsWallTopic {
 | 2 | **活動 → 論壇討論區** | 付費 / `internx_form` 活動可開**專屬討論區**，活動頁「加入活動討論」 | 新增 `activity.chatRoomId?`；`ChatRoom.create({tags:[{targetType:'topic',targetId:activityId}]})` |
 | 3 | **創作者 → 話題牆** | 認證創作者（`badges ⊇ verified-creator` 且 `verifiedRolePitch.expertiseForumIds` 含該話題 `forumId`）→ 話題頁顯示「行業認證專家」卡，連到創作者主頁 | **沿用**既有 badge + `expertiseForumIds`，**無新欄位** |
 | 4 | **話題牆 → 活動建議**（選配）| 高票 `poll` / 高熱度話題 → 建議主辦方開相關講座 | 讀 `voteNeedsWallTopicPoll` 結果，產生建議 |
+
+> **活動要對到哪個行業版（`forumId`）？** `data/activity.ts` 目前沒有行業欄位，可由：①主辦公司的產業（`company.industryCategory` / 既有對照）推導；②或在建立活動時讓主辦方選一個 `forumId`（建議，最準）。對到後即用該 `forumId` 呼叫 `createNeedsWallTopic()`。創意/跨域活動可允許多個 `forumId`。
 
 **資料流（活動 ↔ 話題牆）：**
 
