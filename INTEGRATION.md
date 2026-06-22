@@ -17,6 +17,26 @@
 
 ---
 
+## ★ 先對齊：正式站已有 vs 這次要新增（給工程師）
+
+> 參考站：**https://staging.internx.me**（論壇 / 人脈 / 活動 / 心得）。
+> 這份 mockup 只示意「**這次才要新增、串接的部分**」。下表左欄是正式站**已經有**的（沿用），右欄是**目前沒有、要新做**的。對照真實資料模型 `data/activity.ts`、`data/needs-wall-live.js`、`data/chat.ts`、`data/verified-role-application.ts`。
+
+| 範圍 | 正式站現況（已有，沿用）| 這次新增 / 要串（正式站還沒有）|
+|---|---|---|
+| 活動本體 | `data/activity.ts`：`activityType`/`organizerType`/`feeType`(free\|paid)/`registrationType`(含 `internx_form`)/`approvalStatus`/`createdBy`/`companyId`/`registrationDeadline`/`viewCount` | 票券**販售時間＋數量＋售完**狀態引擎（§3）；報名表單可**拖曳排序**（§4.3、§13）|
+| 票券 / 收費 | `feeType` 二元（免費/付費）、`feeItems {name,price}`（`activity-form-schema.ts:328`）| `Ticket` 模型：`saleStart/saleEnd/quantity/sold` + `ticketStatus()`（§3）|
+| 報名方式 | `registrationType: 'internx_form'`（站內表單已存在）| 可拖曳、可設定的 `FormField` schema + 欄位設定（§13）|
+| **審核** | **活動發布審核**：`approvalStatus` pending/approved/rejected（平台審「活動能否上架」，`professional/home.jsx`）| **報名者審核**：`Registration.status`（主辦方審「個別報名者」，§12）——**與發布審核是兩回事** |
+| 金流 | （目前活動多走外部連結 / 線下）| **平台代收代付**：通過→通知→線上繳費→自動標記 paid（§6、§14）|
+| 通知 | 站內通知基礎建設 | 報名/審核/繳費**事件通知**（§15）|
+| 創作者身分 | `verified-creator` 標章已存在，Post / ChatMessage **已顯示** `senderBadges`；`verifiedRoleApplications` 申請＋審核；`data/blog.ts` | 創作者主頁分頁（主辦活動/部落格/活動紀錄）、blog 發佈權**放寬**給帶標章者、創作者專區 landing/directory（§10）|
+| **話題牆** | **NeedsWall** `data/needs-wall-live.js`（話題含 `forumId`/`branches`/`poll`）＋論壇 `ChatRoom` `data/chat.ts` | 與**活動／創作者**的串接：活動上架自動建話題、活動討論區、話題牆顯示行業認證專家（§17）|
+
+一句話：**活動、報名表單(internx_form)、發布審核、verified-creator 標章、話題牆(NeedsWall) 都已存在**；要新做的是「**票券時間/數量、報名者審核、平台金流、表單拖曳、創作者主頁、以及把話題牆接上活動/創作者**」。
+
+---
+
 ## 1. 前端頁面總覽
 
 | Mockup 頁面 | 真實對應畫面 | 對應現有檔案（frontend） |
@@ -474,7 +494,52 @@ function isActivityAdmin(aid) {
 
 ---
 
-## 17. 本機預覽 / 部署
+## 17. 話題牆（NeedsWall）整合
+
+話題牆＝正式站既有的 **NeedsWall**（`data/needs-wall-live.js`、`pages/[lang]/dashboard/needs-wall`），不是新做的。這次要做的是**把活動與創作者接上去**。
+
+**現況（已有，沿用）：**
+
+```ts
+// NeedsWall 話題（data/needs-wall-live.js）
+interface NeedsWallTopic {
+  id: string; title: string; summary: string;
+  forumId: string;        // 行業（24 種，見 lib/needs-wall-forum-ids.ts：finance/tech/...）
+  category: string; tags: string[];
+  poll?: { question: string; options: {id;label;votes}[] };
+  branches: { id; label; comments: {...}[] }[];  // 討論支線
+  createdBy: string; replies: number; views: number;
+}
+// 既有函式：createNeedsWallTopic() / subscribeNeedsWallTopics({forumId}) / voteNeedsWallTopicPoll()
+// 論壇 ChatRoom（data/chat.ts）：tags[{targetType:'company'|'topic'|'user', targetId}], parentId/depth
+// Post / ChatMessage 已會顯示 senderBadges（verified-creator 標章已串好）
+```
+
+**這次要串的（正式站還沒有）：**
+
+| # | 串接 | 機制 | 欄位 / 檔案 |
+|---|---|---|---|
+| 1 | **活動 → 話題牆** | 活動 `approvalStatus==='approved'` 上架時，依活動行業在對應 `forumId` 的話題牆**自動建立 / 連結一條討論支線**；活動詳情頁顯示「社群討論」連到該話題 | 新增 `activity.needsWallTopicId?`；呼叫既有 `createNeedsWallTopic()` |
+| 2 | **活動 → 論壇討論區** | 付費 / `internx_form` 活動可開**專屬討論區**，活動頁「加入活動討論」 | 新增 `activity.chatRoomId?`；`ChatRoom.create({tags:[{targetType:'topic',targetId:activityId}]})` |
+| 3 | **創作者 → 話題牆** | 認證創作者（`badges ⊇ verified-creator` 且 `verifiedRolePitch.expertiseForumIds` 含該話題 `forumId`）→ 話題頁顯示「行業認證專家」卡，連到創作者主頁 | **沿用**既有 badge + `expertiseForumIds`，**無新欄位** |
+| 4 | **話題牆 → 活動建議**（選配）| 高票 `poll` / 高熱度話題 → 建議主辦方開相關講座 | 讀 `voteNeedsWallTopicPoll` 結果，產生建議 |
+
+**資料流（活動 ↔ 話題牆）：**
+
+```
+主辦方上架活動 (approved)
+   └─▶ 後端 hook：依 activity.activityType + 行業 → forumId
+        └─▶ createNeedsWallTopic({ forumId, title:活動名, tags, createdBy })
+             └─▶ 回寫 activity.needsWallTopicId
+報名者看活動頁 ──▶「社群討論」區塊 ──▶ /dashboard/needs-wall/{needsWallTopicId}
+                                          └─▶ 話題頁底部：行業認證專家（expertiseForumIds 命中）
+```
+
+> 重點：話題牆、論壇、verified-creator 標章顯示**都已存在**；新增的只有「活動 ↔ 話題」的關聯欄位（`needsWallTopicId` / `chatRoomId`）與上架時的建立 hook。創作者在話題牆的曝光是純查詢（badge + expertiseForumIds），不需新資料。
+
+---
+
+## 18. 本機預覽 / 部署
 
 ```bash
 # mockup 本機預覽（零依賴）
