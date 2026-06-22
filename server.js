@@ -23,7 +23,13 @@ http.createServer((req, res) => {
   if (!path.extname(file) && fs.existsSync(file + '.html')) file += '.html';
   fs.readFile(file, (err, data) => {
     if (err) { res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' }); return res.end('404 Not Found'); }
-    res.writeHead(200, { 'Content-Type': TYPES[path.extname(file)] || 'application/octet-stream' });
+    const ext = path.extname(file);
+    // HTML/CSS/JS change every deploy — force revalidation so visitors never see a stale mockup.
+    // Images rarely change, so allow a short cache.
+    const cache = ['.html', '.css', '.js'].includes(ext)
+      ? 'no-cache, must-revalidate'
+      : 'public, max-age=3600';
+    res.writeHead(200, { 'Content-Type': TYPES[ext] || 'application/octet-stream', 'Cache-Control': cache });
     res.end(data);
   });
 }).listen(PORT, () => console.log(`InternX handoff mockup → http://localhost:${PORT}`));
