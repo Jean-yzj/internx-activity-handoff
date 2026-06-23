@@ -53,6 +53,20 @@
   #regBody td:nth-child(1), #regBody td:nth-child(2), #regBody td:nth-child(4), #regBody td:nth-child(5) { white-space: nowrap; }
   #regBody td:nth-child(3) { min-width: 170px; }
   #regBody .regActs { white-space: nowrap; }
+  /* 手機：表格改成卡片式，避免欄位被擠出畫面（報名名單／創作內容） */
+  @media (max-width: 640px) {
+    .respTable thead { display: none; }
+    .respTable, .respTable tbody, .respTable tr, .respTable td { display: block; width: auto; }
+    .respTable tr { border: 1px solid #e6eaf0; border-radius: 12px; padding: 4px 14px; margin: 0 0 12px; background: #fff; }
+    .respTable tr:nth-child(even) td { background: none; }
+    .respTable td { border: none !important; padding: 10px 0; display: flex; gap: 12px; align-items: baseline; justify-content: space-between; white-space: normal !important; min-width: 0 !important; text-align: left !important; }
+    .respTable td + td { border-top: 1px solid #f0f2f6 !important; }
+    .respTable td::before { content: attr(data-label); font-size: 12px; font-weight: 600; color: #8a94a3; flex: 0 0 auto; }
+    .respTable td.cardStack { flex-direction: column; align-items: flex-start; gap: 6px; }
+    .respTable td:last-child { flex-direction: column; align-items: stretch; gap: 8px; }
+    .respTable td:last-child .btn { width: 100%; }
+    .respTable .regActs { display: flex; flex-direction: column; gap: 8px; }
+  }
   /* 既有功能分頁的置中說明區 */
   .sumNote { text-align: center; padding: 30px 22px; }
   .sumNote .ricon { width: 52px; height: 52px; border-radius: 14px; background: var(--theme-white); color: var(--theme-color); display: grid; place-items: center; font-size: 24px; margin: 0 auto 14px; }
@@ -138,10 +152,11 @@
 
           <!-- 報名名單 + 審核 -->
           <div class="tabPane" data-pane="oa" data-pane-key="regs">
-            <div class="sectionHeader"><div class="sectionHeaderLeft"><i class="ri-list-check-2"></i> 學生創業者小聚 · 報名名單</div></div>
+            <div class="sectionHeader"><div class="sectionHeaderLeft"><i class="ri-list-check-2"></i> 學生創業者小聚 · 報名名單</div>
+              <button class="btn btn-white btn-small" onclick="exportRegs()"><i class="ri-file-excel-2-line"></i> 匯出 Excel</button></div>
             <p style="font-size:13px;color:#889;margin:0 0 14px">審核制：通過後系統通知繳費，繳費完成自動標記。匿名背景只給主辦方看。</p>
             <div class="tableWrap">
-              <table>
+              <table class="respTable">
                 <thead><tr><th>報名者</th><th>票種</th><th>匿名背景（過往經歷）</th><th>狀態</th><th style="text-align:right">操作</th></tr></thead>
                 <tbody id="regBody"></tbody>
               </table>
@@ -162,12 +177,12 @@
             <div class="sectionHeader"><div class="sectionHeaderLeft"><i class="ri-article-line"></i> 我的內容</div>
               <a class="btn btn-small" href="/blog-editor"><i class="ri-add-line"></i> 撰寫文章</a></div>
             <div class="tableWrap">
-              <table>
+              <table class="respTable">
                 <thead><tr><th>標題</th><th>分類</th><th>瀏覽</th><th>狀態</th><th style="text-align:right">操作</th></tr></thead>
                 <tbody>
-                  <tr><td><b>外商求職實戰：履歷這樣寫才會被看見</b></td><td>履歷技巧</td><td>3,210</td><td><span class="tg live">已發佈</span></td><td style="text-align:right"><a class="btn btn-white btn-small" href="/blog-editor">編輯</a></td></tr>
-                  <tr><td><b>給大三生的暑期實習時間軸</b></td><td>職涯規劃</td><td>2,540</td><td><span class="tg live">已發佈</span></td><td style="text-align:right"><a class="btn btn-white btn-small" href="/blog-editor">編輯</a></td></tr>
-                  <tr><td>外商面試的 5 個地雷問題</td><td>面試技巧</td><td style="color:#aab">—</td><td><span class="tg soon">草稿</span></td><td style="text-align:right"><a class="btn btn-white btn-small" href="/blog-editor">繼續編輯</a></td></tr>
+                  <tr><td data-label="標題"><b>外商求職實戰：履歷這樣寫才會被看見</b></td><td data-label="分類">履歷技巧</td><td data-label="瀏覽">3,210</td><td data-label="狀態"><span class="tg live">已發佈</span></td><td data-label="操作" style="text-align:right"><a class="btn btn-white btn-small" href="/blog-editor">編輯</a></td></tr>
+                  <tr><td data-label="標題"><b>給大三生的暑期實習時間軸</b></td><td data-label="分類">職涯規劃</td><td data-label="瀏覽">2,540</td><td data-label="狀態"><span class="tg live">已發佈</span></td><td data-label="操作" style="text-align:right"><a class="btn btn-white btn-small" href="/blog-editor">編輯</a></td></tr>
+                  <tr><td data-label="標題">外商面試的 5 個地雷問題</td><td data-label="分類">面試技巧</td><td data-label="瀏覽" style="color:#aab">—</td><td data-label="狀態"><span class="tg soon">草稿</span></td><td data-label="操作" style="text-align:right"><a class="btn btn-white btn-small" href="/blog-editor">繼續編輯</a></td></tr>
                 </tbody>
               </table>
             </div>
@@ -230,7 +245,7 @@
       let act = '<span style="color:#aab;font-size:12px">—</span>';
       if (r.status==="pending") act = `<button class="btn btn-small" onclick="setReg(${i},'approved')">通過</button> <button class="btn btn-white btn-small" onclick="setReg(${i},'rejected')">拒絕</button>`;
       else if (r.status==="approved") act = `<span style="color:#889;font-size:12px">系統已通知繳費</span> <button class="btn btn-white btn-small" onclick="setReg(${i},'paid')">模擬繳費</button>`;
-      return `<tr><td><b>${r.name}</b></td><td>${r.ticket}</td><td>${traits}</td><td><span class="tg ${s.cls}">${s.label}</span></td><td><div class="regActs">${act}</div></td></tr>`;
+      return `<tr><td data-label="報名者"><b>${r.name}</b></td><td data-label="票種">${r.ticket}</td><td data-label="背景" class="cardStack">${traits}</td><td data-label="狀態"><span class="tg ${s.cls}">${s.label}</span></td><td data-label="操作"><div class="regActs">${act}</div></td></tr>`;
     }).join("");
     const pend = regs.filter(r=>r.status==="pending").length;
     document.getElementById("statPend").textContent = pend;
@@ -239,6 +254,17 @@
   }
   function setReg(i,s){ regs[i].status = s; renderRegs();
     CZ.toast(s==="approved" ? "已通過，實習通將寄信通知報名者繳費" : s==="rejected" ? "已拒絕，已通知報名者" : "報名者已於平台繳費，自動標記已付款"); }
+  window.exportRegs = function(){
+    const head = ["報名者","票種","匿名背景（過往經歷）","狀態"];
+    const rows = regs.map(r => [r.name, r.ticket, r.traits.join("、"), ST[r.status].label]);
+    const esc = v => '"' + String(v).replace(/"/g,'""') + '"';
+    const csv = [head, ...rows].map(r => r.map(esc).join(",")).join("\r\n");
+    const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = "學生創業者小聚_報名名單.csv";
+    document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(a.href);
+    CZ.toast("已匯出 " + regs.length + " 筆報名（CSV，可用 Excel 開啟）");
+  };
   renderRegs();
 </script>
 </body>
