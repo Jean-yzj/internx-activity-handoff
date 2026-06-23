@@ -181,36 +181,22 @@
             <div class="sectionHeader"><div class="sectionHeaderLeft"><i class="ri-medal-line"></i> 成果展示</div></div>
             <div class="sumNote">
               <div class="ricon"><i class="ri-image-2-line"></i></div>
-              <h3>沿用官方帳號既有功能</h3>
-              <p>對應 <code>professional/activity-showcase</code>：活動結束後上傳花絮與回饋，前台活動卡顯示「成果版本」。此分頁不需新做，掛在同一個後臺即可。</p>
+              <h3>活動成果與花絮</h3>
+              <p>活動結束後，在這裡上傳花絮與成果回饋，會顯示在活動卡的「成果版本」。</p>
             </div>
           </div>
           <div class="tabPane" data-pane="oa" data-pane-key="reviews">
             <div class="sectionHeader"><div class="sectionHeaderLeft"><i class="ri-chat-3-line"></i> 回應評價</div></div>
             <div class="sumNote">
               <div class="ricon"><i class="ri-chat-3-line"></i></div>
-              <h3>沿用官方帳號既有功能</h3>
-              <p>代表公司回覆求職者評價、發布最新資訊。與既有官方帳號功能相同，掛在同一個後臺即可，不需新做。</p>
+              <h3>回覆評價與提問</h3>
+              <p>代表公司回覆求職者的評價與提問、發布最新資訊。</p>
             </div>
           </div>
 
         </div>
       </div>
     </div>
-
-    <!-- 給工程師：整合缺口（整段置於版型下方、滿欄） -->
-    <section class="cz-section" style="border-top:1px solid #eef0f4;margin-top:8px;padding-top:24px">
-      <span class="cz-eyebrow"><i class="ri-tools-line"></i> 給工程師 · 整合檢查</span>
-      <h2 class="cz-section-title" style="font-size:22px;margin:8px 0 4px">把這個後臺接進官方帳號，還缺什麼</h2>
-      <p style="color:#667;margin:0 0 14px">前端已示意完整，以下為需補齊的串接點（對照現有程式碼）。完整規格見 <a href="/handoff">交接首頁</a>。</p>
-      <div style="background:#fff;border:1px solid #e7eaf0;border-radius:14px;padding:6px 20px">
-        <div class="gapItem"><span class="gi"><i class="ri-quill-pen-line"></i></span><div style="flex:1"><div class="gt">主辦單位 ＝ 創作者（同一認證帳號）</div><div class="gd">辦活動與發內容共用同一帳號：<code>verified-creator</code> 標章 + <code>Activity.createdBy</code>。</div></div><span class="gs partial">部分已有</span></div>
-        <div class="gapItem"><span class="gi"><i class="ri-list-check-2"></i></span><div style="flex:1"><div class="gt">報名名單 + 審核狀態機</div><div class="gd"><code>data/registration.ts</code> 加 <code>status</code>：待審核→已通過→已付款／已拒絕 + 通過/拒絕 API。</div></div><span class="gs partial">部分已有</span></div>
-        <div class="gapItem"><span class="gi"><i class="ri-bank-card-line"></i></span><div style="flex:1"><div class="gt">金流：平台代收代付</div><div class="gd">通過→系統通知→平台繳費→自動回寫 paid，主辦方不對帳（<code>Payments.tsx</code>）。</div></div><span class="gs todo">待補</span></div>
-        <div class="gapItem"><span class="gi"><i class="ri-notification-3-line"></i></span><div style="flex:1"><div class="gt">通知</div><div class="gd">審核結果、待繳費提醒（Email + 站內）。</div></div><span class="gs todo">待補</span></div>
-        <div class="gapItem"><span class="gi" style="background:#e4f9e8;color:#1a8a35"><i class="ri-share-line"></i></span><div style="flex:1"><div class="gt">公開報名連結</div><div class="gd">活動公開頁 <code>activity/[activityId]</code> 已存在，分享即用。</div></div><span class="gs have">已有</span></div>
-      </div>
-    </section>
 
   </div>
 </main>
