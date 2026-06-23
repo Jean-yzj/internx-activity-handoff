@@ -408,7 +408,7 @@ main {
    個人頁 / 創作者主檔（沿用 Profile.module.css）
    ===================================================================== */
 .profile { padding: 28px 0 60px; }
-.layout { display: flex; gap: 32px; align-items: stretch; flex-wrap: wrap; width: 100%; }
+.layout { display: flex; gap: 32px; align-items: flex-start; flex-wrap: wrap; width: 100%; }
 .sidebar { flex: 0 0 300px; min-width: 0; display: flex; flex-direction: column; }
 .sidebarCard {
   background-color: white; border-radius: var(--border-radius); border: 1px solid #e0e0e0;
@@ -458,7 +458,7 @@ main {
 .mainCard {
   padding: 28px 32px; border: 1px solid #e0e0e0; border-top: none;
   border-radius: 0 0 var(--border-radius) var(--border-radius);
-  background-color: white; box-shadow: 0 4px 12px rgba(0,0,0,.08); width: 100%; min-height: 58vh;
+  background-color: white; box-shadow: 0 4px 12px rgba(0,0,0,.08); width: 100%; min-height: 320px;
 }
 .tabPane { display: none; }
 .tabPane.active { display: block; }
