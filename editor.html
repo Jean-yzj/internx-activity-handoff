@@ -73,6 +73,11 @@
           <label>活動介紹</label>
           <textarea id="evIntro" class="textarea" rows="4">把正在第一線的創業者放進同一個房間，交換課本上學不到的經驗，也找到下一個能互相支援的夥伴。聊的是創業早期最真實的問題：內容、資源、驗證、社群，還有下一步該怎麼走。</textarea>
         </div>
+        <div class="field">
+          <label>當天流程 <span style="font-weight:400;color:#8a94a3;font-size:13px">（選填，會顯示在報名頁）</span></label>
+          <div id="agendaList"></div>
+          <button class="btn btn-soft btn-sm" onclick="addAgenda()" style="margin-top:8px"><i class="ri-add-line"></i> 新增時段</button>
+        </div>
         <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:8px">
           <button class="btn btn-primary" onclick="goStep('tickets')">下一步：票券設定 <i class="ri-arrow-right-line"></i></button>
         </div>
@@ -299,6 +304,28 @@ function addTicket(){
 }
 renderTickets();
 
+/* ---------------- AGENDA (當天流程) ---------------- */
+let agenda = [
+  {time:'14:00', title:'報到', desc:'抵達 Garage+，領取名牌。'},
+  {time:'14:30', title:'匿名背景交換', desc:'依照三種經驗軸線，找到可以互補的對象。'},
+  {time:'16:40', title:'自由交流', desc:'保留一對一延伸時間，交換可合作的下一步。'},
+  {time:'18:00', title:'賦歸', desc:'活動結束。'},
+];
+function renderAgenda(){
+  document.getElementById('agendaList').innerHTML = agenda.map((a,i)=>`
+    <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:8px">
+      <input class="input" style="flex:0 0 88px" placeholder="14:00" value="${esc(a.time)}" oninput="agenda[${i}].time=this.value">
+      <div style="flex:1;display:flex;flex-direction:column;gap:6px;min-width:0">
+        <input class="input" placeholder="標題（例：報到）" value="${esc(a.title)}" oninput="agenda[${i}].title=this.value">
+        <input class="input" placeholder="說明（選填）" value="${esc(a.desc||'')}" oninput="agenda[${i}].desc=this.value">
+      </div>
+      <button class="btn btn-soft btn-sm" title="刪除時段" onclick="removeAgenda(${i})" style="flex:0 0 auto"><i class="ri-delete-bin-line"></i></button>
+    </div>`).join('') || `<p class="muted" style="font-size:13px;margin:4px 0">尚未新增時段；報名頁不會顯示「當天流程」。</p>`;
+}
+function addAgenda(){ agenda.push({time:'',title:'',desc:''}); renderAgenda(); }
+function removeAgenda(i){ agenda.splice(i,1); renderAgenda(); }
+renderAgenda();
+
 /* ---------------- FORM BUILDER ----------------  (FIELD_META is in app.js) */
 function fieldDefaults(type){
   switch(type){
@@ -467,6 +494,7 @@ function saveActivity(){
     tickets: tickets.map(t=>({ name:t.name, price:t.price, quantity:t.quantity, sold:t.sold,
       saleStart:t.saleStart?t.saleStart.toISOString():null, saleEnd:t.saleEnd?t.saleEnd.toISOString():null, desc:t.desc })),
     fields: fields.map(f=>{ const c={...f}; delete c.open; return c; }),
+    agenda: agenda.filter(a=>a.time||a.title).map(a=>({ time:a.time, title:a.title, desc:a.desc })),
   });
 }
 function previewRegistration(){ saveActivity(); toast('已帶入目前內容，開啟報名頁預覽'); window.open('attendee.html','_blank'); }

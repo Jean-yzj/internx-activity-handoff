@@ -802,5 +802,6 @@ mockup 以 GitHub Pages 部署（main 分支 / 根目錄）。這份 repo 與 in
 | 13 | 話題牆串接（活動上架自動建話題 / 專屬討論區）| **NeedsWall / ChatRoom 既有** | §17 | 新增 `activity.needsWallTopicId` / `chatRoomId`；`data/needs-wall-live.js`、`data/chat.ts` |
 | 14 | 話題頁「行業認證專家」 | **純查詢、無新欄位** | §17 | `verifiedRolePitch.expertiseForumIds` 命中 `forumId` |
 | 15 | 標章顯示（論壇/心得/部落格作者列）| **`MergedSenderBadges` 已顯示 `verified-creator`** | §10 / §17 | 部落格 byline 補上即可 |
+| 16 | **當天流程 `agenda[]`**：編輯器「活動內容」可新增時段（時間 / 標題 / 說明），報名頁顯示 | 報名頁原本只有寫死範例 | §1.1 編輯器 | 新增 `activity.agenda: {time,title,desc}[]`；報名頁 `if(agenda.length)` 才顯示 |
 
 **一句話：** 真正「新發明」的後端只有票券引擎、報名者審核狀態機、平台金流串接、相關 Cloud Functions 與規則；其餘（活動本體、報名表單、發布審核、professional 後台、部落格、話題牆、標章顯示）都是**把既有系統接起來**。
