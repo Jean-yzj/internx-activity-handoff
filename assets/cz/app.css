@@ -441,19 +441,18 @@ main {
 .main { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; }
 .main .mainCard { flex: 1 1 auto; }
 .sectionTabs {
-  display: flex; gap: 0; border: 1px solid #e0e0e0; border-bottom-color: #e5e8ee;
+  display: flex; gap: 6px; align-items: center;
+  border: 1px solid #e0e0e0; border-bottom-color: #e5e8ee;
   background: #fff; border-radius: var(--border-radius) var(--border-radius) 0 0;
-  width: 100%; overflow-x: auto;
+  width: 100%; overflow-x: auto; padding: 10px 12px;
 }
 .sectionTab {
-  flex: 1 0 auto; padding: 15px 18px; border: none; background: none;
+  flex: 0 0 auto; padding: 8px 16px; border: none; background: none;
   font-size: 15px; font-weight: 500; color: #5b6b7e; cursor: pointer;
-  border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; transition: color .15s ease;
+  border-radius: 999px; white-space: nowrap; transition: background .15s ease, color .15s ease;
 }
-.sectionTab:hover { color: var(--theme-color); }
-.sectionTab.active {
-  color: var(--theme-color); border-bottom-color: var(--theme-color); font-weight: 600;
-}
+.sectionTab:hover { background: #f1f5fa; color: var(--theme-color); }
+.sectionTab.active, .sectionTab.active:hover { background: var(--theme-color); color: #fff; font-weight: 600; }
 .mainCard {
   padding: 28px 32px; border: 1px solid #e0e0e0; border-top: none;
   border-radius: 0 0 var(--border-radius) var(--border-radius);
