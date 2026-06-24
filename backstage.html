@@ -12,9 +12,16 @@
   .oaPill { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 999px; }
   .oaPill.blue { background: var(--theme-white); color: var(--theme-color-black); }
   .oaPill.gold { background: #fff4d6; color: #9a7400; }
-  /* 待審核統計用暖色（additive，不覆寫 cz 的 .statBox 基底） */
-  .statBox.warn { background: #fff8f3; border-color: #f3d9c0; }
+  /* 統計列：與創作者頁同款（單一分隔列；待審核維持暖色數字） */
+  .statRow { background: #f7faff; border: 1px solid #e6eef8; border-radius: 12px; }
+  .statBox { background: none; border: none; border-radius: 0; padding: 11px 6px; }
+  .statBox + .statBox { border-left: 1px solid #e6eef8; }
+  .statBox b { font-size: 19px; }
+  .statBox.warn { background: none; border: none; }
   .statBox.warn b { color: #c35500; }
+  /* 名字深色、頭像柔和陰影（對齊創作者頁側欄） */
+  .profileName { font-size: 20px; font-weight: 700; color: #11243f; }
+  #bkAvatar .avatar { box-shadow: 0 4px 14px rgba(1,130,253,.18); }
   /* 活動列 */
   .mRow { display: flex; gap: 14px; align-items: center; background: #fff; border: 1px solid #e7eaf0; border-radius: 14px; padding: 14px; margin-bottom: 12px; }
   .mRow .thumb { width: 58px; height: 58px; border-radius: 11px; flex-shrink: 0; background: linear-gradient(135deg, var(--theme-light), var(--theme-color)); }
@@ -43,11 +50,7 @@
   .layout { align-items: flex-start; }
   /* 導覽移到側欄後，右側只剩內容卡：補回上框與完整圓角 */
   .main .mainCard { border-top: none; border-radius: 0 0 var(--border-radius) var(--border-radius); }
-  /* 側欄導覽（取代上方 tab，貼近實習通官方帳號後台的側欄） */
-  .navLabel { font-size: 11.5px; font-weight: 600; color: #9aa5b4; letter-spacing: .04em; padding: 0 10px 6px; }
-  .bkNav { font-size: 14px; padding: 9px 12px; }
-  .bkNav.active { background: var(--theme-white); color: var(--theme-color-black); font-weight: 600; }
-  .bkNav.active i { color: var(--theme-color); }
+  /* 報名名單分頁的待審 badge */
   .navPend { background: #d80f0f; color: #fff; font-size: 11px; font-weight: 700; border-radius: 999px; padding: 0 6px; margin-left: 5px; }
   /* 報名名單表格：短欄不換行（避免姓名直書），背景標籤欄可換行 */
   #regBody td:nth-child(1), #regBody td:nth-child(2), #regBody td:nth-child(4), #regBody td:nth-child(5) { white-space: nowrap; }
