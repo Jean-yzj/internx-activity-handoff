@@ -76,8 +76,8 @@
         </div>
         <div class="editorArea articleBody" id="editor" contenteditable="true">
           <h2>從這裡開始寫你的故事⋯</h2>
-          <p>選取文字後點擊上方工具列可套用格式。這個編輯器對應平台既有的 <strong>BlockEditor</strong> 元件。</p>
-          <ul><li>支援標題、粗體、清單、引用、連結與圖片</li><li>送出時會轉成 Markdown 儲存到 BlogPost.content</li></ul>
+          <p>選取文字後點擊上方工具列可套用格式。</p>
+          <ul><li>支援標題、粗體、清單、引用、連結與圖片</li><li>送出後會儲存成你的文章內容</li></ul>
         </div>
       </div>
       <div id="previewWrap" style="display:none">
@@ -137,18 +137,18 @@
       <div style="text-align:center">
         <div class="publishCheck"><i class="ri-checkbox-circle-fill"></i></div>
         <h3 style="margin:6px 0 4px">文章已發佈！</h3>
-        <p class="muted" style="margin:0 0 18px;font-size:13.5px">這篇文章透過 <code>authorId</code> 連到你的帳號，會自動出現在以下三個位置：</p>
+        <p class="muted" style="margin:0 0 18px;font-size:13.5px">這篇文章會連到你的帳號，自動出現在以下三個位置：</p>
       </div>
       <div class="linkFlow">
-        <div class="lfStep"><div class="lfIco"><i class="ri-user-star-line"></i></div><div><b>你的創作者主頁 › 部落格分頁</b><span>對應 fetchUserBlogPosts(authorId)，訪客點頭像就能看到。</span></div></div>
-        <div class="lfStep"><div class="lfIco"><i class="ri-article-line"></i></div><div><b>平台部落格列表 /blog</b><span>進入全站 BlogPost 流，依分類與時間排序。</span></div></div>
-        <div class="lfStep"><div class="lfIco"><i class="ri-bell-line"></i></div><div><b>追蹤者的通知與動態</b><span>對應 Notification → 追蹤你的人會收到新文章提醒。</span></div></div>
+        <div class="lfStep"><div class="lfIco"><i class="ri-user-star-line"></i></div><div><b>你的創作者主頁 › 部落格分頁</b><span>訪客點你的頭像進到主頁就能看到。</span></div></div>
+        <div class="lfStep"><div class="lfIco"><i class="ri-article-line"></i></div><div><b>平台部落格列表</b><span>進入全站文章流，依分類與時間排序。</span></div></div>
+        <div class="lfStep"><div class="lfIco"><i class="ri-bell-line"></i></div><div><b>追蹤者的通知與動態</b><span>追蹤你的人會收到新文章提醒。</span></div></div>
       </div>
       <div style="display:flex;gap:10px;justify-content:center;margin-top:20px;flex-wrap:wrap">
         <a class="btn btn-small" href="/creator#blog"><i class="ri-user-star-line"></i> 查看主頁部落格</a>
         <a class="btn btn-white btn-small" href="/blog"><i class="ri-article-line"></i> 查看部落格列表</a>
       </div>
-      <p class="muted" style="font-size:12px;text-align:center;margin:14px 0 0">（Demo：實際發佈會寫入 <code>BlogPost</code> 集合並標記 <code>published:true</code>。）</p>
+      <p class="muted" style="font-size:12px;text-align:center;margin:14px 0 0">（Demo：實際發佈會同步到你的部落格。）</p>
     `);
   });
 </script>

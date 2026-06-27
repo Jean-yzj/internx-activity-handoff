@@ -19,7 +19,7 @@
         <i class="ri-route-line"></i>
         <div>
           <h2>創作者註冊：走哪一條路？</h2>
-          <p>創作者<strong>不是</strong>一條獨立的註冊流程。所有人都用<strong>同一個註冊入口</strong>，差別只在「<strong>何時／何處</strong>」申請「認證創作者」標章。下面是兩個可並行的入口，共用同一張認證表單與審核機制（對應交接文件 §10.1 入口 A／B）。</p>
+          <p>創作者<strong>不是</strong>一條獨立的註冊流程。所有人都用<strong>同一個註冊入口</strong>，差別只在「<strong>何時／何處</strong>」申請「認證創作者」標章。下面是兩個可並行的入口，共用同一張認證表單與審核機制。</p>
         </div>
       </div>
       <div class="flowCompare">
@@ -29,7 +29,6 @@
           <ol class="foSteps">
             <li>一般註冊（Email／Google）→ 完成 onboarding → 正常使用</li>
             <li>想成為創作者時，到「設定 → 申請認證創作者」</li>
-            <li>對應路由 <code>/dashboard/verified-role-apply</code></li>
           </ol>
           <p class="foNote"><i class="ri-thumb-up-line"></i> 註冊零阻力，不擋一般使用者；創作者只是「加掛」的身分。</p>
         </div>
@@ -44,7 +43,7 @@
           <p class="foNote"><i class="ri-error-warning-line"></i> 引導完整、創作者意圖明確；代價是拉長註冊漏斗。</p>
         </div>
       </div>
-      <div class="feFoot"><i class="ri-information-line"></i><span>下方示範的是<strong>入口 B 的「選身分」介面</strong>。無論走哪個入口，後端都走 <code>verifiedRoleApplications</code> 申請 → 管理員審核 → <code>grantVerifiedBadgeToUser</code> 發標章（並行邏輯見交接文件 §10.1）。建議預設採<strong>入口 A（事後申請）</strong>。</span></div>
+      <div class="feFoot"><i class="ri-information-line"></i><span>下方示範的是<strong>入口 B 的「選身分」介面</strong>。不論從哪個入口申請，都會送到同一套審核流程，通過後取得認證標章。</span></div>
     </div>
 
     <!-- 步驟列 -->
@@ -96,7 +95,7 @@
     <section id="step2" style="display:none">
       <div class="cz-section-head" style="margin-bottom:18px">
         <h2 class="cz-section-title" style="font-size:24px">認證創作者資訊</h2>
-        <p class="cz-section-sub">填寫以下資訊以申請「認證創作者」標章，團隊將於 3–5 個工作天內審核。對應後端 <code>verifiedRoleApplications</code> 集合。</p>
+        <p class="cz-section-sub">填寫以下資訊以申請「認證創作者」標章，團隊將於 3–5 個工作天內審核。</p>
       </div>
       <div class="formCard">
         <label class="formLabel">所在產業或公司 *</label>
@@ -112,7 +111,7 @@
 
         <label class="formLabel" style="margin-top:16px">補充證明連結（選填）</label>
         <input class="input" id="evidence" type="url" placeholder="作品集、課程、個人網站等連結" maxlength="1000" />
-        <div class="fieldHint">此欄位與上傳檔案僅供審核使用，不會公開（對應 verifiedRoleApplicationPrivate）。</div>
+        <div class="fieldHint">此欄位與上傳檔案僅供審核使用，不會公開。</div>
 
         <label class="formLabel" style="margin-top:16px">或上傳證明檔案（選填，最多 5 個）</label>
         <div class="fileDrop" onclick="CZ.toast('Demo 不含真實上傳')"><i class="ri-attachment-2"></i> 點擊上傳證明檔案</div>

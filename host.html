@@ -47,13 +47,13 @@
       <div class="cz-section-head center" style="margin:0 auto 10px">
         <span class="cz-eyebrow"><i class="ri-verified-badge-line"></i> 第一步</span>
         <h2 class="cz-section-title">如何取得主辦單位身份</h2>
-        <p class="cz-section-sub" style="margin:6px auto 0">沒有「主辦帳號」這種東西 —— 所有人同一個帳號，「主辦／創作者」只是一個 <code>verified-creator</code> 標章。取得標章有<strong>兩個入口（可並行）</strong>：① 一般註冊後再申請（建議）；② 註冊時就選「認證創作者」直接送審。兩者走<strong>同一套審核</strong>，下面三步相同。</p>
+        <p class="cz-section-sub" style="margin:6px auto 0">「主辦」不是另一種帳號，而是你現有帳號上的一枚<strong>認證標章</strong>。取得方式有<strong>兩個入口（都可以）</strong>：① 先一般註冊，想辦活動時再申請認證（建議）；② 註冊時直接選「認證創作者」送審。兩種方式審核相同，下面三步都一樣。</p>
       </div>
       <div class="cz-creator-grid" id="identitySteps" style="max-width:980px;margin:24px auto 0"></div>
       <div class="center" style="margin-top:26px"><a class="btn" href="/register"><i class="ri-arrow-right-line"></i> 前往申請認證</a></div>
       <div class="infoBanner" style="max-width:760px;margin:22px auto 0">
         <i class="ri-information-line"></i>
-        <span>建議實作採「<strong>事後申請</strong>」：一般註冊零阻力，想辦活動時再到「設定 → 申請認證」。完整身分流程見 <a href="/register">申請認證頁</a> 與 <a href="/creators">創作者專區介紹</a>。</span>
+        <span>最省事的方式是「<strong>事後申請</strong>」：先一般註冊、零阻力使用，等要辦活動時再到「設定 → 申請認證」。完整流程見 <a href="/register">申請認證頁</a> 與 <a href="/creators">創作者專區介紹</a>。</span>
       </div>
     </div>
   </section>
@@ -79,7 +79,7 @@
     <div class="cz-container">
       <div class="cz-section-head center" style="margin:0 auto 28px">
         <h2 class="cz-section-title">認證後，你會得到</h2>
-        <p class="cz-section-sub" style="margin:0 auto">主辦能力與平台既有的後台、活動、部落格完全打通，全部掛在同一個認證帳號下。</p>
+        <p class="cz-section-sub" style="margin:0 auto">主辦能力與你的後台、活動、部落格完全打通，全部掛在同一個認證帳號下。</p>
       </div>
       <div class="cz-creator-grid" id="perkGrid"></div>
     </div>
@@ -107,7 +107,7 @@
   const identity = [
     { n:"1", gold:false, icon:"ri-edit-box-line", title:"申請認證", desc:"在「設定 → 申請認證創作者」填寫所在產業／公司與相關經歷，可附作品連結。",
       links:[["填寫認證表單","/register"]] },
-    { n:"2", gold:false, icon:"ri-time-line", title:"平台審核", desc:"團隊於 3–5 個工作天內審核；審核期間你仍可正常使用平台。對應後端 verifiedRoleApplications。", links:[] },
+    { n:"2", gold:false, icon:"ri-time-line", title:"平台審核", desc:"團隊於 3–5 個工作天內審核；審核期間你仍可正常使用平台。", links:[] },
     { n:"3", gold:true, icon:"ri-verified-badge-line", title:"取得標章 · 解鎖", desc:"通過後名字旁出現認證標章，並解鎖「建立活動」與認證帳號後台。",
       links:[["看認證帳號後台","/backstage"]] },
   ];

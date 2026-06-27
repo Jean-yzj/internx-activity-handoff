@@ -227,7 +227,7 @@
           <a class="btn btn-small" href="/blog-editor"><i class="ri-add-line"></i> 撰寫文章</a></div>
         ${(blogIds.length || drafts.length) ? rows.join("")
           : CZ.emptyState({ icon: "quill-pen-line", title: "還沒有文章", desc: "寫下你的求職心法，發佈後會出現在你的主頁與部落格。", ctaText: "撰寫第一篇", ctaHref: "/blog-editor", ctaIcon: "quill-pen-line" })}
-        <p class="muted" style="font-size:12.5px;margin-top:14px"><i class="ri-information-line"></i> 草稿僅自己可見；發佈後同步到 <a href="/blog" style="color:var(--theme-color)">部落格列表</a>。完整管理對應平台 <code>/blog/manage</code>。</p>`;
+        <p class="muted" style="font-size:12.5px;margin-top:14px"><i class="ri-information-line"></i> 草稿僅自己可見；發佈後同步到 <a href="/blog" style="color:var(--theme-color)">部落格列表</a>。</p>`;
     } else {
       pane.innerHTML = `
         <div class="sectionHeader"><div class="sectionHeaderLeft"><i class="ri-quill-pen-line"></i> 部落格文章</div></div>
@@ -262,7 +262,7 @@
     const tabBtn = (k, t) => `<button class="tabSwitch-btn ${tab === k ? 'on' : ''}" onclick="renderEditBody('${k}')">${t}</button>`;
     document.getElementById("editBody").innerHTML = `
       <h3 style="text-align:left;margin-bottom:4px">編輯我的頁面</h3>
-      <p class="muted" style="margin:0 0 14px;font-size:13px">對應平台的 ProfileEdit／SkillsEdit／LinksEdit 編輯彈窗。</p>
+      <p class="muted" style="margin:0 0 14px;font-size:13px">更新你的基本資料、專長、社群連結與認證資訊。</p>
       <div class="editTabs">${tabBtn('basic', '基本資料')}${tabBtn('skills', '專長')}${tabBtn('links', '社群連結')}${tabBtn('verify', '認證資訊')}</div>
       <div style="margin-top:16px">${editSection(tab)}</div>
       <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;border-top:1px solid #eee;padding-top:16px">
@@ -277,7 +277,7 @@
       <label class="formLabel" style="margin-top:10px">學校</label><input class="input" oninput="edit.school=this.value" value="${edit.school}">
       <label class="formLabel" style="margin-top:10px">自我介紹</label><textarea class="textArea" rows="4" oninput="edit.bio=this.value">${edit.bio}</textarea>`;
     if (tab === "skills") return `
-      <p class="muted" style="font-size:13px;margin-top:0">每個分類可新增／移除技能（對應 currentSkills）。</p>
+      <p class="muted" style="font-size:13px;margin-top:0">每個分類可新增／移除技能。</p>
       ${edit.specialties.map((g, gi) => `
         <div class="skillGroup">
           <input class="input" style="font-weight:600;margin-bottom:8px" value="${g.category}" oninput="edit.specialties[${gi}].category=this.value">
@@ -286,7 +286,7 @@
         </div>`).join("")}
       <button class="btn btn-white btn-small" onclick="edit.specialties.push({category:'新分類',skills:[]});renderEditBody('skills')"><i class="ri-add-line"></i> 新增分類</button>`;
     if (tab === "links") return `
-      <p class="muted" style="font-size:13px;margin-top:0">對應 socialLinks（LinkedIn／IG 等，網址由 getSocialLinkUrl 產生）。</p>
+      <p class="muted" style="font-size:13px;margin-top:0">填寫 LinkedIn／IG 等社群連結。</p>
       ${edit.socialLinks.map((l, i) => `
         <div style="display:flex;gap:8px;margin-bottom:8px;align-items:center">
           <select class="input" style="flex:0 0 130px" onchange="setPlatform(${i},this.value)">${Object.keys(PLATFORMS).map(p => `<option value="${p}" ${l.platform === p ? 'selected' : ''}>${PLATFORMS[p].label}</option>`).join("")}</select>
@@ -296,7 +296,7 @@
       <button class="btn btn-white btn-small" onclick="edit.socialLinks.push({platform:'linkedin',icon:'linkedin-fill',label:'LinkedIn',username:'',url:'#'});renderEditBody('links')"><i class="ri-add-line"></i> 新增連結</button>`;
     // verify (read-only)
     return `
-      <div class="infoBanner"><i class="ri-lock-line"></i><span>認證資訊（所在產業／經歷）由平台審核後填入，<b>無法自行編輯</b>。對應 <code>profiles.verifiedRolePitch</code>，僅後端可寫。要更新請重新送認證申請。</span></div>
+      <div class="infoBanner"><i class="ri-lock-line"></i><span>認證資訊（所在產業／經歷）由平台審核後填入，<b>無法自行編輯</b>。要更新請重新送認證申請。</span></div>
       ${c.pitch ? `<div class="pitchCard" style="margin-top:14px"><h4>所在產業或公司</h4><p>${c.pitch.organizationText}</p><h4>相關經歷與說明</h4><p>${c.pitch.experienceText}</p></div>` : `<p class="muted" style="margin-top:14px">尚未通過認證。</p>`}`;
   }
   window.addSkill = function (gi) {
@@ -310,7 +310,7 @@
     Object.assign(c, { name: edit.name, headline: edit.headline, school: edit.school, bio: edit.bio, specialties: edit.specialties, socialLinks: edit.socialLinks });
     CZ.closeModal();
     renderSidebar(); renderPanes();
-    CZ.toast("儲存完成！（對應 profile.save → profiles + subprofiles/realProfile）");
+    CZ.toast("儲存完成！");
   };
 
   /* ============ init ============ */
