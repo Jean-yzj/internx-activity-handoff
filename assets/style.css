@@ -802,8 +802,10 @@ table.reg .ra { display: flex; gap: 6px; }
 @media (max-width: 920px) {
   .grid-3, .grid-2, .row2, .row3 { grid-template-columns: 1fr; }
   .editor { grid-template-columns: 1fr; }
-  .editor-nav { display: flex; gap: 6px; overflow-x: auto; border-right: none; border-bottom: 1px solid var(--border); }
+  /* 步驟列改為換行（不再水平捲動）：手機一眼看完全部步驟 */
+  .editor-nav { display: flex; flex-wrap: wrap; gap: 8px; overflow-x: visible; border-right: none; border-bottom: 1px solid var(--border); }
   .editor-nav .title { display: none; }
+  .editor-nav .step { flex: 0 1 auto; width: auto; white-space: nowrap; margin-bottom: 0; }
   .step { white-space: nowrap; margin-bottom: 0; }
   .fb { grid-template-columns: 1fr; }
   .topnav { display: none; }
