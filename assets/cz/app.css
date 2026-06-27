@@ -905,7 +905,7 @@ main {
   .layout { flex-direction: column; }
   .sidebar { flex: 0 0 auto; width: 100%; max-width: 100%; }
   .sidebarCard { position: static; }
-  .footer { margin-bottom: 64px; }
+  .footer { margin-bottom: 72px; }
   /* 主內容欄位固定為視窗寬度 */
   .main { width: 100%; max-width: 100%; min-width: 0; }
   .mainCard { max-width: 100%; min-height: auto; }
