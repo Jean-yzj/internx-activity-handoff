@@ -397,6 +397,7 @@ main {
 }
 .cz-cc-tags { display: flex; flex-wrap: wrap; gap: 6px; }
 .cz-tag-mini {
+  display: inline-flex; align-items: center; white-space: nowrap; vertical-align: middle;
   font-size: 12px; color: #1e40af; background: #eef4ff; border: 1px solid #d7e6ff;
   padding: 3px 10px; border-radius: 999px;
 }

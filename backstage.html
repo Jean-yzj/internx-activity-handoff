@@ -32,7 +32,7 @@
   .mRow .bars b { color: #11243f; }
   .mRow .acts { display: flex; gap: 6px; flex-wrap: wrap; }
   /* 狀態標籤 */
-  .tg { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: 999px; }
+  .tg { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: 999px; white-space: nowrap; }
   .tg.live { background: #e4f9e8; color: #1a8a35; } .tg.soon { background: #fff4d6; color: #9a7400; }
   .tg.review { background: var(--theme-white); color: var(--theme-color-black); }
   .tg.paid { background: #e4f9e8; color: #1a8a35; } .tg.rej { background: #f0f1f4; color: #6b7585; }
@@ -52,10 +52,17 @@
   .main .mainCard { border-top: none; border-radius: 0 0 var(--border-radius) var(--border-radius); }
   /* 報名名單分頁的待審 badge */
   .navPend { background: #d80f0f; color: #fff; font-size: 11px; font-weight: 700; border-radius: 999px; padding: 0 6px; margin-left: 5px; }
-  /* 報名名單表格：短欄不換行（避免姓名直書），背景標籤欄可換行 */
+  /* 報名名單表格：短欄不換行（避免姓名直書），背景標籤欄整顆換行不裂字 */
   #regBody td:nth-child(1), #regBody td:nth-child(2), #regBody td:nth-child(4), #regBody td:nth-child(5) { white-space: nowrap; }
-  #regBody td:nth-child(3) { min-width: 170px; }
-  #regBody .regActs { white-space: nowrap; }
+  .bgTags { display: flex; flex-wrap: wrap; gap: 6px; width: 100%; }
+  .regHint { color: #8a94a3; font-size: 12px; white-space: nowrap; }
+  /* 桌機：背景欄較寬可放兩顆標籤；操作欄靠右對齊（對齊表頭）。手機沿用卡片式堆疊 */
+  @media (min-width: 641px) {
+    #regBody td:nth-child(3) { min-width: 200px; width: 40%; }
+    #regBody td:nth-child(5) { text-align: right; }
+    #regBody .regActs { display: inline-flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 8px; }
+    #regBody .regActs .btn { white-space: nowrap; }
+  }
   /* 手機：表格改成卡片式，避免欄位被擠出畫面（報名名單／創作內容） */
   @media (max-width: 640px) {
     .respTable thead { display: none; }
@@ -244,11 +251,11 @@
   function renderRegs(){
     document.getElementById("regBody").innerHTML = regs.map((r,i)=>{
       const s = ST[r.status];
-      const traits = r.traits.map(t=>`<span class="cz-tag-mini">${t}</span>`).join(" ");
+      const traits = r.traits.map(t=>`<span class="cz-tag-mini">${t}</span>`).join("");
       let act = '<span style="color:#aab;font-size:12px">—</span>';
       if (r.status==="pending") act = `<button class="btn btn-small" onclick="setReg(${i},'approved')">通過</button> <button class="btn btn-white btn-small" onclick="setReg(${i},'rejected')">拒絕</button>`;
-      else if (r.status==="approved") act = `<span style="color:#889;font-size:12px">系統已通知繳費</span> <button class="btn btn-white btn-small" onclick="setReg(${i},'paid')">模擬繳費</button>`;
-      return `<tr><td data-label="報名者"><b>${r.name}</b></td><td data-label="票種">${r.ticket}</td><td data-label="背景" class="cardStack">${traits}</td><td data-label="狀態"><span class="tg ${s.cls}">${s.label}</span></td><td data-label="操作"><div class="regActs">${act}</div></td></tr>`;
+      else if (r.status==="approved") act = `<span class="regHint">系統已通知繳費</span><button class="btn btn-white btn-small" onclick="setReg(${i},'paid')">模擬繳費</button>`;
+      return `<tr><td data-label="報名者"><b>${r.name}</b></td><td data-label="票種">${r.ticket}</td><td data-label="背景" class="cardStack"><div class="bgTags">${traits}</div></td><td data-label="狀態"><span class="tg ${s.cls}">${s.label}</span></td><td data-label="操作"><div class="regActs">${act}</div></td></tr>`;
     }).join("");
     const pend = regs.filter(r=>r.status==="pending").length;
     document.getElementById("statPend").textContent = pend;
