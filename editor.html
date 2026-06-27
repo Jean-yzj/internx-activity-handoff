@@ -37,7 +37,6 @@
       <!-- STEP 1: CONTENT -->
       <section class="pane active" data-pane="content">
         <div class="step-head"><div><h2>活動內容</h2></div></div>
-        <p class="step-sub">固定寬度欄位，輸入時版面不會跳動。</p>
 
         <div class="field">
           <label>活動名稱 <span class="req">*</span></label>
@@ -197,6 +196,12 @@ function goStep(step) {
     s.classList.toggle('done', i < idx);
   });
   document.querySelector('.editor-main').scrollTop = 0;
+  // 手機：整頁捲回編輯器頂端（扣掉固定頂欄 64px），桌機頁面短、幾乎無感
+  const ed = document.querySelector('.editor-nav') || document.querySelector('.editor');
+  if (ed) {
+    const y = ed.getBoundingClientRect().top + window.scrollY - 72;
+    window.scrollTo({ top: Math.max(0, y), behavior: 'auto' });
+  }
 }
 document.querySelectorAll('.step').forEach(s => s.addEventListener('click', () => goStep(s.dataset.step)));
 
@@ -395,10 +400,18 @@ function handleFieldRowClick(e,i){
 function selectField(i){ selectedField = (selectedField===i ? -1 : i); renderFields(); }
 function delField(i){ if(fields[i].locked){toast('系統必填欄位不可刪除');return;} fields.splice(i,1); selectedField=-1; renderFields(); }
 function addField(type){
-  fields.push({ type, label:(FIELD_META[type]||{}).label||'欄位', required:false, locked:false, ...fieldDefaults(type) });
-  selectedField = fields.length-1;
+  const nf = { type, label:(FIELD_META[type]||{}).label||'欄位', required:false, locked:false, ...fieldDefaults(type) };
+  // 插在目前正在編輯的欄位「正下方」；沒有選取時才加到最後
+  const at = (selectedField >= 0 && selectedField < fields.length) ? selectedField + 1 : fields.length;
+  fields.splice(at, 0, nf);
+  selectedField = at;            // 自動展開新欄位，點完立刻能編輯
   renderFields();
-  document.querySelectorAll('#fieldList .field-block')[selectedField]?.scrollIntoView({behavior:'smooth',block:'center'});
+  const block = document.querySelectorAll('#fieldList .field-block')[selectedField];
+  if (block) {
+    // 捲到新欄位頂端（扣掉固定頂欄），手機不必再往下找
+    const y = block.getBoundingClientRect().top + window.scrollY - 76;
+    window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+  }
 }
 
 /* ---- inline settings panel (rendered inside the field block) ---- */
