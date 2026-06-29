@@ -12,12 +12,6 @@
 <body data-cz data-page="attendee">
 
 <main class="wrap ix-attendee-wrap">
-  <div class="section" style="margin-bottom:20px">
-    <div class="eyebrow">報名者視角</div>
-    <h1 style="font-size:30px">實習通活動報名頁</h1>
-    <p class="lead">版型對齊原站活動詳情頁：左側活動內容、右側報名資訊卡。票券、表單、付款、退款與審核流程仍由主辦方編輯器帶入。</p>
-  </div>
-
   <div class="from-editor" id="editorBanner" style="display:none">
     <i class="ri-information-line"></i>
     <span>此預覽<b>帶入了主辦方編輯器目前填寫的內容</b>（標題、介紹、票券、報名表單與進階設定）。</span>
@@ -36,6 +30,11 @@
       <section class="ix-content-section">
         <h2>活動介紹</h2>
         <div class="ix-markdown" id="introBox"></div>
+      </section>
+
+      <section class="ix-content-section" id="agendaSection" style="display:none">
+        <h2>當天流程</h2>
+        <ul class="agenda" id="agendaBox"></ul>
       </section>
 
       <section class="ix-content-section">
@@ -68,15 +67,21 @@
         </div>
       </section>
 
+      <section class="ix-content-section" id="faqSection" style="display:none">
+        <h2>常見問題</h2>
+        <div class="faq" id="faqBox"></div>
+      </section>
+
       <section class="ix-content-section">
         <h2>報名表單</h2>
-        <p class="form-note">以下欄位與順序，完全來自主辦方在編輯器的設定。<span style="color:var(--cancel-color)">★</span> 為必填。</p>
+        <div id="noticeBox"></div>
+        <p class="form-note">以下欄位由主辦方設定，<span style="color:var(--cancel-color)">★</span> 為必填。</p>
         <div id="formBox"></div>
       </section>
 
       <section class="ix-content-section">
         <h2>選擇票券</h2>
-        <p class="form-note">票券狀態會依販售時間與數量自動判斷。示範目前時間：2026/06/22 14:30。</p>
+        <p class="form-note">票券狀態會依販售時間與數量自動判斷。</p>
         <div id="pick"></div>
       </section>
     </article>
@@ -215,21 +220,27 @@ if(fromEditor) document.getElementById('editorBanner').style.display='flex';
 
 /* ---- ① intro + agenda + faq ---- */
 (function(){
-  let h = (A.intro||'').split(/\n+/).filter(Boolean).map(p=>`<p>${esc(p)}</p>`).join('');
+  // 活動介紹：只放介紹文字（不再把流程／提示／問答全塞在這裡）
+  document.getElementById('introBox').innerHTML =
+    (A.intro||'').split(/\n+/).filter(Boolean).map(p=>`<p>${esc(p)}</p>`).join('');
+  // 當天流程：獨立區塊
   if(A.agenda && A.agenda.length){
-    h += `<h3 style="font-size:15px;margin:20px 0 10px">當天流程</h3><ul class="agenda">` +
-      A.agenda.map(a=>`<li><span class="t">${esc(a.time)}</span><b>${esc(a.title)}</b><p>${esc(a.desc||'')}</p></li>`).join('') + `</ul>`;
+    document.getElementById('agendaBox').innerHTML =
+      A.agenda.map(a=>`<li><span class="t">${esc(a.time)}</span><b>${esc(a.title)}</b><p>${esc(a.desc||'')}</p></li>`).join('');
+    document.getElementById('agendaSection').style.display='';
   }
+  // 名額／審核提示：移到報名表單上方（報名前才看到最有用）
   const approvalNote = isReview
     ? '<b>名額有限，採審核制。</b>送出報名後由主辦方審核；通過後<b>實習通會寄信通知</b>，於實習通線上完成繳費。'
     : '<b>名額有限。</b>送出後即在實習通完成報名與線上繳費。';
-  h += `<div class="callout callout-info" style="margin:18px 0 0"><i class="ri-information-line"></i>
-    <p style="margin:0">${approvalNote}</p></div>`;
+  document.getElementById('noticeBox').innerHTML =
+    `<div class="callout callout-info" style="margin:0 0 14px"><i class="ri-information-line"></i><p style="margin:0">${approvalNote}</p></div>`;
+  // 常見問題：獨立區塊
   if(A.faq && A.faq.length){
-    h += `<h3 style="font-size:15px;margin:22px 0 6px">常見問題</h3><div class="faq">` +
-      A.faq.map((f,i)=>`<details ${i===0?'open':''}><summary>${esc(f.q)}</summary><p>${esc(f.a)}</p></details>`).join('') + `</div>`;
+    document.getElementById('faqBox').innerHTML =
+      A.faq.map((f,i)=>`<details ${i===0?'open':''}><summary>${esc(f.q)}</summary><p>${esc(f.a)}</p></details>`).join('');
+    document.getElementById('faqSection').style.display='';
   }
-  document.getElementById('introBox').innerHTML = h;
 })();
 
 /* ---- ② form fields (how each field displays to the attendee) ---- */

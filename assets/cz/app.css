@@ -326,6 +326,7 @@ main {
 .socialLinkChip:hover { background: #d8ebff; border-color: var(--theme-light); }
 .socialLinkChip i { font-size: 18px; color: var(--theme-color); }
 .socialLinkChip .username { color: #6b7c93; font-weight: 400; }
+.socialChips { display: flex; flex-wrap: wrap; gap: 8px; }
 
 /* =====================================================================
    Avatar（沿用 Avatar.module.css）
@@ -922,6 +923,11 @@ main {
   .cz-section-title { font-size: 26px; }
   .step .lbl { display: none; }
   .article, .editorForm { width: 92vw; }
+  /* 活動卡：手機把過高的圖片佔位收成矮橫幅，少一堆死空間 */
+  .activityImage { aspect-ratio: auto; height: 104px; font-size: 30px; }
+  /* 社群連結：手機改成整齊的整排，不再參差不齊 */
+  .socialChips { flex-direction: column; }
+  .socialChips .socialLinkChip { width: 100%; margin: 0; justify-content: flex-start; }
 }
 
 /* 行動版漢堡選單面板 */

@@ -12,13 +12,12 @@
 <body data-cz data-page="editor">
 
 <main class="wrap">
-  <div class="section" style="margin-bottom:24px">
-    <div class="eyebrow">主辦方視角</div>
-    <h1 style="font-size:30px">建立活動 · 編輯器</h1>
-    <p class="lead">左側固定步驟、右側固定寬度表單，不再跑版。最關鍵的 <b>票券設定</b> 與 <b>報名表單</b> 兩步可直接操作試用。</p>
-    <div style="margin-top:14px">
-      <button class="btn btn-soft" onclick="previewRegistration()"><i class="ri-external-link-line"></i> 預覽報名頁（帶入目前填寫內容）</button>
+  <div class="section editorIntro">
+    <div>
+      <h1 class="editorTitle">建立活動</h1>
+      <p class="lead">設定活動內容、票券、報名表單與付款方式，隨時預覽報名頁。</p>
     </div>
+    <button class="btn btn-soft" onclick="previewRegistration()"><i class="ri-external-link-line"></i> 預覽報名頁</button>
   </div>
 
   <div class="editor">
@@ -44,8 +43,8 @@
         </div>
         <div class="field">
           <label>活動封面</label>
-          <div class="card" style="border-style:dashed;display:grid;place-items:center;height:140px;color:var(--text-faint);background:var(--bg-gray)">
-            <div style="text-align:center"><i class="ri-image-add-line" style="font-size:28px"></i><div style="font-size:13px;margin-top:6px">點擊或拖曳上傳，建議 1200 × 630</div></div>
+          <div class="card" style="border-style:dashed;display:flex;align-items:center;justify-content:center;gap:10px;height:84px;color:var(--text-faint);background:var(--bg-gray)">
+            <i class="ri-image-add-line" style="font-size:24px"></i><span style="font-size:13px">點擊或拖曳上傳封面 · 建議 1200 × 630</span>
           </div>
         </div>
         <div class="row2">
@@ -102,7 +101,7 @@
       <!-- STEP 3: FORM BUILDER -->
       <section class="pane" data-pane="form">
         <div class="step-head"><div><h2>報名表單</h2></div></div>
-        <p class="step-sub">從左側欄位庫點擊加入，右側<b>拖曳左邊的把手</b>即可上下排序。系統必填欄位固定在最上方。</p>
+        <p class="step-sub">從欄位庫點擊加入，<b>拖曳把手</b>即可上下排序；系統必填欄位固定在最上方。</p>
 
         <div class="fb">
           <aside class="fb-library">
@@ -318,13 +317,11 @@ let agenda = [
 ];
 function renderAgenda(){
   document.getElementById('agendaList').innerHTML = agenda.map((a,i)=>`
-    <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:8px">
-      <input class="input" style="flex:0 0 88px" placeholder="14:00" value="${esc(a.time)}" oninput="agenda[${i}].time=this.value">
-      <div style="flex:1;display:flex;flex-direction:column;gap:6px;min-width:0">
-        <input class="input" placeholder="標題（例：報到）" value="${esc(a.title)}" oninput="agenda[${i}].title=this.value">
-        <input class="input" placeholder="說明（選填）" value="${esc(a.desc||'')}" oninput="agenda[${i}].desc=this.value">
-      </div>
-      <button class="btn btn-soft btn-sm" title="刪除時段" onclick="removeAgenda(${i})" style="flex:0 0 auto"><i class="ri-delete-bin-line"></i></button>
+    <div class="agenda-item">
+      <input class="input ag-time" placeholder="14:00" value="${esc(a.time)}" oninput="agenda[${i}].time=this.value">
+      <input class="input ag-title" placeholder="標題（例：報到）" value="${esc(a.title)}" oninput="agenda[${i}].title=this.value">
+      <button class="ag-del" title="刪除時段" onclick="removeAgenda(${i})"><i class="ri-delete-bin-line"></i></button>
+      <input class="input ag-desc" placeholder="說明（選填）" value="${esc(a.desc||'')}" oninput="agenda[${i}].desc=this.value">
     </div>`).join('') || `<p class="muted" style="font-size:13px;margin:4px 0">尚未新增時段；報名頁不會顯示「當天流程」。</p>`;
 }
 function addAgenda(){ agenda.push({time:'',title:'',desc:''}); renderAgenda(); }

@@ -289,6 +289,15 @@ body:not([data-cz]) .topbar {
 .fb-chip:hover { border-color: var(--theme-light); background: var(--theme-white); color: var(--theme-color-dark); }
 .fb-chip i { font-size: 16px; color: var(--theme-color); }
 .fb-canvas { border: 1px solid var(--border); border-radius: 12px; padding: 16px; min-height: 360px; background: #fff; }
+/* 編輯器抬頭：標題＋說明在左，預覽按鈕在右 */
+.editorIntro { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 22px; }
+.editorTitle { font-size: 28px; margin: 0 0 6px; }
+.editorIntro .lead { margin: 0; }
+/* 當天流程：時間＋標題＋刪除在第一排，說明整排在第二排（無左側空檔），刪除是小圖示鈕 */
+.agenda-item { display: grid; grid-template-columns: 78px 1fr auto; gap: 6px 8px; align-items: center; margin-bottom: 8px; }
+.agenda-item .ag-desc { grid-column: 1 / -1; }
+.agenda-item .ag-del { width: 34px; height: 34px; display: grid; place-items: center; border: 1px solid var(--border); background: #fff; border-radius: 8px; color: var(--text-faint); cursor: pointer; transition: all .12s ease; }
+.agenda-item .ag-del:hover { color: var(--cancel-color); border-color: var(--cancel-color); }
 .field-row {
   display: flex; align-items: center; gap: 12px; padding: 12px 14px;
   border: 1px solid var(--border); border-radius: 11px; margin-bottom: 10px; background: #fff;
@@ -810,6 +819,16 @@ table.reg .ra { display: flex; gap: 6px; }
   .editor-nav .step { flex: 0 1 auto; width: auto; white-space: nowrap; margin-bottom: 0; }
   .step { white-space: nowrap; margin-bottom: 0; }
   .fb { grid-template-columns: 1fr; }
+  /* 編輯器密度：成對欄位仍並排、欄位間距收緊、抬頭縮小 */
+  .editor .row2 { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .field { margin-bottom: 13px; }
+  .editorTitle { font-size: 22px; }
+  .editorIntro { margin-bottom: 16px; gap: 10px; }
+  /* 欄位庫改成晶片格（約 3 欄），10 個欄位 4 排看完，不用滑過一長條 */
+  .fb-library { display: grid; grid-template-columns: repeat(auto-fill, minmax(106px, 1fr)); gap: 8px; align-content: start; }
+  .fb-library .title { grid-column: 1 / -1; margin-bottom: 2px; }
+  .fb-chip { width: auto; margin-bottom: 0; padding: 9px 10px; font-size: 13px; }
+  .fb-canvas { min-height: 0; }
   .topnav { display: none; }
   .hero h1 { font-size: 28px; }
 }

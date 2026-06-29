@@ -35,10 +35,11 @@
   /* 手機：身分改成水平標頭，內容更快觸及（原本整張卡會堆在內容上方） */
   @media (max-width: 850px) {
     .sidebarCard { padding: 16px; box-shadow: 0 2px 8px rgba(16,32,56,.07); }
-    .sbHead { flex-direction: row; align-items: center; text-align: left; gap: 14px; }
+    .sbHead { flex-direction: row; align-items: flex-start; text-align: left; gap: 14px; }
     .sbIdentity { flex: 1; min-width: 0; width: auto; }
     .sidebarAvatar { width: 56px !important; height: 56px !important; font-size: 21px !important; margin-bottom: 0; flex: 0 0 56px; }
-    .profileName { font-size: 17px; margin-bottom: 5px; }
+    .profileName { font-size: 20px; margin-bottom: 6px; }
+    .sidebarBadgeStrip .profileBadgePill { font-size: 11px; padding: 3px 8px; }
     .sidebarBadgeStrip { justify-content: flex-start; margin-bottom: 6px; }
     .profileHeadline { font-size: 13px; margin-bottom: 6px; }
     .profileMeta { flex-direction: row; flex-wrap: wrap; align-items: flex-start; gap: 3px 14px; }
@@ -154,13 +155,13 @@
         ${forSelf ? `<button class="pointsInfoRow" style="width:auto" onclick="openEdit()"><i class="ri-edit-line"></i> 編輯</button>` : ""}</div>
       ${c.pitch ? `
         <div class="pitchCard">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">${CZ.badgePill(c, { clickable: true })}<span style="font-size:13px;color:#5b6b7e"><i class="ri-checkbox-circle-fill" style="color:#1a8a35;margin-right:3px"></i>已通過實習通官方審核</span></div>
+          <div style="font-size:12.5px;color:#5b6b7e;margin-bottom:12px"><i class="ri-checkbox-circle-fill" style="color:#1a8a35;margin-right:4px"></i>實習通官方已審核的認證資訊</div>
           <h4>所在產業或公司</h4><p>${c.pitch.organizationText}</p>
           <h4>相關經歷與說明</h4><p>${c.pitch.experienceText}</p>
         </div>` : ""}
       <div class="aboutBlock"><div class="aboutBlockTitle">讓我介紹自己⋯</div><p class="aboutText">${c.bio}</p></div>
       <div class="aboutBlock"><div class="aboutBlockTitle">社群連結</div>
-        <div style="display:flex;flex-wrap:wrap">${social || CZ.emptyState({ icon: "links-line", title: "尚未連結社群", desc: forSelf ? "在「編輯主頁」加入你的 LinkedIn、Instagram。" : "這位創作者尚未提供社群連結。", ctaText: forSelf ? "編輯主頁" : "", ctaHref: "javascript:openEdit()", ctaIcon: "edit-line" })}</div>
+        <div class="socialChips">${social || CZ.emptyState({ icon: "links-line", title: "尚未連結社群", desc: forSelf ? "在「編輯主頁」加入你的 LinkedIn、Instagram。" : "這位創作者尚未提供社群連結。", ctaText: forSelf ? "編輯主頁" : "", ctaHref: "javascript:openEdit()", ctaIcon: "edit-line" })}</div>
       </div>`;
 
     // 專長

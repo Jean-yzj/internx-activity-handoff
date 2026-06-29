@@ -81,7 +81,7 @@
     const past = e.past;
     const showcase = past && e.showcase ? `
       <div class="showcasePanel">
-        <div class="showcaseHeadline">${e.showcase.headline}</div>
+        <div class="showcaseHeadline">${e.showcase.headline.replace(/[，,、]\s*滿意度.*$/, '')}</div>
         <div class="showcaseMeta"><span><i class="ri-star-fill" style="color:#e2a200"></i> ${e.showcase.rating} / 5</span><span>回饋 ${e.showcase.count} 份</span></div>
       </div>` : `
       <div class="activityMeta">
@@ -93,7 +93,6 @@
         <div class="activityImage">
           <i class="ri-${e.typeIcon}"></i>
           <span class="typeTag ${past?"past":""}"><i class="ri-${e.typeIcon}"></i> ${e.type}</span>
-          ${past && e.showcase ? `<span class="showcaseTag"><i class="ri-sparkling-2-line"></i> 活動回顧</span>` : ""}
         </div>
         <div class="activityBody">
           <div class="activityDate">${e.date}・${e.venue}</div>
