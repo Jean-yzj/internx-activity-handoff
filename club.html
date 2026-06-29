@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>社團主頁｜InternX 實習通</title>
+<link rel="icon" href="/assets/cz/favicon.png" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" />
+<link rel="stylesheet" href="/assets/cz/app.css" />
+<style>
+  /* 社團＝組織型主辦帳號：方形社徽，與個人創作者的圓形頭像區隔 */
+  .clubCrest { width: 84px; height: 84px; border-radius: 20px; display: grid; place-items: center; color: #fff; font-weight: 800; font-size: 26px; font-family: "Noto Sans TC"; background: linear-gradient(135deg, var(--theme-color), var(--theme-color-black)); box-shadow: 0 6px 16px rgba(1,130,253,.28); margin-bottom: 14px; }
+  .clubBadge { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: var(--theme-white); color: var(--theme-color-black); }
+  .clubBadge i { font-size: 14px; }
+  .profileName { font-size: 20px; font-weight: 700; color: #11243f; margin: 0 0 8px; }
+
+  /* 多管理員 roster */
+  .roster { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .member { position: relative; border: 1px solid #e7eaf0; border-radius: 14px; padding: 20px 12px 14px; text-align: center; background: #fff; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .member.owner { border-color: var(--complementary-color); background: var(--complementary-white); box-shadow: 0 0 0 1px var(--complementary-color); }
+  .member .crown { position: absolute; top: -9px; left: 50%; transform: translateX(-50%); width: 26px; height: 26px; border-radius: 50%; background: var(--complementary-color); color: #fff; display: grid; place-items: center; font-size: 14px; box-shadow: 0 3px 8px rgba(226,162,0,.45); }
+  .member .mName { font-weight: 600; font-size: 14.5px; color: #11243f; }
+  .rp { display: inline-flex; align-items: center; gap: 4px; font-size: 11.5px; font-weight: 600; padding: 3px 9px; border-radius: 999px; }
+  .rp i { font-size: 13px; }
+  .rp.owner { background: var(--complementary-white); color: #9a7400; }
+  .rp.vice { background: var(--theme-white); color: var(--theme-color-black); }
+  .rp.fin { background: #e4f9e8; color: #1a8a35; }
+  .rp.act { background: #ffe9d6; color: #b5530a; }
+  .rp.pr { background: #ede7fb; color: #6a3fc0; }
+  .permRow { display: flex; gap: 10px; align-items: flex-start; padding: 9px 0; border-bottom: 1px solid #f0f2f6; font-size: 13.5px; color: #556; }
+  .permRow:last-child { border-bottom: none; }
+  .permRow i { color: var(--theme-color); font-size: 17px; flex-shrink: 0; margin-top: 1px; }
+  .permRow b { color: #11243f; }
+
+  /* 換屆 term timeline */
+  .termTrack { display: flex; margin: 8px 0 24px; }
+  .termNode { flex: 1; position: relative; padding: 0 6px; text-align: center; }
+  .termNode .dot { width: 14px; height: 14px; border-radius: 50%; background: #cdd6e3; border: 3px solid #fff; box-shadow: 0 0 0 2px #cdd6e3; margin: 0 auto 12px; position: relative; z-index: 2; }
+  .termNode::before { content: ""; position: absolute; top: 6px; left: -50%; width: 100%; height: 2px; background: #cdd6e3; z-index: 1; }
+  .termNode:first-child::before { display: none; }
+  .termNode.past::before, .termNode.current::before { background: var(--theme-light); }
+  .termNode.current .dot { background: var(--theme-color); box-shadow: 0 0 0 2px var(--theme-color); }
+  .termNode.next .dot { background: #fff; border-style: dashed; }
+  .termNode.next::before { background: none; border-top: 2px dashed #cdd6e3; }
+  .termNode .tT { font-weight: 700; font-size: 13.5px; color: #11243f; }
+  .termNode .tY { font-size: 12px; color: #889; font-family: "Poppins"; }
+  .termNode .tO { font-size: 12px; color: #667; margin-top: 4px; display: inline-flex; align-items: center; gap: 3px; }
+  .termNode .tO i { color: var(--complementary-color); }
+  .termNode.next .tT, .termNode.next .tO { color: #aab; }
+  .termNode.next .tO i { color: #cdd6e3; }
+  .termTag { display: inline-block; margin-top: 5px; font-size: 10.5px; font-weight: 600; color: var(--theme-color); background: var(--theme-white); padding: 1px 8px; border-radius: 999px; }
+
+  /* 換屆 交接 before → after */
+  .handover { display: grid; grid-template-columns: 1fr auto 1fr; gap: 14px; align-items: center; margin: 6px 0 20px; }
+  .hoCard { border: 1px solid #e7eaf0; border-radius: 14px; padding: 15px; background: #fff; }
+  .hoCard.in { border-color: var(--theme-light); background: var(--theme-white); }
+  .hoTag { font-size: 12px; font-weight: 600; color: #889; margin-bottom: 10px; }
+  .hoCard.in .hoTag { color: var(--theme-color-black); }
+  .hoPerson { display: flex; align-items: center; gap: 11px; }
+  .hoPerson b { display: block; font-size: 14.5px; color: #11243f; }
+  .hoPerson span { font-size: 12px; color: #667; }
+  .hoArrow { display: flex; flex-direction: column; align-items: center; gap: 3px; color: var(--theme-color); }
+  .hoArrow i { font-size: 24px; }
+  .hoArrow span { font-size: 10.5px; font-weight: 600; color: #889; white-space: nowrap; }
+  .handover.done .hoCard.out { opacity: .5; }
+
+  /* 移轉 vs 保留 */
+  .keeps { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 4px; }
+  .keepCol { border: 1px solid #e7eaf0; border-radius: 12px; padding: 15px; }
+  .keepCol.stay { background: #f6fbf7; border-color: #cdeccf; }
+  .kcT { font-weight: 600; font-size: 13.5px; display: flex; align-items: center; gap: 7px; margin-bottom: 10px; }
+  .keepCol.transfer .kcT { color: var(--theme-color-black); } .keepCol.transfer .kcT i { color: var(--theme-color); }
+  .keepCol.stay .kcT { color: #1a8a35; } .keepCol.stay .kcT i { color: #1a8a35; }
+  .kcI { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; color: #556; padding: 4px 0; }
+  .kcI i { font-size: 15px; margin-top: 1px; flex-shrink: 0; }
+  .keepCol.transfer .kcI i { color: var(--theme-light); } .keepCol.stay .kcI i { color: #3cb950; }
+
+  /* 社團資訊 / 活動列 */
+  .clubInfo { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 22px; }
+  .clubInfo .ci { display: flex; gap: 9px; align-items: flex-start; font-size: 13.5px; }
+  .clubInfo .ci i { color: var(--theme-color); font-size: 17px; margin-top: 1px; }
+  .clubInfo .ci .cl { color: #889; font-size: 12px; } .clubInfo .ci .cv { color: #11243f; font-weight: 600; }
+  .evRow { display: flex; gap: 14px; align-items: center; border: 1px solid #e7eaf0; border-radius: 14px; padding: 14px; margin-bottom: 12px; }
+  .evRow .eThumb { width: 52px; height: 52px; border-radius: 11px; flex-shrink: 0; display: grid; place-items: center; color: #fff; font-size: 22px; }
+  .evRow .eMeta { flex: 1; min-width: 0; } .evRow .eT { font-weight: 600; font-size: 14.5px; color: #11243f; } .evRow .eS { font-size: 12.5px; color: #889; margin-top: 3px; }
+
+  @media (max-width: 560px) { .roster { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 680px) { .handover { grid-template-columns: 1fr; } .hoArrow { transform: rotate(90deg); } .keeps { grid-template-columns: 1fr; } .clubInfo { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body data-page="club">
+
+<main>
+  <div class="cz-container profile">
+    <div class="layout">
+      <aside class="sidebar"><div class="sidebarCard" id="sidebar"></div></aside>
+      <div class="main">
+        <div class="sectionTabs" data-tabs="club" id="tabs">
+          <button class="sectionTab active" data-tab="about"><i class="ri-information-line"></i> 關於社團</button>
+          <button class="sectionTab" data-tab="officers"><i class="ri-team-line"></i> 幹部團隊</button>
+          <button class="sectionTab" data-tab="terms"><i class="ri-loop-left-line"></i> 換屆交接</button>
+          <button class="sectionTab" data-tab="events"><i class="ri-calendar-event-line"></i> 社團活動</button>
+        </div>
+        <div class="mainCard">
+          <div class="tabPane active" data-pane="club" data-pane-key="about" id="paneAbout"></div>
+          <div class="tabPane" data-pane="club" data-pane-key="officers" id="paneOfficers"></div>
+          <div class="tabPane" data-pane="club" data-pane-key="terms" id="paneTerms"></div>
+          <div class="tabPane" data-pane="club" data-pane-key="events" id="paneEvents"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="/assets/cz/data.js"></script>
+<script src="/assets/cz/app.js"></script>
+<script>
+  /* ===== 社團 Demo 資料（政大創新創業研究社）。社團＝組織型認證帳號，活動掛在 clubId 而非個人 ===== */
+  const PALETTE = ["#0182fd","#e2a200","#c35500","#1a8a35","#7a4ddb","#d8527c"];
+  const ini = n => n.length > 2 ? n.slice(-2) : n;
+
+  const ROLE = {
+    "社長":   { cls:"owner", icon:"ri-vip-crown-2-line" },
+    "副社長": { cls:"vice",  icon:"ri-user-star-line" },
+    "財務長": { cls:"fin",   icon:"ri-wallet-3-line" },
+    "活動長": { cls:"act",   icon:"ri-calendar-event-line" },
+    "公關長": { cls:"pr",    icon:"ri-megaphone-line" },
+  };
+
+  const club = {
+    name: "創新創業研究社", crest: "創創", school: "國立政治大學", type: "學術性社團", founded: 2018,
+    contact: "nccu.entrepreneur@gmail.com", followers: 1240, eventsCount: 38,
+    bio: "把校園裡想創業、想做專案的人聚在一起。每學期辦工作坊、業師小聚與 Demo Night，從 0 到 1 陪你把想法做出來。",
+  };
+  // 第 15 屆（現任）與第 16 屆（換屆後）名冊
+  const roster15 = [
+    { name:"林宇辰", role:"社長",   owner:true },
+    { name:"陳思妤", role:"副社長", owner:false },
+    { name:"王柏翔", role:"財務長", owner:false },
+    { name:"李沛玹", role:"活動長", owner:false },
+    { name:"張哲瑋", role:"公關長", owner:false },
+  ];
+  const roster16 = [
+    { name:"陳思妤", role:"社長",   owner:true },
+    { name:"李沛玹", role:"副社長", owner:false },
+    { name:"周宥廷", role:"財務長", owner:false },
+    { name:"蔡昀蓁", role:"活動長", owner:false },
+    { name:"郭子睿", role:"公關長", owner:false },
+  ];
+  const events = [
+    { title:"學生創業者小聚", date:"6/28 · Garage+ 台北中山", icon:"ri-rocket-2-line", color:"#0182fd", status:"報名中", href:"/attendee", cta:"看報名頁" },
+    { title:"履歷健診工作坊", date:"6/10 · 已結束 · 報名 45/45", icon:"ri-file-user-line", color:"#e2a200", status:"可撥款", href:"/backstage", cta:"看結算" },
+    { title:"春季職涯講座", date:"5/20 · 已結束 · 已撥款 NT$25,816", icon:"ri-presentation-line", color:"#1861a8", status:"已撥款", href:"/backstage", cta:"看結算" },
+  ];
+
+  let handedOver = false;
+  const roster = () => handedOver ? roster16 : roster15;
+  const curTerm = () => handedOver ? 16 : 15;
+  const curYear = () => handedOver ? 2027 : 2026;
+
+  /* ===== 側欄 ===== */
+  function renderSidebar(){
+    document.getElementById("sidebar").innerHTML = `
+      <div class="clubCrest">${club.crest}</div>
+      <h2 class="profileName">${club.name}</h2>
+      <div class="sidebarBadgeStrip"><span class="clubBadge"><i class="ri-verified-badge-fill"></i> 已驗證社團</span></div>
+      <p class="profileHeadline">${club.school} · ${club.type}</p>
+      <p class="profileSchool"><i class="ri-calendar-event-line"></i> 第 ${curTerm()} 屆（${curYear()}）· 成立於 ${club.founded}</p>
+      <div class="sidebarButtons">
+        <button class="btn btn-block" onclick="CZ.toast('已追蹤 ${club.name}')"><i class="ri-heart-line"></i> 追蹤社團</button>
+        <a class="btn btn-white btn-block" href="/backstage"><i class="ri-dashboard-3-line"></i> 社團後臺</a>
+      </div>
+      <div class="sidebarDivider"></div>
+      <div class="statRow">
+        <div class="statBox"><b>${club.followers.toLocaleString()}</b><span>追蹤者</span></div>
+        <div class="statBox"><b>${club.eventsCount}</b><span>累計活動</span></div>
+        <div class="statBox"><b id="sbAdmins">${roster().length}</b><span>管理員</span></div>
+      </div>`;
+  }
+
+  /* ===== 關於社團 ===== */
+  function renderAbout(){
+    document.getElementById("paneAbout").innerHTML = `
+      <div class="sectionHeader"><div class="sectionHeaderLeft"><i class="ri-information-line"></i> 關於社團</div></div>
+      <div class="cz-info" style="background:#f0f9f1;border:1px solid #cdeccf;border-radius:12px;padding:12px 14px;margin-bottom:16px;font-size:13.5px;color:#2f6b3a">
+        <i class="ri-verified-badge-fill" style="color:#1a8a35"></i> <b>已驗證學生社團</b> — 經指導老師 Email 認證 + 學校課外組登記。社團以「組織」身分擁有此帳號，不綁在任何一位幹部個人名下。
+      </div>
+      <p style="font-size:15px;line-height:1.8;color:#33414f;margin:0 0 22px">${club.bio}</p>
+      <div class="sectionHeader"><div class="sectionHeaderLeft"><i class="ri-profile-line"></i> 社團資訊</div></div>
+      <div class="clubInfo">
+        <div class="ci"><i class="ri-school-line"></i><div><div class="cl">所屬學校</div><div class="cv">${club.school}</div></div></div>
+        <div class="ci"><i class="ri-price-tag-3-line"></i><div><div class="cl">社團類型</div><div class="cv">${club.type}</div></div></div>
+        <div class="ci"><i class="ri-calendar-line"></i><div><div class="cl">成立年份</div><div class="cv">${club.founded}</div></div></div>
+        <div class="ci"><i class="ri-mail-line"></i><div><div class="cl">對外聯絡</div><div class="cv">${club.contact}</div></div></div>
+      </div>`;
+  }
+
+  /* ===== 幹部團隊（多管理員）===== */
+  function renderOfficers(){
+    const list = roster();
+    const cards = list.map((m,i)=>{
+      const r = ROLE[m.role] || ROLE["公關長"];
+      return `<div class="member${m.owner?' owner':''}">
+        ${m.owner?'<span class="crown" title="擁有者"><i class="ri-vip-crown-2-fill"></i></span>':''}
+        ${CZ.avatar(ini(m.name), PALETTE[i%PALETTE.length], 52)}
+        <div class="mName">${m.name}</div>
+        <span class="rp ${r.cls}"><i class="${r.icon}"></i> ${m.role}</span>
+      </div>`;
+    }).join("");
+    document.getElementById("paneOfficers").innerHTML = `
+      <div class="sectionHeader" style="justify-content:space-between"><div class="sectionHeaderLeft"><i class="ri-team-line"></i> 幹部團隊 · 第 ${curTerm()} 屆</div>
+        <span class="chip chip-ghost" style="font-size:12px"><i class="ri-team-line"></i> 多管理員</span></div>
+      <p style="font-size:13.5px;color:#667;margin:0 0 16px">一個社團可以有<b>多位管理員</b>，各自分工；<i class="ri-vip-crown-2-fill" style="color:var(--complementary-color)"></i> 為<b>擁有者</b>（社長），可移轉擁有權與管理社團設定。</p>
+      <div class="roster">${cards}</div>
+      <div class="sectionHeader" style="margin-top:26px"><div class="sectionHeaderLeft"><i class="ri-shield-keyhole-line"></i> 角色與權限</div></div>
+      <div class="permRow"><i class="ri-vip-crown-2-line"></i><div><b>社長（擁有者）</b>　最高權限：移轉擁有權、刪除社團、管理所有成員與設定。</div></div>
+      <div class="permRow"><i class="ri-wallet-3-line"></i><div><b>財務長</b>　查看<a href="/backstage" style="color:var(--theme-color)">撥款結算</a>、管理收款帳戶與發票。</div></div>
+      <div class="permRow"><i class="ri-calendar-event-line"></i><div><b>活動長</b>　建立 / 編輯活動、審核報名名單。</div></div>
+      <div class="permRow"><i class="ri-megaphone-line"></i><div><b>公關長</b>　編輯社團主頁、發佈貼文與部落格。</div></div>
+      <p style="font-size:12.5px;color:#889;margin-top:14px"><i class="ri-information-line"></i> 權限以 <code style="font-size:12px">clubMember.role</code> 控管；活動不會卡在一個人身上，社長畢業也不會把社團帶走。</p>`;
+  }
+
+  /* ===== 換屆交接 ===== */
+  function renderTerms(){
+    const nodes = [
+      { t:"第 13 屆", y:"2024", o:"吳承恩", s:"past" },
+      { t:"第 14 屆", y:"2025", o:"黃郁婷", s:"past" },
+      { t:"第 15 屆", y:"2026", o:"林宇辰", s: handedOver ? "past" : "current" },
+      handedOver ? { t:"第 16 屆", y:"2027", o:"陳思妤", s:"current" }
+                 : { t:"第 16 屆", y:"2027", o:"？ 待換屆", s:"next" },
+    ];
+    const track = nodes.map(n=>`
+      <div class="termNode ${n.s}">
+        <span class="dot"></span>
+        <div class="tT">${n.t}</div><div class="tY">${n.y}</div>
+        <div class="tO"><i class="ri-vip-crown-2-${n.s==='next'?'line':'fill'}"></i> ${n.o}</div>
+        ${n.s==='current'?'<span class="termTag">現任</span>':''}
+      </div>`).join("");
+
+    document.getElementById("paneTerms").innerHTML = `
+      <div class="sectionHeader" style="justify-content:space-between"><div class="sectionHeaderLeft"><i class="ri-loop-left-line"></i> 換屆交接</div>
+        <span class="chip chip-ghost" style="font-size:12px">每年的痛點</span></div>
+      <p style="font-size:13.5px;color:#667;margin:0 0 6px">社長畢業、幹部輪替時，社團最怕「帳號跟著人走」。實習通把<b>社團</b>與<b>個人</b>拆開：人會換，社團這個組織與它的歷史留著。</p>
+      <div class="termTrack">${track}</div>
+
+      <div class="handover${handedOver?' done':''}">
+        <div class="hoCard out">
+          <div class="hoTag">卸任擁有者</div>
+          <div class="hoPerson">${CZ.avatar("宇辰","#0182fd",46)}<div><b>林宇辰</b><span>社長 · 第 15 屆</span></div></div>
+        </div>
+        <div class="hoArrow"><i class="ri-arrow-right-line"></i><span>移轉擁有權</span></div>
+        <div class="hoCard in">
+          <div class="hoTag">新任擁有者</div>
+          <div class="hoPerson">${CZ.avatar("思妤","#e2a200",46)}<div><b>陳思妤</b><span>社長 · 第 16 屆</span></div></div>
+        </div>
+      </div>
+
+      <div class="keeps">
+        <div class="keepCol transfer">
+          <div class="kcT"><i class="ri-key-2-line"></i> 移轉給新任社長</div>
+          <div class="kcI"><i class="ri-arrow-right-circle-line"></i> 擁有者權限（最高管理權）</div>
+          <div class="kcI"><i class="ri-arrow-right-circle-line"></i> 撥款帳戶與結算管理</div>
+          <div class="kcI"><i class="ri-arrow-right-circle-line"></i> 社團設定與成員管理</div>
+        </div>
+        <div class="keepCol stay">
+          <div class="kcT"><i class="ri-lock-2-line"></i> 永久留在社團（不歸個人）</div>
+          <div class="kcI"><i class="ri-checkbox-circle-line"></i> 社團主頁與網址（不變）</div>
+          <div class="kcI"><i class="ri-checkbox-circle-line"></i> 歷年活動與報名紀錄</div>
+          <div class="kcI"><i class="ri-checkbox-circle-line"></i> ${club.followers.toLocaleString()} 位追蹤者</div>
+          <div class="kcI"><i class="ri-checkbox-circle-line"></i> 撥款與結算記錄</div>
+          <div class="kcI"><i class="ri-checkbox-circle-line"></i> 歷任幹部名冊</div>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:12px;margin-top:18px;flex-wrap:wrap">
+        <button class="btn" onclick="toggleHandover()"><i class="ri-loop-left-line"></i> ${handedOver?'重設示範':'模擬換屆交接'}</button>
+        <span style="font-size:13px;color:#889">卸任社長提名 → 新任社長確認 → 權限移轉，舊幹部自動歸入「歷任成員」。</span>
+      </div>
+      <p style="font-size:12.5px;color:#889;margin-top:14px"><i class="ri-information-line"></i> 換屆 = 換 <code style="font-size:12px">isOwner</code>，不換 <code style="font-size:12px">clubId</code>：活動、追蹤者、結算全部掛在社團上，永久保留。</p>`;
+  }
+
+  function toggleHandover(){
+    handedOver = !handedOver;
+    renderSidebar(); renderOfficers(); renderTerms();   // 只換各 pane 內容，分頁按鈕與 active 狀態不動
+    CZ.toast(handedOver ? "換屆完成：擁有權已移轉給陳思妤，社團資料與粉絲全數保留" : "已重設回第 15 屆");
+  }
+
+  /* ===== 社團活動 ===== */
+  function renderEvents(){
+    const TG = { "報名中":"live", "可撥款":"review", "已撥款":"paid" };
+    document.getElementById("paneEvents").innerHTML = `
+      <div class="sectionHeader"><div class="sectionHeaderLeft"><i class="ri-calendar-event-line"></i> 社團活動</div></div>
+      <p style="font-size:13px;color:#889;margin:0 0 16px">活動掛在社團（<code style="font-size:12px">clubId</code>）名下，換屆後仍屬於社團。收款與撥款見 <a href="/backstage" style="color:var(--theme-color)">社團後臺 · 撥款結算</a>。</p>
+      ${events.map(e=>`
+        <div class="evRow">
+          <div class="eThumb" style="background:linear-gradient(135deg,${e.color},${e.color}cc)"><i class="${e.icon}"></i></div>
+          <div class="eMeta"><div class="eT">${e.title} <span class="tg ${TG[e.status]||'soon'}" style="margin-left:4px">${e.status}</span></div><div class="eS">${e.date}</div></div>
+          <a class="btn btn-white btn-small" href="${e.href}">${e.cta}</a>
+        </div>`).join("")}`;
+  }
+
+  /* ===== init ===== */
+  renderSidebar(); renderAbout(); renderOfficers(); renderTerms(); renderEvents();
+  CZ.wireTabs(document);
+  if (location.hash) { const t = document.querySelector('[data-tab="'+location.hash.slice(1)+'"]'); if (t) t.click(); }
+</script>
+</body>
+</html>

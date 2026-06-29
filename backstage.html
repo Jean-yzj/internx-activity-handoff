@@ -82,6 +82,50 @@
   .sumNote .ricon { width: 52px; height: 52px; border-radius: 14px; background: var(--theme-white); color: var(--theme-color); display: grid; place-items: center; font-size: 24px; margin: 0 auto 14px; }
   .sumNote h3 { font-size: 17px; color: #11243f; margin: 0 0 6px; }
   .sumNote p { font-size: 13.5px; color: #667; line-height: 1.7; max-width: 460px; margin: 0 auto; }
+  /* ── 撥款結算（代收代付的「撥款」那半，對齊 金流邏輯_平台代收代付.md §10）── */
+  .settleSummary { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 20px; }
+  .settleSummary .sBox { background: #f7faff; border: 1px solid #e6eef8; border-radius: 12px; padding: 14px 12px; }
+  .settleSummary .sBox.accent { background: linear-gradient(135deg, var(--theme-color), var(--theme-color-dark)); border-color: transparent; }
+  .settleSummary .sBox .l { font-size: 12px; color: #667; font-weight: 600; display: flex; align-items: center; gap: 5px; }
+  .settleSummary .sBox .l i { font-size: 14px; color: #9aa7b8; }
+  .settleSummary .sBox .v { font-family: "Poppins"; font-weight: 700; font-size: 19px; color: #11243f; margin-top: 6px; letter-spacing: -.01em; }
+  .settleSummary .sBox.accent .l, .settleSummary .sBox.accent .l i, .settleSummary .sBox.accent .v { color: #fff; }
+  .payRoute { display: flex; align-items: stretch; gap: 6px; margin: 4px 0; }
+  .payRoute .node { flex: 1; border: 1px solid #e7eaf0; border-radius: 12px; background: #fff; padding: 14px 10px; text-align: center; }
+  .payRoute .node .ic { width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; font-size: 19px; margin: 0 auto 8px; }
+  .payRoute .node .nt { font-weight: 600; font-size: 13.5px; color: #11243f; }
+  .payRoute .node .nd { font-size: 11.5px; color: #889; margin-top: 3px; line-height: 1.5; }
+  .payRoute .arr { display: flex; align-items: center; color: #b5c0d0; font-size: 20px; flex-shrink: 0; }
+  .payRoute .n-pay .ic { background: var(--theme-white); color: var(--theme-color); }
+  .payRoute .n-gw .ic { background: #ede7fb; color: #6a3fc0; }
+  .payRoute .n-hold .ic { background: var(--complementary-white); color: #9a7400; }
+  .payRoute .n-out .ic { background: #e4f9e8; color: #1a8a35; }
+  .feeCol { color: #c35500; white-space: nowrap; }
+  .netCol { color: var(--theme-color-dark); font-weight: 700; white-space: nowrap; }
+  .payoutGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 18px; }
+  .payoutBox { background: #fff; border: 1px solid #e7eaf0; border-radius: 14px; padding: 18px; }
+  .payoutBox h4 { margin: 0 0 12px; font-size: 15px; color: #11243f; }
+  .kv2 { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px dashed #e7eaf0; font-size: 13.5px; }
+  .kv2:last-of-type { border-bottom: none; }
+  .kv2 .k { color: #667; display: inline-flex; align-items: center; gap: 6px; } .kv2 .k i { color: #9aa7b8; }
+  .kv2 .vv { color: #11243f; font-weight: 600; text-align: right; }
+  .poItem { display: flex; align-items: center; gap: 11px; padding: 10px 0; border-bottom: 1px solid #f0f2f6; }
+  .poItem:last-child { border-bottom: none; }
+  .poItem .pic { width: 30px; height: 30px; border-radius: 50%; background: #e4f9e8; color: #1a8a35; display: grid; place-items: center; flex-shrink: 0; }
+  .poItem .pmain { flex: 1; min-width: 0; }
+  .poItem .pt { font-weight: 600; font-size: 13.5px; color: #11243f; }
+  .poItem .psub { font-size: 11.5px; color: #889; }
+  .poItem .pa { font-family: "Poppins"; font-weight: 700; color: #1a8a35; white-space: nowrap; }
+  /* 桌機：8 欄結算表給最小寬度，欄太擠時讓 .tableWrap 橫向捲動，而不是把活動名擠成逐字換行 */
+  @media (min-width: 641px) {
+    [data-pane-key="settle"] .respTable { min-width: 680px; }
+    [data-pane-key="settle"] #settleBody td:first-child { white-space: nowrap; }
+  }
+  @media (max-width: 760px) {
+    .settleSummary { grid-template-columns: repeat(2, 1fr); }
+    .payRoute { flex-direction: column; } .payRoute .arr { transform: rotate(90deg); align-self: center; }
+    .payoutGrid { grid-template-columns: 1fr; }
+  }
 </style>
 </head>
 <body data-page="backstage">
@@ -121,6 +165,7 @@
         <div class="sectionTabs" id="bkTabs">
           <button class="sectionTab active" data-go="manage"><i class="ri-calendar-todo-line"></i> 活動管理</button>
           <button class="sectionTab" data-go="regs"><i class="ri-list-check-2"></i> 報名名單 <span id="navPend" class="navPend">3</span></button>
+          <button class="sectionTab" data-go="settle"><i class="ri-wallet-3-line"></i> 撥款結算</button>
           <button class="sectionTab" data-go="content"><i class="ri-quill-pen-line"></i> 創作內容</button>
           <button class="sectionTab" data-go="showcase"><i class="ri-medal-line"></i> 成果展示</button>
           <button class="sectionTab" data-go="reviews"><i class="ri-chat-3-line"></i> 回應評價</button>
@@ -131,7 +176,7 @@
           <div class="tabPane active" data-pane="oa" data-pane-key="manage">
             <div class="sectionHeader"><div class="sectionHeaderLeft"><i class="ri-calendar-todo-line"></i> 我的活動</div>
               <a class="btn btn-small" href="/editor"><i class="ri-add-line"></i> 建立活動</a></div>
-            <p style="font-size:13px;color:#889;margin:0 0 16px">本月票券收入 <b style="color:#11243f">NT$ 28,400</b> · 2 場進行中 · 共 60 筆報名</p>
+            <p style="font-size:13px;color:#889;margin:0 0 16px">本月票券收入 <b style="color:#11243f">NT$ 28,400</b> · 2 場進行中 · 共 60 筆報名 · <a href="#" onclick="goTab('settle');return false" style="color:var(--theme-color);font-weight:600">看撥款結算 →</a></p>
             <div class="mRow">
               <div class="thumb"></div>
               <div class="meta">
@@ -172,6 +217,55 @@
               </table>
             </div>
             <p style="font-size:12.5px;color:#889;margin-top:10px"><i class="ri-information-line"></i> 「通過」後實習通自動寄信通知報名者於平台繳費；繳費完成後此處<b>自動</b>顯示「已付款」，主辦方不需對帳。</p>
+          </div>
+
+          <!-- 撥款結算（代收代付的撥款那半） -->
+          <div class="tabPane" data-pane="oa" data-pane-key="settle">
+            <div class="cz-info" style="background:#f0f7ff;border:1px solid #cfe6ff;border-radius:12px;padding:12px 14px;margin-bottom:18px;font-size:13.5px;color:#33506e">
+              <i class="ri-bank-card-line"></i> <b>代收代付：</b>報名者把錢付給實習通暫管，活動結束 <b>T+7</b> 扣除平台抽成與金流手續費後，撥款到你的銀行帳戶。你只審核、<b>不碰錢、不對帳</b>。
+            </div>
+
+            <div class="settleSummary" id="settleSummary"></div>
+
+            <div class="sectionHeader"><div class="sectionHeaderLeft"><i class="ri-route-line"></i> 錢的流向（代收 → 保留 → 撥款）</div></div>
+            <div class="payRoute">
+              <div class="node n-pay"><div class="ic"><i class="ri-user-3-line"></i></div><div class="nt">報名者付款</div><div class="nd">信用卡 / ATM / 超商</div></div>
+              <div class="arr"><i class="ri-arrow-right-line"></i></div>
+              <div class="node n-gw"><div class="ic"><i class="ri-secure-payment-line"></i></div><div class="nt">統一金流 PAYUNi</div><div class="nd">代收・發票</div></div>
+              <div class="arr"><i class="ri-arrow-right-line"></i></div>
+              <div class="node n-hold"><div class="ic"><i class="ri-safe-2-line"></i></div><div class="nt">實習通保留帳戶</div><div class="nd">履約保證・暫管</div></div>
+              <div class="arr"><i class="ri-arrow-right-line"></i></div>
+              <div class="node n-out"><div class="ic"><i class="ri-bank-line"></i></div><div class="nt">撥款到你的帳戶</div><div class="nd">活動後 T+7・扣費後</div></div>
+            </div>
+
+            <div class="sectionHeader" style="margin-top:24px"><div class="sectionHeaderLeft"><i class="ri-bill-line"></i> 每場結算明細</div></div>
+            <div class="tableWrap">
+              <table class="respTable">
+                <thead><tr><th>活動</th><th>售出</th><th>總收款</th><th>平台抽成 5%</th><th>金流手續費 2.8%</th><th>淨額</th><th>狀態</th><th>撥款</th></tr></thead>
+                <tbody id="settleBody"></tbody>
+              </table>
+            </div>
+            <p style="font-size:12.5px;color:#889;margin-top:10px"><i class="ri-information-line"></i> 費率為示意（平台抽成 5%、金流手續費 2.8%）。活動結束 <b>T+7</b> 留緩衝給退款／爭議後才撥款；點數折抵的票款回饋至點數帳戶、不走銀行撥款。</p>
+
+            <div class="payoutGrid">
+              <div class="payoutBox">
+                <h4><i class="ri-bank-line" style="color:var(--theme-color)"></i> 撥款帳戶</h4>
+                <div class="kv2"><span class="k"><i class="ri-bank-line"></i> 收款帳戶</span><span class="vv">玉山銀行（808）****1234</span></div>
+                <div class="kv2"><span class="k"><i class="ri-user-line"></i> 戶名</span><span class="vv">實習通 InternX</span></div>
+                <div class="kv2"><span class="k"><i class="ri-calendar-schedule-line"></i> 撥款週期</span><span class="vv">活動結束後 T+7 自動撥款</span></div>
+                <div class="kv2"><span class="k"><i class="ri-bill-line"></i> 電子發票</span><span class="vv">由實習通代開（B2C）</span></div>
+                <div style="display:flex;gap:8px;margin-top:14px">
+                  <button class="btn btn-small" onclick="CZ.toast('已送出提前撥款申請（示意）')"><i class="ri-flashlight-line"></i> 申請提前撥款</button>
+                  <button class="btn btn-white btn-small" onclick="CZ.toast('開啟收款帳戶設定（示意）')"><i class="ri-edit-line"></i> 更換帳戶</button>
+                </div>
+              </div>
+              <div class="payoutBox">
+                <h4><i class="ri-history-line" style="color:var(--theme-color)"></i> 撥款記錄</h4>
+                <div class="poItem"><span class="pic"><i class="ri-check-line"></i></span><div class="pmain"><div class="pt">春季職涯講座</div><div class="psub">2026/06/02 · 玉山 ****1234 · PO-20260602-014</div></div><div class="pa">+ NT$ 25,816</div></div>
+                <div class="poItem"><span class="pic"><i class="ri-check-line"></i></span><div class="pmain"><div class="pt">領袖思維工作坊</div><div class="psub">2026/05/02 · 玉山 ****1234 · PO-20260502-009</div></div><div class="pa">+ NT$ 18,240</div></div>
+                <p style="font-size:12px;color:#889;margin:12px 0 0"><i class="ri-information-line"></i> 撥款失敗（帳戶有誤）會 hold 並通知你更正。對應 <code style="font-size:12px">data/payout.ts</code>。</p>
+              </div>
+            </div>
           </div>
 
           <!-- 創作內容 -->
@@ -276,6 +370,56 @@
     CZ.toast("已匯出 " + regs.length + " 筆報名（CSV，可用 Excel 開啟）");
   };
   renderRegs();
+
+  /* ── 撥款結算 render（對齊 金流邏輯_平台代收代付.md §10）── */
+  const FEE = { platform: 0.05, gateway: 0.028 };          // 平台抽成 / 金流手續費（示意費率）
+  function settle(gross){
+    const platformFee = Math.round(gross * FEE.platform);
+    const gatewayFee  = Math.round(gross * FEE.gateway);
+    return { gross, platformFee, gatewayFee, net: gross - platformFee - gatewayFee };
+  }
+  const SST = {
+    collecting: { label:"代收中 · 待結算", cls:"soon" },
+    ready:      { label:"可撥款 · 結算中", cls:"review" },
+    paid:       { label:"已撥款",          cls:"paid" },
+  };
+  const settleData = [
+    { name:"學生創業者小聚", date:"6/28", sold:28, gross:19200, status:"collecting", payout:"活動後 T+7（預計 7/5）" },
+    { name:"職涯實戰營",     date:"7/12", sold:32, gross:9200,  status:"collecting", payout:"活動後 T+7（預計 7/19）" },
+    { name:"履歷健診工作坊", date:"6/10", sold:45, gross:18000, status:"ready",      payout:"結算中" },
+    { name:"春季職涯講座",   date:"5/20", sold:80, gross:28000, status:"paid",       payout:"6/2 已撥款" },
+  ];
+  const refundedTotal = 600;   // 已退款（示意：1 筆早鳥退款）
+  function renderSettlement(){
+    document.getElementById("settleBody").innerHTML = settleData.map(a=>{
+      const s = settle(a.gross), st = SST[a.status];
+      return `<tr>
+        <td data-label="活動"><b>${a.name}</b><div style="font-size:11.5px;color:#889">${a.date}</div></td>
+        <td data-label="售出">${a.sold} 張</td>
+        <td data-label="總收款">NT$ ${s.gross.toLocaleString()}</td>
+        <td data-label="平台抽成" class="feeCol">− ${s.platformFee.toLocaleString()}</td>
+        <td data-label="金流手續費" class="feeCol">− ${s.gatewayFee.toLocaleString()}</td>
+        <td data-label="淨額"><span class="netCol">NT$ ${s.net.toLocaleString()}</span></td>
+        <td data-label="狀態"><span class="tg ${st.cls}">${st.label}</span></td>
+        <td data-label="撥款"><span style="font-size:12.5px;color:#667">${a.payout}</span></td>
+      </tr>`;
+    }).join("");
+    let gross=0, fees=0, pending=0, paidOut=0;
+    settleData.forEach(a=>{ const s=settle(a.gross); gross+=s.gross; fees+=s.platformFee+s.gatewayFee; if(a.status==="paid") paidOut+=s.net; else pending+=s.net; });
+    const boxes = [
+      { l:"總收款",     i:"ri-safe-2-line",         v:gross, accent:true },
+      { l:"已扣手續費", i:"ri-scissors-cut-line",   v:fees },
+      { l:"待撥款",     i:"ri-time-line",           v:pending },
+      { l:"已撥款",     i:"ri-checkbox-circle-line",v:paidOut },
+      { l:"已退款",     i:"ri-refund-2-line",       v:refundedTotal },
+    ];
+    document.getElementById("settleSummary").innerHTML = boxes.map(b=>`
+      <div class="sBox${b.accent?' accent':''}"><div class="l"><i class="${b.i}"></i> ${b.l}</div><div class="v">NT$ ${b.v.toLocaleString()}</div></div>`).join("");
+  }
+  renderSettlement();
+
+  // 深層連結：/backstage#settle 直接開「撥款結算」分頁
+  if (location.hash) { const k = location.hash.slice(1); if (document.querySelector('.sectionTab[data-go="'+k+'"]')) showSection(k); }
 </script>
 </body>
 </html>

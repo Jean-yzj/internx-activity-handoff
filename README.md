@@ -26,7 +26,9 @@ demo into one site, one nav, one model. Visual system mirrors the real InternX a
 | 頁面 | 說明 |
 |---|---|
 | `index.html` `/` | 總覽：痛點對照、改版重點、一個帳號兩種能力 |
-| `backstage.html` `/backstage` | 認證帳號後臺：活動管理 / 報名名單（審核）/ 創作內容（部落格）|
+| `backstage.html` `/backstage` | 認證帳號後臺：活動管理 / 報名名單（審核）/ **撥款結算（代收代付）** / 創作內容（部落格）|
+| `club.html` `/club` | 社團主頁：幹部團隊（**多管理員**）/ **換屆交接** / 社團活動 |
+| `club-register.html` `/club-register` | 社團註冊流程：社團資料 / 身分驗證 / 邀請幹部（多管理員）/ 送審 |
 | `editor.html` `/editor` | 建立活動（票券時間/數量、表單就地編輯與拖曳、進階設定）|
 | `attendee.html` `/attendee` | 報名頁：活動介紹 + 報名表單 + 票券狀態（帶入編輯器內容）|
 | `creator.html` `/creator` | 創作者主頁（關於我 / 專長 / 部落格 / 主辦活動 / 活動紀錄）|

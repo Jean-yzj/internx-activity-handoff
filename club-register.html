@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>社團註冊｜InternX 實習通</title>
+<link rel="icon" href="/assets/cz/favicon.png" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" />
+<link rel="stylesheet" href="/assets/cz/app.css" />
+<style>
+  /* 多管理員邀請列（沿用 cz 表單元件，只補這個複合列） */
+  .invRow { display: flex; align-items: center; gap: 12px; border: 1px solid #e7eaf0; border-radius: 12px; padding: 12px 14px; margin-bottom: 10px; background: #fff; }
+  .invRow .iMain { flex: 1; min-width: 0; display: grid; grid-template-columns: 1fr 1.25fr; gap: 8px; }
+  .invRow .iMain .input { margin: 0; }
+  .invRow .iRole { width: 124px; flex-shrink: 0; }
+  .invRow .iStatus { flex-shrink: 0; }
+  .invRow .iDel { width: 38px; height: 40px; border: 1px solid #eee; border-radius: 8px; background: #fff; color: #d8392b; cursor: pointer; flex-shrink: 0; }
+  .invRow .iDel:disabled { opacity: .3; cursor: not-allowed; }
+  .miniTag { display: inline-flex; align-items: center; gap: 4px; font-size: 11.5px; font-weight: 600; padding: 3px 9px; border-radius: 999px; white-space: nowrap; }
+  .miniTag.owner { background: var(--complementary-white); color: #9a7400; }
+  .miniTag.active { background: #e4f9e8; color: #1a8a35; }
+  .miniTag.invited { background: #f0f1f4; color: #6b7585; }
+  @media (max-width: 680px) {
+    .invRow { flex-wrap: wrap; }
+    .invRow .iMain { grid-template-columns: 1fr; flex: 1 1 100%; order: 3; }
+    .invRow .iRole { flex: 1; width: auto; }
+  }
+</style>
+</head>
+<body data-page="register">
+
+<main>
+  <div class="cz-narrow" style="padding:36px 0 64px">
+
+    <div class="cz-section-head center" style="margin-bottom:18px">
+      <span class="cz-eyebrow"><i class="ri-group-line"></i> 社團註冊</span>
+      <h1 class="cz-section-title" style="font-size:26px">以「社團」身分註冊，幹部換屆也不中斷</h1>
+      <p class="cz-section-sub" style="margin:6px auto 0">社團是長期存在的主辦單位。用組織帳號註冊，支援多位管理員與換屆交接，帳號、粉絲與歷年活動不會因為換人而中斷。</p>
+    </div>
+
+    <!-- 步驟列 -->
+    <div class="stepper" id="stepper">
+      <div class="step active" data-s="1"><span class="dot">1</span><span class="lbl">社團資料</span></div>
+      <div class="bar"></div>
+      <div class="step" data-s="2"><span class="dot">2</span><span class="lbl">身分驗證</span></div>
+      <div class="bar"></div>
+      <div class="step" data-s="3"><span class="dot">3</span><span class="lbl">幹部與管理員</span></div>
+      <div class="bar"></div>
+      <div class="step" data-s="4"><span class="dot">4</span><span class="lbl">送審完成</span></div>
+    </div>
+
+    <!-- STEP 1：社團資料 -->
+    <section id="step1">
+      <div class="formCard">
+        <label class="formLabel">社團名稱 *</label>
+        <input class="input" id="cName" value="創新創業研究社" />
+        <div class="row2" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px">
+          <div>
+            <label class="formLabel">所屬學校 *</label>
+            <select class="input" id="cSchool"><option>國立政治大學</option><option>國立臺灣大學</option><option>國立清華大學</option><option>跨校 / 校外社團</option></select>
+          </div>
+          <div>
+            <label class="formLabel">社團類型</label>
+            <select class="input" id="cType"><option>學術性</option><option>服務性</option><option>康樂性</option><option>體育性</option><option>聯誼性</option><option>自治性</option></select>
+          </div>
+        </div>
+        <div class="row2" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px">
+          <div><label class="formLabel">創立年份</label><input class="input" id="cFounded" value="2018" /></div>
+          <div><label class="formLabel">對外聯絡 Email</label><input class="input" id="cMail" type="email" value="nccu.entrepreneur@gmail.com" /></div>
+        </div>
+        <label class="formLabel" style="margin-top:10px">社團標誌（選填）</label>
+        <div class="fileDrop" onclick="CZ.toast('Demo 不含真實上傳')"><i class="ri-image-add-line"></i> 點擊上傳社徽，建議方形 512 × 512</div>
+        <label class="formLabel" style="margin-top:12px">社團簡介</label>
+        <textarea class="textArea" id="cBio" rows="3">把校園裡想創業、想做專案的人聚在一起。每學期辦工作坊、業師小聚與 Demo Night，從 0 到 1 陪你把想法做出來。</textarea>
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-top:24px">
+        <button class="btn" onclick="setStep(2)">下一步：身分驗證 <i class="ri-arrow-right-line"></i></button>
+      </div>
+    </section>
+
+    <!-- STEP 2：身分驗證 -->
+    <section id="step2" style="display:none">
+      <div class="cz-section-head" style="margin-bottom:16px">
+        <h2 class="cz-section-title" style="font-size:22px">身分驗證</h2>
+        <p class="cz-section-sub">驗證通過後主頁會出現「已驗證社團」標章，報名者更信任、學校也好認列。擇一方式即可。</p>
+      </div>
+      <div class="roleGrid" id="verifyGrid"></div>
+      <div class="formCard" style="margin-top:18px">
+        <label class="formLabel">指導老師 Email *</label>
+        <input class="input" value="prof.wang@nccu.edu.tw" />
+        <div class="fieldHint">系統將寄確認信給指導老師，僅用於本次驗證、不會公開。</div>
+        <div class="row2" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px">
+          <div><label class="formLabel">現任社長 / 負責人 *</label><input class="input" value="林宇辰" /></div>
+          <div><label class="formLabel">系所 / 年級</label><input class="input" value="資管系四年級" /></div>
+        </div>
+      </div>
+      <div class="infoBanner" style="margin-top:16px">
+        <i class="ri-shield-keyhole-line"></i>
+        <span>負責人是<strong>第一位擁有者</strong>，但社團不綁定他個人 — 下一步可加入其他幹部一起管理，畢業換屆時再把擁有者移轉出去。</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:24px">
+        <button class="btn btn-white" onclick="setStep(1)"><i class="ri-arrow-left-line"></i> 上一步</button>
+        <button class="btn" onclick="setStep(3)">下一步：幹部與管理員 <i class="ri-arrow-right-line"></i></button>
+      </div>
+    </section>
+
+    <!-- STEP 3：幹部與管理員（多管理員，互動）-->
+    <section id="step3" style="display:none">
+      <div class="cz-section-head" style="margin-bottom:14px">
+        <h2 class="cz-section-title" style="font-size:22px">幹部與管理員</h2>
+        <p class="cz-section-sub">一個社團可以有<strong>多位管理員</strong>，各自分工 — 活動不會卡在一個人身上，社長畢業也不會把社團帶走。</p>
+      </div>
+      <div class="infoBanner" style="margin-bottom:16px">
+        <i class="ri-team-line"></i>
+        <span><strong>多管理員：</strong>財務長能看撥款結算、活動長能開活動、公關長能改主頁 — 權限分開。只有擁有者（社長）能移轉擁有權與刪除社團。</span>
+      </div>
+      <div class="formCard">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <b style="color:#11243f">幹部名單</b>
+          <button class="btn btn-white btn-small" onclick="addAdmin()"><i class="ri-user-add-line"></i> 邀請夥伴</button>
+        </div>
+        <div id="adminList"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:24px">
+        <button class="btn btn-white" onclick="setStep(2)"><i class="ri-arrow-left-line"></i> 上一步</button>
+        <button class="btn" onclick="submitClub()"><i class="ri-send-plane-line"></i> 送出審核</button>
+      </div>
+    </section>
+
+    <!-- STEP 4：送審完成 -->
+    <section id="step4" style="display:none">
+      <div class="formCard statusCard" id="statusCard"></div>
+    </section>
+  </div>
+</main>
+
+<script src="/assets/cz/data.js"></script>
+<script src="/assets/cz/app.js"></script>
+<script>
+  const $ = s => document.querySelector(s);
+  const PALETTE = ["#0182fd","#e2a200","#c35500","#1a8a35","#7a4ddb"];
+  const ini = n => (n && n.length > 2) ? n.slice(-2) : (n || "?");
+
+  function setStep(n){
+    [1,2,3,4].forEach(i => $("#step"+i).style.display = (i===n?"block":"none"));
+    document.querySelectorAll(".step").forEach(s => {
+      const si = +s.dataset.s;
+      s.classList.toggle("active", si===n);
+      s.classList.toggle("done", si<n);
+    });
+    window.scrollTo({ top:0, behavior:"smooth" });
+  }
+
+  /* 驗證方式（roleCard 風格，預設選第一個）*/
+  const methods = [
+    { id:"prof",  icon:"ri-mail-check-line",  title:"指導老師 Email 認證", desc:"寄確認信給指導老師，點擊即完成（最快）", rec:"建議" },
+    { id:"doc",   icon:"ri-file-shield-2-line", title:"上傳社團證明文件", desc:"社團成立核准函 / 課外組登記證明" },
+    { id:"union", icon:"ri-government-line",   title:"學生會 / 課外組核章", desc:"適合校級正式社團" },
+  ];
+  $("#verifyGrid").innerHTML = methods.map((m,i)=>`
+    <div class="roleCard ${i===0?'selected':''}" data-m="${m.id}">
+      ${m.rec?`<span class="recommend">${m.rec}</span>`:""}
+      <i class="ri-check-line check"></i>
+      <div class="ricon"><i class="${m.icon}"></i></div>
+      <h4>${m.title}</h4>
+      <p>${m.desc}</p>
+    </div>`).join("");
+  document.querySelectorAll("#verifyGrid .roleCard").forEach(c => c.addEventListener("click", () => {
+    document.querySelectorAll("#verifyGrid .roleCard").forEach(x => x.classList.remove("selected"));
+    c.classList.add("selected");
+  }));
+
+  /* 多管理員（互動）*/
+  const ROLES = ["社長","副社長","財務長","活動長","公關長","一般幹部"];
+  let admins = [
+    { name:"林宇辰", email:"yuchen.lin@nccu.edu.tw",  role:"社長",   status:"owner" },
+    { name:"陳思妤", email:"siyu.chen@nccu.edu.tw",   role:"副社長", status:"active" },
+    { name:"王柏翔", email:"boxiang.wang@nccu.edu.tw", role:"財務長", status:"invited" },
+  ];
+  const STAG = {
+    owner:   '<span class="miniTag owner"><i class="ri-vip-crown-2-fill"></i> 擁有者</span>',
+    active:  '<span class="miniTag active"><i class="ri-check-line"></i> 已加入</span>',
+    invited: '<span class="miniTag invited"><i class="ri-mail-send-line"></i> 邀請中</span>',
+  };
+  function renderAdmins(){
+    $("#adminList").innerHTML = admins.map((a,i)=>`
+      <div class="invRow">
+        ${CZ.avatar(ini(a.name), PALETTE[i%PALETTE.length], 40)}
+        <div class="iMain">
+          <input class="input" value="${a.name}" placeholder="幹部姓名" oninput="admins[${i}].name=this.value">
+          <input class="input" value="${a.email}" placeholder="邀請用 Email" oninput="admins[${i}].email=this.value">
+        </div>
+        <select class="input iRole" onchange="admins[${i}].role=this.value">
+          ${ROLES.map(r=>`<option ${r===a.role?'selected':''}>${r}</option>`).join("")}
+        </select>
+        <span class="iStatus">${STAG[a.status]}</span>
+        <button class="iDel" title="${a.status==='owner'?'擁有者不可移除':'移除'}" ${a.status==='owner'?'disabled':''} onclick="delAdmin(${i})"><i class="ri-delete-bin-line"></i></button>
+      </div>`).join("");
+  }
+  window.addAdmin = function(){ admins.push({ name:"", email:"", role:"一般幹部", status:"invited" }); renderAdmins(); };
+  window.delAdmin = function(i){
+    if (admins[i].status === "owner") { CZ.toast("擁有者不可移除，請先換屆移轉擁有權"); return; }
+    admins.splice(i,1); renderAdmins();
+  };
+  renderAdmins();
+
+  /* 送審 → 完成 */
+  window.submitClub = function(){
+    const count = admins.length;
+    $("#statusCard").innerHTML = `
+      <div class="statusIcon pending"><i class="ri-time-line"></i></div>
+      <h2>社團註冊已送出，等待審核</h2>
+      <p>感謝註冊「<b>${$("#cName").value || "社團"}</b>」！我們會於 <b>1–2 個工作天</b>內完成審核（指導老師 Email 確認 + 資料查核），結果以 Email 與站內通知告知。</p>
+      <div style="margin-top:6px"><span class="chip chip-pending"><i class="ri-loader-4-line"></i> 待審核中</span></div>
+      <div class="reviewSummary">
+        <div class="r"><b>社團名稱</b><span>${$("#cName").value} · ${$("#cSchool").value} · ${$("#cType").value}性</span></div>
+        <div class="r"><b>管理員</b><span>${count} 位（含 1 位擁有者 / 社長）</span></div>
+        <div class="r"><b>驗證方式</b><span>指導老師 Email 認證</span></div>
+      </div>
+      <div style="margin-top:24px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+        <a class="btn btn-white" href="/host">先看主辦單位入口</a>
+        <button class="btn btn-gold" id="simApprove"><i class="ri-magic-line"></i> 模擬：審核通過</button>
+      </div>
+      <p class="muted" style="font-size:12.5px;margin-top:14px;color:#889">（「模擬審核通過」僅展示審核後狀態；實際由管理員於後台操作。）</p>`;
+    setStep(4);
+    const sa = $("#simApprove");
+    sa && sa.addEventListener("click", () => {
+      $("#statusCard").innerHTML = `
+        <div class="statusIcon approved"><i class="ri-checkbox-circle-line"></i></div>
+        <h2>恭喜！社團主頁已上線</h2>
+        <p>「${$("#cName").value}」已成為 <span class="miniTag owner" style="vertical-align:middle"><i class="ri-verified-badge-fill"></i> 已驗證社團</span>，${count} 位幹部依角色分工管理；社長畢業時可<strong>換屆交接</strong>，帳號與歷年活動永久保留。</p>
+        <div style="margin-top:24px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+          <a class="btn" href="/club"><i class="ri-home-4-line"></i> 前往社團主頁</a>
+          <a class="btn btn-white" href="/editor"><i class="ri-add-circle-line"></i> 建立第一場活動</a>
+          <a class="btn btn-white" href="/backstage"><i class="ri-dashboard-3-line"></i> 社團後臺</a>
+        </div>`;
+    });
+  };
+</script>
+</body>
+</html>

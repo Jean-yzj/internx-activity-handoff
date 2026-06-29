@@ -60,6 +60,7 @@
           <div class="sectionLabel">主辦 / 創作者</div>
           <div class="dd-card">
             <a class="dd-button" href="/host"><i class="ri-store-2-line"></i> 主辦單位入口</a>
+            <a class="dd-button" href="/club"><i class="ri-group-line"></i> 社團主頁</a>
             <a class="dd-button" href="/editor"><i class="ri-add-circle-line"></i> 建立活動</a>
             <a class="dd-button" href="/blog-editor"><i class="ri-quill-pen-line"></i> 撰寫新文章</a>
             <a class="dd-button" href="/creator?id=${D.featured}#events"><i class="ri-calendar-event-line"></i> 我的主辦活動</a>
@@ -91,6 +92,7 @@
           ${items}
           <div style="height:1px;background:#eee;margin:10px 0"></div>
           <a href="/host"><i class="ri-store-2-line"></i>主辦單位入口</a>
+          <a href="/club"><i class="ri-group-line"></i>社團主頁</a>
           <a href="/editor"><i class="ri-add-circle-line"></i>建立活動</a>
           <a href="/directory"><i class="ri-compass-3-line"></i>探索創作者</a>
           <a href="/register"><i class="ri-verified-badge-line"></i>申請認證</a>
