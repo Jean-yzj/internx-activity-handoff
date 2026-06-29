@@ -7,6 +7,52 @@
 <link rel="icon" href="/assets/cz/favicon.png" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" />
 <link rel="stylesheet" href="/assets/cz/app.css" />
+<style>
+  /* ── block 編輯器（取代舊的單一 contenteditable「框」）── */
+  .bkEditor { border: 1px solid #e7eaf0; border-radius: 12px; padding: 8px 6px; background: #fff; min-height: 320px; }
+  .blk { position: relative; display: flex; align-items: flex-start; gap: 4px; padding: 2px 0; border-radius: 8px; }
+  .blk.dragover { box-shadow: 0 -2px 0 0 var(--theme-color); }
+  .blk.dragging { opacity: .35; }
+  .blk-handle { cursor: grab; color: #c2c8d2; font-size: 18px; padding: 6px 2px; flex-shrink: 0; opacity: 0; transition: opacity .1s; }
+  .blk:hover .blk-handle { opacity: 1; }
+  .blk-handle:active { cursor: grabbing; }
+  .blk-main { flex: 1; min-width: 0; }
+  .blk-actions { display: flex; gap: 2px; opacity: 0; transition: opacity .1s; flex-shrink: 0; }
+  .blk:hover .blk-actions { opacity: 1; }
+  .blk-actions button { width: 26px; height: 26px; border: none; background: none; color: #b5c0d0; border-radius: 6px; cursor: pointer; font-size: 15px; display: grid; place-items: center; }
+  .blk-actions button:hover { background: #f1f5fa; color: var(--theme-color); }
+  .blk-body { padding: 5px 8px; border-radius: 6px; outline: none; }
+  .blk-body:focus { background: #f7faff; box-shadow: inset 0 0 0 1px #d6e6fb; }
+  .blk-body:empty:before { content: attr(data-ph); color: #b5c0d0; }
+  .bk-p { font-size: 15px; color: #2b2b2b; line-height: 1.85; }
+  .bk-h2 { font-size: 21px; font-weight: 700; color: #11243f; line-height: 1.4; }
+  .bk-h3 { font-size: 17px; font-weight: 700; color: #11243f; line-height: 1.4; }
+  .bk-quote { border-left: 3px solid var(--theme-color); background: #f6f9fd; padding: 8px 14px; color: #4a5568; border-radius: 0 8px 8px 0; font-size: 15px; line-height: 1.75; }
+  .bk-ul { font-size: 15px; color: #2b2b2b; line-height: 1.8; margin: 0; padding-left: 22px; }
+  .bk-callout { display: flex; gap: 9px; align-items: flex-start; background: #fff8e7; border: 1px solid #f0dca8; border-radius: 10px; padding: 9px 12px; }
+  .bk-callout > i { color: var(--complementary-color); font-size: 18px; margin-top: 6px; flex-shrink: 0; }
+  .bk-callout .blk-body { flex: 1; color: #7a5e00; font-size: 14.5px; }
+  .bk-divider { border-top: 2px solid #e7eaf0; margin: 12px 4px; }
+  .bk-imgbox { border-radius: 10px; overflow: hidden; cursor: pointer; }
+  .bk-imgph { height: 150px; display: grid; place-items: center; color: #fff; font-size: 13px; gap: 6px; }
+  .bk-imgph i { font-size: 26px; }
+  .bk-cap { font-size: 12.5px; color: #889; text-align: center; padding: 6px; outline: none; }
+  .bk-cap:focus { background: #f7faff; border-radius: 6px; }
+  .addRow { display: flex; justify-content: center; margin-top: 6px; }
+  .addBtn { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #5b6b7e; background: none; border: 1px dashed #d8dee8; border-radius: 999px; padding: 6px 14px; cursor: pointer; }
+  .addBtn:hover { border-color: var(--theme-color); color: var(--theme-color); }
+  .editorHint { font-size: 12.5px; color: #8a94a3; margin: 8px 2px 0; }
+  /* 浮動選取工具列 */
+  .selBar { position: absolute; display: none; gap: 2px; background: #11243f; border-radius: 8px; padding: 3px; z-index: 200; box-shadow: 0 6px 18px rgba(16,32,56,.28); }
+  .selBar button { background: none; border: none; color: #fff; cursor: pointer; padding: 5px 9px; border-radius: 6px; font-size: 14px; display: inline-flex; align-items: center; gap: 4px; }
+  .selBar button:hover { background: rgba(255,255,255,.16); }
+  /* 區塊插入選單 */
+  .bkMenu { position: absolute; display: none; background: #fff; border: 1px solid #e0e0e0; border-radius: 10px; box-shadow: 0 12px 30px rgba(16,32,56,.18); padding: 6px; z-index: 201; width: 184px; }
+  .bkMenu button { display: flex; align-items: center; gap: 9px; width: 100%; text-align: left; border: none; background: none; padding: 8px 10px; border-radius: 7px; cursor: pointer; font-size: 13.5px; color: #11243f; }
+  .bkMenu button:hover { background: #f1f5fa; }
+  .bkMenu i { color: var(--theme-color); font-size: 16px; width: 18px; text-align: center; }
+  .bkMenu .mh { font-size: 11px; color: #8a94a3; padding: 4px 10px 2px; }
+</style>
 </head>
 <body data-page="blog">
 
@@ -15,18 +61,9 @@
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
       <div>
         <h1 style="font-size:26px;color:#11243f;margin:0">撰寫新文章</h1>
-        <p class="muted" style="margin:6px 0 0;font-size:14px">以認證創作者身分發佈，文章會自動連結到你的主頁。</p>
+        <p class="muted" style="margin:6px 0 0;font-size:14px">block 編輯器：每段是一個區塊，可<b>拖曳排序</b>、按 <b>＋</b> 或打 <b>/</b> 插入、<b>選字</b>浮出工具列。</p>
       </div>
       <span class="profileBadgePill profileBadgePillGold profileBadgePillCompact"><span class="pillEmoji"><i class="ri-quill-pen-line"></i></span><span class="pillLabel">認證創作者</span></span>
-    </div>
-
-    <!-- 圖片 -->
-    <div class="formSection">
-      <h3><i class="ri-image-line"></i> 文章封面圖片</h3>
-      <div class="fileDrop" onclick="CZ.toast('Demo 不含真實上傳')">
-        <i class="ri-upload-cloud-2-line"></i>
-        拖曳圖片到這裡，或點擊上傳（最多 5 張）
-      </div>
     </div>
 
     <!-- 基本資訊 -->
@@ -55,30 +92,19 @@
       </div>
     </div>
 
-    <!-- 內容 -->
+    <!-- 內容（block 編輯器）-->
     <div class="formSection">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <h3 style="margin:0"><i class="ri-file-text-line"></i> 文章內容</h3>
+        <h3 style="margin:0"><i class="ri-layout-2-line"></i> 文章內容</h3>
         <div class="tabSwitch">
           <button class="activeTab" id="editTab">編輯</button>
           <button id="previewTab">預覽</button>
         </div>
       </div>
       <div id="editorWrap">
-        <div class="editorToolbar">
-          <button class="formatButton" data-cmd="h2"><i class="ri-h-2"></i> 標題</button>
-          <button class="formatButton" data-cmd="bold"><i class="ri-bold"></i> 粗體</button>
-          <button class="formatButton" data-cmd="ul"><i class="ri-list-unordered"></i> 項目清單</button>
-          <button class="formatButton" data-cmd="ol"><i class="ri-list-ordered"></i> 編號清單</button>
-          <button class="formatButton" data-cmd="link"><i class="ri-link"></i> 連結</button>
-          <button class="formatButton" data-cmd="quote"><i class="ri-double-quotes-l"></i> 引用</button>
-          <button class="formatButton" style="margin-left:auto" onclick="CZ.toast('Demo 不含真實上傳')"><i class="ri-image-add-line"></i> 上傳圖片</button>
-        </div>
-        <div class="editorArea articleBody" id="editor" contenteditable="true">
-          <h2>從這裡開始寫你的故事⋯</h2>
-          <p>選取文字後點擊上方工具列可套用格式。</p>
-          <ul><li>支援標題、粗體、清單、引用、連結與圖片</li><li>送出後會儲存成你的文章內容</li></ul>
-        </div>
+        <div class="bkEditor" id="bkEditor"></div>
+        <div class="addRow"><button class="addBtn" id="addBottom"><i class="ri-add-line"></i> 新增區塊</button></div>
+        <p class="editorHint"><i class="ri-information-line"></i> 拖曳左側把手排序 · 滑到區塊按 ＋ 插入 · 空段落打「/」選類型 · 選取文字會浮出粗體 / 連結</p>
       </div>
       <div id="previewWrap" style="display:none">
         <div class="articleBody" id="preview" style="border:1px solid #eee;border-radius:10px;padding:20px;min-height:280px"></div>
@@ -92,55 +118,191 @@
   </div>
 </main>
 
+<div class="selBar" id="selBar">
+  <button data-fmt="bold" title="粗體"><i class="ri-bold"></i></button>
+  <button data-fmt="italic" title="斜體"><i class="ri-italic"></i></button>
+  <button data-fmt="link" title="連結"><i class="ri-link"></i> 連結</button>
+</div>
+<div class="bkMenu" id="bkMenu"></div>
+
 <script src="/assets/cz/data.js"></script>
-<script src="/assets/cz/render.js"></script>
 <script src="/assets/cz/app.js"></script>
 <script>
   const $ = s => document.querySelector(s);
-  // 字數
-  function bind(inputId, countId, max) {
-    const el = $("#"+inputId), c = $("#"+countId);
-    el.addEventListener("input", () => { const n = el.value.length; c.textContent = n + " / " + max; c.classList.toggle("over", n > max); });
+  function bind(inputId, countId, max){
+    const el=$("#"+inputId), c=$("#"+countId);
+    el.addEventListener("input", ()=>{ const n=el.value.length; c.textContent=n+" / "+max; c.classList.toggle("over", n>max); });
   }
   bind("title","titleCount",60); bind("excerpt","excerptCount",120);
 
-  // 工具列
-  document.querySelectorAll(".formatButton[data-cmd]").forEach(b => b.addEventListener("click", () => {
-    const cmd = b.dataset.cmd; document.getElementById("editor").focus();
-    if (cmd === "bold") document.execCommand("bold");
-    else if (cmd === "ul") document.execCommand("insertUnorderedList");
-    else if (cmd === "ol") document.execCommand("insertOrderedList");
-    else if (cmd === "h2") document.execCommand("formatBlock", false, "h2");
-    else if (cmd === "quote") document.execCommand("formatBlock", false, "blockquote");
-    else if (cmd === "link") { const u = prompt("輸入連結網址","https://"); if (u) document.execCommand("createLink", false, u); }
-  }));
+  /* ── block 模型 ── */
+  let uid = 0; const nid = () => "b" + (++uid);
+  const GRAD = ["linear-gradient(135deg,#5aafff,#0182fd)","linear-gradient(135deg,#ffd16b,#e2a200)","linear-gradient(135deg,#7a4ddb,#3c34a0)"];
+  let blocks = [
+    { id:nid(), type:"h2",   html:"從這裡開始寫你的故事" },
+    { id:nid(), type:"p",    html:"每一段都是獨立區塊：拖曳左邊把手排序、滑到區塊按 ＋ 插入、在空段落打 <b>/</b> 選類型。選取文字會浮出工具列。" },
+    { id:nid(), type:"callout", html:"重點：把實習經驗用 STAR 寫成「戰功」，每條都量化。" },
+    { id:nid(), type:"image", src:GRAD[0], caption:"示意圖片（點圖框模擬上傳，會先預覽再插入）" },
+    { id:nid(), type:"ul",   html:"<li>可拖曳排序</li><li>「/」指令插入</li><li>圖片先預覽</li>" },
+  ];
+  const TYPES = [
+    { t:"p",       icon:"ri-text",                label:"內文" },
+    { t:"h2",      icon:"ri-h-2",                 label:"標題" },
+    { t:"h3",      icon:"ri-h-3",                 label:"小標" },
+    { t:"quote",   icon:"ri-double-quotes-l",     label:"引用" },
+    { t:"ul",      icon:"ri-list-unordered",      label:"項目清單" },
+    { t:"callout", icon:"ri-lightbulb-flash-line",label:"重點提示" },
+    { t:"image",   icon:"ri-image-line",          label:"圖片" },
+    { t:"divider", icon:"ri-separator",           label:"分隔線" },
+  ];
+  const PH = { p:"輸入內文，或打「/」插入區塊…", h2:"標題", h3:"小標", quote:"引用…", callout:"重點提示…" };
+  const editor = $("#bkEditor"), menu = $("#bkMenu"), selBar = $("#selBar");
 
-  // 編輯 / 預覽
+  function blockMain(b){
+    if (b.type === "divider") return `<div class="bk-divider"></div>`;
+    if (b.type === "image") return `
+      <div class="bk-imgbox" data-img="${b.id}"><div class="bk-imgph" style="background:${b.src}"><i class="ri-image-add-line"></i> ${b.uploaded?'已上傳預覽（點擊更換）':'點擊模擬上傳圖片'}</div></div>
+      <div class="bk-cap" contenteditable data-cap data-id="${b.id}">${b.caption||""}</div>`;
+    if (b.type === "callout") return `<div class="bk-callout"><i class="ri-lightbulb-flash-line"></i><div class="blk-body" contenteditable data-id="${b.id}" data-ph="${PH.callout}">${b.html}</div></div>`;
+    if (b.type === "ul") return `<ul class="blk-body bk-ul" contenteditable data-id="${b.id}">${b.html}</ul>`;
+    const cls = b.type === "h2" ? "bk-h2" : b.type === "h3" ? "bk-h3" : b.type === "quote" ? "bk-quote" : "bk-p";
+    return `<div class="blk-body ${cls}" contenteditable data-id="${b.id}" data-ph="${PH[b.type]||PH.p}">${b.html||""}</div>`;
+  }
+  function render(){
+    editor.innerHTML = blocks.map(b => `
+      <div class="blk" data-id="${b.id}">
+        <span class="blk-handle" draggable="true" title="拖曳排序"><i class="ri-draggable"></i></span>
+        <div class="blk-main">${blockMain(b)}</div>
+        <span class="blk-actions">
+          <button class="blk-add" data-id="${b.id}" title="在下方插入"><i class="ri-add-line"></i></button>
+          <button class="blk-del" data-id="${b.id}" title="刪除"><i class="ri-close-line"></i></button>
+        </span>
+      </div>`).join("");
+  }
+
+  /* ── 編輯：input 直接更新 model（不重繪，保留游標）── */
+  editor.addEventListener("input", e => {
+    const el = e.target.closest("[data-id]"); if (!el) return;
+    const b = blocks.find(x => x.id === el.dataset.id); if (!b) return;
+    if (el.hasAttribute("data-cap")) b.caption = el.textContent;
+    else b.html = el.innerHTML;
+  });
+
+  /* ── 空段落打「/」→ 開插入選單（替換此區塊）── */
+  editor.addEventListener("keydown", e => {
+    const body = e.target.closest(".blk-body"); if (!body) return;
+    if (e.key === "/" && body.textContent.trim() === "") { e.preventDefault(); openMenu(body.dataset.id, "replace", body); }
+  });
+
+  /* ── 點擊：插入 / 刪除 / 圖片上傳 ── */
+  editor.addEventListener("click", e => {
+    const add = e.target.closest(".blk-add"); if (add) { openMenu(add.dataset.id, "after", add); return; }
+    const del = e.target.closest(".blk-del"); if (del) { blocks = blocks.filter(b => b.id !== del.dataset.id); if (!blocks.length) blocks.push({id:nid(),type:"p",html:""}); render(); return; }
+    const img = e.target.closest("[data-img]"); if (img) { const b = blocks.find(x=>x.id===img.dataset.img); b.src = GRAD[(GRAD.indexOf(b.src)+1)%GRAD.length]; b.uploaded = true; render(); CZ.toast("已選擇圖片並預覽（Demo 不實際上傳）"); }
+  });
+  $("#addBottom").addEventListener("click", () => openMenu(blocks[blocks.length-1]?.id, "after", $("#addBottom")));
+
+  /* ── 插入選單 ── */
+  let menuTarget = null, menuMode = null;
+  function openMenu(id, mode, anchor){
+    menuTarget = id; menuMode = mode;
+    menu.innerHTML = `<div class="mh">${mode==="replace"?"這個區塊變成…":"插入區塊"}</div>` +
+      TYPES.map(t => `<button data-t="${t.t}"><i class="${t.icon}"></i> ${t.label}</button>`).join("");
+    const r = anchor.getBoundingClientRect();
+    menu.style.display = "block";
+    menu.style.top = (r.bottom + window.scrollY + 4) + "px";
+    menu.style.left = (Math.min(r.left + window.scrollX, window.scrollX + window.innerWidth - 200)) + "px";
+  }
+  function closeMenu(){ menu.style.display = "none"; menuTarget = null; }
+  function blankFor(type){
+    if (type === "ul") return { html:"<li>項目一</li>" };
+    if (type === "image") return { src:GRAD[0], caption:"圖片說明" };
+    if (type === "divider") return {};
+    return { html:"" };
+  }
+  menu.addEventListener("click", e => {
+    const btn = e.target.closest("button[data-t]"); if (!btn) return;
+    const type = btn.dataset.t;
+    if (menuMode === "replace") {
+      const b = blocks.find(x => x.id === menuTarget);
+      Object.assign(b, { type }, blankFor(type));
+    } else {
+      const i = blocks.findIndex(x => x.id === menuTarget);
+      blocks.splice(i + 1, 0, { id:nid(), type, ...blankFor(type) });
+    }
+    closeMenu(); render();
+  });
+  document.addEventListener("click", e => { if (!e.target.closest(".bkMenu") && !e.target.closest(".blk-add") && !e.target.closest("#addBottom")) closeMenu(); });
+
+  /* ── 拖曳排序（HTML5 DnD，把手觸發）── */
+  let dragId = null;
+  editor.addEventListener("dragstart", e => { const h = e.target.closest(".blk-handle"); if (!h) return; dragId = h.closest(".blk").dataset.id; h.closest(".blk").classList.add("dragging"); e.dataTransfer.effectAllowed = "move"; });
+  editor.addEventListener("dragover", e => { if (!dragId) return; e.preventDefault(); const t = e.target.closest(".blk"); document.querySelectorAll(".blk.dragover").forEach(x => x.classList.remove("dragover")); if (t && t.dataset.id !== dragId) t.classList.add("dragover"); });
+  editor.addEventListener("drop", e => {
+    if (!dragId) return; e.preventDefault();
+    const t = e.target.closest(".blk");
+    if (t && t.dataset.id !== dragId) {
+      const from = blocks.findIndex(b => b.id === dragId), to = blocks.findIndex(b => b.id === t.dataset.id);
+      const [m] = blocks.splice(from, 1); blocks.splice(to, 0, m); render();
+    }
+    cleanupDrag();
+  });
+  editor.addEventListener("dragend", cleanupDrag);
+  function cleanupDrag(){ document.querySelectorAll(".blk.dragover,.blk.dragging").forEach(x => x.classList.remove("dragover","dragging")); dragId = null; }
+
+  /* ── 選取文字 → 浮動工具列 ── */
+  document.addEventListener("selectionchange", () => {
+    const sel = document.getSelection();
+    if (!sel.rangeCount || sel.isCollapsed) { selBar.style.display = "none"; return; }
+    let n = sel.anchorNode; n = n && (n.nodeType === 1 ? n : n.parentElement);
+    const body = n && n.closest && n.closest(".blk-body, .bk-cap");
+    if (!body || !editor.contains(body)) { selBar.style.display = "none"; return; }
+    const r = sel.getRangeAt(0).getBoundingClientRect();
+    if (!r.width) { selBar.style.display = "none"; return; }
+    selBar.style.display = "flex";
+    selBar.style.top = (r.top + window.scrollY - 40) + "px";
+    selBar.style.left = (r.left + window.scrollX + r.width / 2 - 52) + "px";
+  });
+  selBar.querySelectorAll("button").forEach(b => {
+    b.addEventListener("mousedown", e => e.preventDefault());  // 保留選取
+    b.addEventListener("click", () => {
+      const f = b.dataset.fmt;
+      if (f === "bold") document.execCommand("bold");
+      else if (f === "italic") document.execCommand("italic");
+      else if (f === "link") { const u = prompt("連結網址", "https://"); if (u) document.execCommand("createLink", false, u); }
+      const el = document.getSelection().anchorNode?.parentElement?.closest?.(".blk-body, .bk-cap");
+      if (el) { const bl = blocks.find(x => x.id === el.dataset.id); if (bl && !el.hasAttribute("data-cap")) bl.html = el.innerHTML; }
+    });
+  });
+
+  /* ── 編輯 / 預覽 ── */
+  function blockToHTML(b){
+    switch (b.type) {
+      case "h2": return `<h2>${b.html}</h2>`;
+      case "h3": return `<h3>${b.html}</h3>`;
+      case "quote": return `<blockquote>${b.html}</blockquote>`;
+      case "callout": return `<div style="background:#fff8e7;border:1px solid #f0dca8;border-radius:10px;padding:10px 14px;color:#7a5e00;display:flex;gap:9px"><span>💡</span><div>${b.html}</div></div>`;
+      case "ul": return `<ul>${b.html}</ul>`;
+      case "image": return `<figure style="margin:14px 0"><div style="height:180px;border-radius:10px;background:${b.src}"></div><figcaption style="font-size:12.5px;color:#889;text-align:center;padding:6px">${b.caption||""}</figcaption></figure>`;
+      case "divider": return `<hr style="border:none;border-top:2px solid #e7eaf0;margin:16px 0">`;
+      default: return `<p>${b.html}</p>`;
+    }
+  }
   $("#editTab").addEventListener("click", () => { $("#editTab").classList.add("activeTab"); $("#previewTab").classList.remove("activeTab"); $("#editorWrap").style.display="block"; $("#previewWrap").style.display="none"; });
-  $("#previewTab").addEventListener("click", () => { $("#previewTab").classList.add("activeTab"); $("#editTab").classList.remove("activeTab"); $("#editorWrap").style.display="none"; $("#previewWrap").style.display="block"; $("#preview").innerHTML = $("#editor").innerHTML; });
+  $("#previewTab").addEventListener("click", () => { $("#previewTab").classList.add("activeTab"); $("#editTab").classList.remove("activeTab"); $("#editorWrap").style.display="none"; $("#previewWrap").style.display="block"; $("#preview").innerHTML = blocks.map(blockToHTML).join(""); });
 
-  // 送出：示範文章如何「連動」回平台
+  /* ── 送出（沿用原本的連動說明）── */
   $("#submitBtn").addEventListener("click", () => {
     if (!$("#title").value.trim()) { CZ.toast("請先填寫文章標題"); $("#title").focus(); return; }
-    const status = $("#status").value;
-    const title = $("#title").value.trim();
-    const D_FEATURED = window.CZ_DATA.featured;
-
-    if (status === "draft") {
-      CZ.toast("已儲存為草稿（status:draft，僅自己可見）");
-      setTimeout(() => location.href = "/creator#blog", 900);
-      return;
-    }
-
-    // 發佈成功：說明連動關係（對應 BlogPost.published + authorId）
+    if ($("#status").value === "draft") { CZ.toast("已儲存為草稿（status:draft，僅自己可見）"); setTimeout(() => location.href = "/creator#blog", 900); return; }
     CZ.modal(`
       <div style="text-align:center">
         <div class="publishCheck"><i class="ri-checkbox-circle-fill"></i></div>
         <h3 style="margin:6px 0 4px">文章已發佈！</h3>
-        <p class="muted" style="margin:0 0 18px;font-size:13.5px">這篇文章會連到你的帳號，自動出現在以下三個位置：</p>
+        <p class="muted" style="margin:0 0 18px;font-size:13.5px">內容以 <b>blocks（JSON）</b>儲存，自動出現在三個位置：</p>
       </div>
       <div class="linkFlow">
-        <div class="lfStep"><div class="lfIco"><i class="ri-user-star-line"></i></div><div><b>你的創作者主頁 › 部落格分頁</b><span>訪客點你的頭像進到主頁就能看到。</span></div></div>
+        <div class="lfStep"><div class="lfIco"><i class="ri-user-star-line"></i></div><div><b>你的創作者主頁 › 部落格分頁</b><span>訪客點頭像進主頁就能看到。</span></div></div>
         <div class="lfStep"><div class="lfIco"><i class="ri-article-line"></i></div><div><b>平台部落格列表</b><span>進入全站文章流，依分類與時間排序。</span></div></div>
         <div class="lfStep"><div class="lfIco"><i class="ri-bell-line"></i></div><div><b>追蹤者的通知與動態</b><span>追蹤你的人會收到新文章提醒。</span></div></div>
       </div>
@@ -148,9 +310,10 @@
         <a class="btn btn-small" href="/creator#blog"><i class="ri-user-star-line"></i> 查看主頁部落格</a>
         <a class="btn btn-white btn-small" href="/blog"><i class="ri-article-line"></i> 查看部落格列表</a>
       </div>
-      <p class="muted" style="font-size:12px;text-align:center;margin:14px 0 0">（Demo：實際發佈會同步到你的部落格。）</p>
     `);
   });
+
+  render();
 </script>
 </body>
 </html>
