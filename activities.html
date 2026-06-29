@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>職涯活動 · 個人化探索｜InternX 實習通</title>
+<link rel="icon" href="/assets/cz/favicon.png" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" />
+<link rel="stylesheet" href="/assets/cz/app.css" />
+<style>
+  .discoverHead { margin: 4px 0 18px; }
+  .discoverHead h1 { font-size: 26px; color: #11243f; margin: 0 0 6px; }
+  .discoverHead p { font-size: 14.5px; color: #5b6b7e; margin: 0; }
+  .ctrlLabel { font-size: 12.5px; color: #8a94a3; font-weight: 600; margin: 14px 0 8px; display: flex; align-items: center; gap: 6px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { font-size: 13.5px; padding: 7px 13px; border-radius: 999px; border: 1px solid #d8dee8; background: #fff; color: #11243f; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; user-select: none; transition: all .12s; }
+  .chip:hover { border-color: var(--theme-light); }
+  .chip.on { background: var(--theme-white); color: var(--theme-color-black); border-color: var(--theme-color); font-weight: 600; }
+  .chip i { font-size: 15px; }
+  .qf { font-size: 13px; padding: 6px 12px; border-radius: 999px; border: 1px solid #d8dee8; background: #fff; color: #5b6b7e; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; user-select: none; }
+  .qf.on { background: #11243f; color: #fff; border-color: #11243f; }
+  .feedHead { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin: 24px 0 12px; }
+  .feedHead h2 { font-size: 18px; color: #11243f; margin: 0; display: flex; align-items: center; gap: 7px; }
+  .feedHead .cnt { font-size: 13px; color: #8a94a3; }
+  .actCard { display: flex; gap: 14px; align-items: center; background: #fff; border: 1px solid #e7eaf0; border-radius: 14px; padding: 14px; margin-bottom: 11px; text-decoration: none; color: inherit; transition: box-shadow .15s, border-color .15s; }
+  .actCard:hover { box-shadow: 0 8px 22px rgba(16,32,56,.08); border-color: var(--theme-color); }
+  .actThumb { width: 56px; height: 56px; border-radius: 12px; flex-shrink: 0; display: grid; place-items: center; color: #fff; font-size: 24px; }
+  .actBody { flex: 1; min-width: 0; }
+  .actT { font-weight: 600; font-size: 15px; color: #11243f; }
+  .actMeta { font-size: 12.5px; color: #889; margin-top: 3px; }
+  .why { display: inline-flex; align-items: center; gap: 4px; font-size: 11.5px; font-weight: 600; padding: 2px 9px; border-radius: 999px; margin-top: 7px; }
+  .why.match { background: var(--theme-white); color: var(--theme-color-black); }
+  .why.follow { background: #fdeef0; color: #c2304e; }
+  .why.hot { background: #fff4d6; color: #9a7400; }
+  .favRow { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .fav { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-weight: 600; font-size: 13px; font-family: "Noto Sans TC"; flex-shrink: 0; }
+  .emptyFeed { text-align: center; color: #889; padding: 34px; font-size: 14px; border: 1px dashed #d8dee8; border-radius: 14px; }
+  @media (max-width: 640px) { .actThumb { width: 46px; height: 46px; font-size: 20px; } }
+</style>
+</head>
+<body data-page="activities">
+
+<main>
+  <div class="cz-container" style="padding:26px 0 64px">
+    <div class="discoverHead">
+      <h1>職涯活動</h1>
+      <p>選你想進的領域，下面的「為你推薦」會依<b>領域 × 你追蹤的主辦 × 報名熱度</b>重新排序，每張卡會說明<b>為什麼推給你</b>。</p>
+    </div>
+
+    <div class="cz-info" style="background:#f0f7ff;border:1px solid #cfe6ff;border-radius:12px;padding:11px 14px;margin-bottom:16px;font-size:13px;color:#33506e">
+      <i class="ri-cursor-line"></i> 這是<b>個人化探索原型</b>：點下面的領域 chips（可複選），feed 會即時變化。預設已選「財會／金融」。
+    </div>
+
+    <div class="ctrlLabel"><i class="ri-focus-3-line"></i> 選你想進的領域</div>
+    <div class="chips" id="indChips"></div>
+
+    <div class="ctrlLabel"><i class="ri-equalizer-line"></i> 快篩</div>
+    <div class="chips" id="qfRow">
+      <span class="qf" data-qf="free"><i class="ri-price-tag-3-line"></i> 免費</span>
+      <span class="qf" data-qf="online"><i class="ri-vidicon-line"></i> 線上</span>
+    </div>
+
+    <div class="feedHead">
+      <h2><i class="ri-sparkling-2-line" style="color:var(--complementary-color)"></i> 為你推薦</h2>
+      <span class="cnt" id="feedCnt"></span>
+    </div>
+    <div id="feed"></div>
+
+    <div class="ctrlLabel" style="margin-top:24px"><i class="ri-heart-line"></i> 你追蹤的主辦</div>
+    <div class="favRow" id="favRow"></div>
+
+    <div class="cz-info" style="background:#f9fafb;border:1px solid #eee;border-radius:12px;padding:14px 16px;margin-top:26px;font-size:13px;color:#556;line-height:1.7">
+      <b style="color:#11243f"><i class="ri-route-line" style="color:var(--theme-color)"></i> 給工程師：怎麼接</b><br>
+      重用既有 <code style="font-size:12px">INDUSTRY_CATEGORIES</code>（17 類，目前只用在公司評價）。新增 <code style="font-size:12px">userData.preferredIndustries[]</code>（onboarding 選 2–3 個）＋ <code style="font-size:12px">activity.industryTags[]</code>。排序＝<code style="font-size:12px">領域 match ×100 ＋ 追蹤主辦 ×10 ＋ 報名熱度</code>，推薦原因直接由命中條件產生（透明）。追蹤系統接既有通知 / 里程碑。詳見 <a href="/spec" style="color:var(--theme-color)">工程規格</a>。
+    </div>
+  </div>
+</main>
+
+<script src="/assets/cz/data.js"></script>
+<script src="/assets/cz/app.js"></script>
+<script>
+  /* 領域（對齊 lib/config.js 的 INDUSTRY_CATEGORIES，取常見子集）*/
+  const INDUSTRIES = [
+    { key:"finance",   label:"財會／金融" },
+    { key:"it",        label:"資訊軟體" },
+    { key:"marketing", label:"行銷／企劃" },
+    { key:"hr",        label:"經營／人資" },
+    { key:"sales",     label:"客服／業務" },
+    { key:"design",    label:"設計" },
+    { key:"startup",   label:"創業" },
+  ];
+  const labelOf = k => (INDUSTRIES.find(i=>i.key===k)||{}).label || k;
+
+  /* Demo 活動（每筆帶 industryTags / type / fee / venue / 主辦 / 是否追蹤）*/
+  const ACTS = [
+    { t:"金融業職涯講座：從實習到 offer", ind:["finance"], type:"講座", date:"7/2", venue:"線上", fee:"免費", free:true, online:true, org:"玉山金控", icon:"ri-bank-line", color:"#0182fd", followed:true, soon:0 },
+    { t:"投行求職 Networking 工作坊", ind:["finance"], type:"工作坊", date:"6/12", venue:"台北", fee:"NT$900", free:false, online:false, org:"張哲瑋", icon:"ri-line-chart-line", color:"#1861a8", followed:false, soon:0 },
+    { t:"FinTech 新創 Demo Night", ind:["finance","startup"], type:"交流活動", date:"7/9", venue:"台北", fee:"免費", free:true, online:false, org:"創新創業研究社", icon:"ri-rocket-2-line", color:"#7a4ddb", followed:true, soon:3 },
+    { t:"前端工程師技術面試衝刺營", ind:["it"], type:"工作坊", date:"5/10", venue:"線上", fee:"NT$800", free:false, online:true, org:"陳柏宇", icon:"ri-code-s-slash-line", color:"#0f766e", followed:false, soon:0 },
+    { t:"產品設計作品集健診", ind:["design"], type:"講座", date:"5/16", venue:"線上", fee:"免費", free:true, online:true, org:"李思妤", icon:"ri-palette-line", color:"#db2777", followed:false, soon:0 },
+    { t:"個人品牌與社群行銷實戰", ind:["marketing"], type:"工作坊", date:"5/24", venue:"台北", fee:"NT$500", free:false, online:false, org:"黃詩涵", icon:"ri-megaphone-line", color:"#e2a200", followed:false, soon:0 },
+    { t:"學生創業者小聚", ind:["startup"], type:"交流活動", date:"6/28", venue:"台北", fee:"審核制", free:false, online:false, org:"創新創業研究社", icon:"ri-group-line", color:"#0182fd", followed:true, soon:0 },
+    { t:"履歷健診 Open Office Hour", ind:["hr"], type:"講座", date:"7/3", venue:"線上", fee:"免費", free:true, online:true, org:"林宥蓁", icon:"ri-file-user-line", color:"#1d9e75", followed:false, soon:2 },
+    { t:"外商求職實戰工作坊（不分領域）", ind:[], type:"工作坊", date:"7/6", venue:"台北", fee:"NT$600", free:false, online:false, org:"林宥蓁", icon:"ri-briefcase-line", color:"#8a94a3", followed:false, soon:0 },
+  ];
+  const FOLLOWS = [
+    { nm:"創創", color:"#0182fd" }, { nm:"哲瑋", color:"#1861a8" }, { nm:"玉山", color:"#1d9e75" }, { nm:"宥蓁", color:"#7a4ddb" },
+  ];
+
+  let selected = new Set(["finance"]);   // demo 預設
+  let qf = { free:false, online:false };
+
+  function score(a){
+    let s = 0;
+    if (selected.size && a.ind.some(i=>selected.has(i))) s += 100;
+    if (a.followed) s += 10;
+    if (a.soon) s += (5 - a.soon);
+    return s;
+  }
+  function reason(a){
+    const m = a.ind.find(i=>selected.has(i));
+    if (m) return { cls:"match", icon:"ri-focus-3-line", text:"因為你選了「"+labelOf(m)+"」" };
+    if (a.followed) return { cls:"follow", icon:"ri-heart-line", text:"你追蹤的 "+a.org };
+    if (a.soon && a.soon<=3) return { cls:"hot", icon:"ri-time-line", text:"報名剩 "+a.soon+" 天" };
+    return { cls:"hot", icon:"ri-fire-line", text:"熱門" };
+  }
+
+  function renderChips(){
+    document.getElementById("indChips").innerHTML = INDUSTRIES.map(i=>
+      `<span class="chip ${selected.has(i.key)?'on':''}" data-ind="${i.key}">${selected.has(i.key)?'<i class="ri-check-line"></i>':''} ${i.label}</span>`).join("");
+    document.querySelectorAll("#indChips .chip").forEach(c=>c.addEventListener("click",()=>{
+      const k=c.dataset.ind; selected.has(k)?selected.delete(k):selected.add(k); renderChips(); renderFeed();
+    }));
+  }
+  function renderFeed(){
+    let list = ACTS.filter(a => (!qf.free||a.free) && (!qf.online||a.online));
+    list = list.map(a=>({a,s:score(a)})).sort((x,y)=> y.s - x.s).map(o=>o.a);
+    const feed = document.getElementById("feed");
+    if (!list.length){ feed.innerHTML = `<div class="emptyFeed"><i class="ri-inbox-line"></i> 沒有符合的活動，試著放寬快篩或多選領域。</div>`; }
+    else feed.innerHTML = list.map(a=>{
+      const r = reason(a);
+      return `<a class="actCard" href="/attendee">
+        <div class="actThumb" style="background:linear-gradient(135deg,${a.color},${a.color}cc)"><i class="${a.icon}"></i></div>
+        <div class="actBody">
+          <div class="actT">${a.t}</div>
+          <div class="actMeta">${a.type} · ${a.date} · ${a.venue} · ${a.fee} · ${a.org}</div>
+          <span class="why ${r.cls}"><i class="${r.icon}"></i> ${r.text}</span>
+        </div>
+        <i class="ri-arrow-right-s-line" style="color:#b5c0d0;font-size:22px"></i>
+      </a>`;
+    }).join("");
+    document.getElementById("feedCnt").textContent =
+      (selected.size? `已選 ${selected.size} 個領域 · ` : "") + `${list.length} 場`;
+  }
+
+  document.querySelectorAll("#qfRow .qf").forEach(b=>b.addEventListener("click",()=>{
+    const k=b.dataset.qf; qf[k]=!qf[k]; b.classList.toggle("on",qf[k]); renderFeed();
+  }));
+  document.getElementById("favRow").innerHTML = FOLLOWS.map(f=>
+    `<div class="fav" style="background:${f.color}">${f.nm}</div>`).join("")
+    + `<span style="font-size:12.5px;color:#8a94a3">新活動會優先出現在「為你推薦」</span>`;
+
+  renderChips(); renderFeed();
+</script>
+</body>
+</html>
