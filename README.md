@@ -35,7 +35,7 @@ demo into one site, one nav, one model. Visual system mirrors the real InternX a
 | `blog.html` `/blog` | 部落格列表（`/blog-editor` 撰寫、`/blog-article` 內文）|
 | `academy.html` `/academy` | **職涯學院**：課程探索（五類標籤篩選＋職涯導向課程卡）|
 | `course.html` `/course?id=…` | 課程詳情（18 區塊）＋ **Mock 購買全流程**（Order→Payment→Enrollment→分潤）|
-| `classroom.html` `/classroom?id=…` | 教室播放器：進度、試看、教材下載、單元留言、公告、完課→個人頁 |
+| `classroom.html` `/classroom?id=…` | 教室播放器：進度、字幕（CC 開關）、試看、教材下載、單元留言、公告、完課→個人頁 |
 | `my-courses.html` `/my-courses` | 我的課程：進行中／已完成／收藏／下載紀錄 |
 | `academy-studio.html` `/academy-studio` | 創作者課程後台：Dashboard／我的課程／4 步開課精靈／收益／留言管理 |
 | `academy-admin.html` `/academy-admin` | 課程管理後台：審核、創作者、訂單退款、收益撥款、分潤設定 |

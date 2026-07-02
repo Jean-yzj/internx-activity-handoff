@@ -9,7 +9,7 @@
 (function () {
   "use strict";
   const KEY = "ixa_db_v1";
-  const SEED_V = 6; // 改 seed 結構時 +1，舊資料自動重建
+  const SEED_V = 7; // 改 seed 結構時 +1，舊資料自動重建
   const now = () => Date.now();
   const DAY = 86400000;
   const ago = d => now() - d * DAY;
@@ -98,7 +98,16 @@
         ],
         sections: [
           S("先搞懂：企業為什麼要商業分析", [
-            L("課程導覽＆怎麼拿到最好效果", 6, { preview: true }),
+            L("課程導覽＆怎麼拿到最好效果", 6, { preview: true, subtitles: [
+              { t: 0,   text: "嗨，我是哲瑋。歡迎加入商業分析實習準備課。" },
+              { t: 16,  text: "這堂課的目標只有一個：讓你帶著一份能放進履歷的分析專案離開。" },
+              { t: 40,  text: "我們會從 Excel 資料清理開始，一路做到 SQL 筆試與完整案例。" },
+              { t: 70,  text: "每一章都有作業與詳解 —— 動手做，比看十遍影片有用。" },
+              { t: 110, text: "建議先到教材區下載練習檔，跟著影片一起操作。" },
+              { t: 160, text: "遇到卡關就在單元下面留言，我每週固定回覆一次。" },
+              { t: 230, text: "準備好了嗎？我們從企業為什麼需要商業分析開始。" },
+              { t: 320, text: "下一個單元，會用三個真實案例看 BA 實習每天在做什麼。" },
+            ] }),
             L("BA 實習在做什麼：三個真實案例", 14, { preview: true }),
             L("拆解 JD：企業要的其實是這三件事", 11),
           ]),
@@ -910,6 +919,39 @@
   }
   const MAT_ICON = { xlsx: "ri-file-excel-2-line", pptx: "ri-slideshow-2-line", docx: "ri-file-word-2-line", pdf: "ri-file-pdf-2-line", zip: "ri-file-zip-line", fig: "ri-pen-nib-line", notion: "ri-booklet-line" };
 
+  /* ================= 字幕（cue 模型；正式版＝講師上傳 SRT/VTT，見 spec §17） ================= */
+  // lesson.subtitles = [{ t: 秒, text }]；沒有自訂字幕的單元回傳示範字幕（demo 佔位）
+  function cuesFor(lesson) {
+    if (lesson.subtitles && lesson.subtitles.length) return lesson.subtitles;
+    const dur = lesson.mins * 60;
+    const mk = (f, text) => ({ t: Math.round(dur * f), text });
+    return [
+      mk(0,    "（示範字幕）歡迎來到「" + lesson.title + "」。"),
+      mk(0.12, "這個單元約 " + lesson.mins + " 分鐘，建議搭配教材一起看。"),
+      mk(0.30, "正式平台的字幕由講師上傳 SRT／VTT，或平台自動轉錄後校對。"),
+      mk(0.50, "右下角 CC 按鈕可以開關字幕，偏好會記住。"),
+      mk(0.70, "「" + lesson.title + "」的重點就在這一段，記得做筆記。"),
+      mk(0.88, "本單元接近尾聲，看完會自動標記完成並前往下一堂。"),
+    ];
+  }
+  const cueAt = (lesson, sec) => {
+    const cues = cuesFor(lesson);
+    let cur = null;
+    for (const c of cues) { if (c.t <= sec) cur = c; else break; }
+    return cur ? cur.text : "";
+  };
+  const ccOn = () => db.ccOn !== false; // 預設開啟
+  function setCC(v) { db.ccOn = !!v; save(); }
+  // 解析「mm:ss 文字」多行輸入（Studio 字幕編輯用）
+  function parseCueLines(str) {
+    return String(str || "").split("\n").map(line => {
+      const m = line.trim().match(/^(\d{1,3}):([0-5]\d)\s+(.+)$/);
+      return m ? { t: (+m[1]) * 60 + (+m[2]), text: m[3].trim() } : null;
+    }).filter(Boolean).sort((a, b) => a.t - b.t);
+  }
+  const cueLinesOf = lesson => (lesson.subtitles || []).map(c =>
+    Math.floor(c.t / 60) + ":" + String(c.t % 60).padStart(2, "0") + " " + c.text).join("\n");
+
   /* ================= 對外 API ================= */
   window.IXA = {
     ME, USERS, CAREERS, STAGES, GRADES, OUTCOMES, careerOf, stageOf, outcomeOf,
@@ -924,5 +966,6 @@
     approveCourse, rejectCourse, takedownCourse, setFeatured, decideCreatorApp, setSuspended,
     platformSummary, markPayout, exportCSV,
     covStyle, avatarHTML, priceHTML, courseCardHTML, wireFavs, MAT_ICON,
+    cuesFor, cueAt, ccOn, setCC, parseCueLines, cueLinesOf,
   };
 })();

@@ -189,6 +189,10 @@ a.ax-lsRow:hover { background: #fafcff; }
 .ax-pvBtns button { background: none; border: none; color: #fff; font-size: 20px; cursor: pointer; padding: 2px; display: grid; place-items: center; }
 .ax-pvBtns .spacer { flex: 1; }
 .ax-speed { background: rgba(255,255,255,.15); border: none; color: #fff; font-size: 12px; font-weight: 700; border-radius: 7px; padding: 3px 8px; cursor: pointer; }
+.ax-ccBox { position: absolute; left: 0; right: 0; bottom: 74px; display: flex; justify-content: center; padding: 0 24px; z-index: 1; pointer-events: none; }
+.ax-ccBox span { background: rgba(4, 10, 20, .78); color: #fff; font-size: 15px; line-height: 1.6; padding: 5px 14px; border-radius: 8px; max-width: 82%; text-align: center; text-shadow: 0 1px 2px rgba(0,0,0,.5); }
+.ax-pvBtns button.ccOff { opacity: .45; }
+@media (max-width: 640px) { .ax-ccBox { bottom: 64px; } .ax-ccBox span { font-size: 12.5px; } }
 .ax-lessonBar { display: flex; align-items: center; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
 .ax-lessonBar h2 { font-size: 16.5px; color: #11243f; margin: 0; flex: 1; min-width: 200px; }
 .ax-playlist { background: #fff; border: 1px solid #e7eaf0; border-radius: 16px; overflow: hidden; }

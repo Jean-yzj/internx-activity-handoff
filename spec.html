@@ -24,7 +24,7 @@
         <b>身分/整合</b> 7 帳號認證並行・11 話題牆；
         <b>收尾</b> 12 改動檔案清單・13 驗收標準；
         <b>增補</b> 14 撥款結算＋社團・15 帳號選單・16 活動個人化；
-        <b>未來</b> 17 Academy 課程平台（預告，低優先）。</p>
+        <b>職涯學院</b> 17 Academy 課程平台（原型已完成：入口地圖・預留事項・資料流・字幕）。</p>
     </div>
   </div>
 
@@ -457,11 +457,25 @@ interface ActivityData { <span class="c">/* …現有… */</span> <span class="
   <!-- 17. academy future feature (heads-up only) -->
   <section class="section">
     <h2>17 · InternX Academy 職涯課程平台（原型已完成；主平台整併後續排程）</h2>
-    <div class="callout callout-fix"><i class="ri-checkbox-circle-line"></i><p style="margin:0"><b>本 repo 已含完整可操作原型</b>：探索 <a href="/academy">/academy</a> → 詳情＋Mock 購買 <a href="/course?id=c-ba">/course</a> → 教室播放器 <a href="/classroom?id=c-ba">/classroom</a> → <a href="/my-courses">/my-courses</a>；創作者後台 <a href="/academy-studio">/academy-studio</a>（4 步開課精靈／收益／留言管理）、管理後台 <a href="/academy-admin">/academy-admin</a>（審核／訂單／收益／分潤）。資料層在 <code class="coderef">assets/academy/academy.js</code>：localStorage 持久化＋<b>PaymentProvider 抽象層（FakePay）</b>，Order → Payment → Enrollment → RevenueRecord 全流程真的會跑。<b>整併進 internx.me 主平台仍屬後續排程（低優先）</b>，完整需求見 <code class="coderef">ACADEMY-PRD.md</code>（<a href="/handoff#doc">交接首頁可線上閱讀</a>）；下面的預留事項仍然成立。</p></div>
+    <div class="callout callout-fix"><i class="ri-checkbox-circle-line"></i><p style="margin:0"><b>本 repo 已含完整可操作原型</b>：探索 <a href="/academy">/academy</a> → 詳情＋Mock 購買 <a href="/course?id=c-ba">/course</a> → 教室播放器（含<b>字幕 CC</b>）<a href="/classroom?id=c-ba">/classroom</a> → <a href="/my-courses">/my-courses</a>；創作者後台 <a href="/academy-studio">/academy-studio</a>（4 步開課精靈／字幕與教材上傳／收益／留言管理）、管理後台 <a href="/academy-admin">/academy-admin</a>（審核／訂單／收益／分潤）。資料層在 <code class="coderef">assets/academy/academy.js</code>：localStorage 持久化＋<b>PaymentProvider 抽象層（FakePay）</b>，Order → Payment → Enrollment → RevenueRecord 全流程真的會跑。<b>整併進 internx.me 主平台仍屬後續排程（低優先）</b>，完整需求見 <code class="coderef">ACADEMY-PRD.md</code>（<a href="/handoff#doc">交接首頁可線上閱讀</a>）；下面的預留事項仍然成立。</p></div>
+
+    <h3>17.1 入口地圖（各頁彼此怎麼進；詳版見 INTEGRATION.md §20.1）</h3>
+    <table class="spec">
+      <thead><tr><th>頁面</th><th>誰用</th><th>進入方式（全部列出）</th></tr></thead>
+      <tbody>
+        <tr><td><a href="/academy">/academy</a> 探索</td><td>學生</td><td>主導覽「職涯學院」（每頁都有，手機＝漢堡選單）· Footer「職涯學院」· 活動頁「延伸學習資源→看更多」· 各頁麵包屑</td></tr>
+        <tr><td><a href="/course?id=c-ba">/course?id=…</a> 詳情</td><td>學生</td><td>探索頁課程卡 · 活動頁推薦卡 · 其他課程「推薦搭配」· 我的課程「課程頁」· 教室頂欄「課程介紹」· 完課 modal 推薦</td></tr>
+        <tr><td><a href="/classroom?id=c-ba">/classroom?id=…&amp;lesson=…</a> 教室</td><td>學生（未購＝試看模式）</td><td>購買成功 modal「進入教室」· 課程頁「開始/繼續上課」· 章節列表「免費試看」單元 · 探索頁「繼續上課」條 · 我的課程「繼續上課/複習」（自動接上次單元）</td></tr>
+        <tr><td><a href="/my-courses">/my-courses</a></td><td>學生</td><td>帳號選單「我的課程」· 手機選單 · Footer · 課程頁（已購）· 購買成功 modal</td></tr>
+        <tr><td><a href="/academy-studio">/academy-studio?tab=…</a></td><td>創作者（verified-creator）</td><td>帳號選單「課程後台（開課）」· 手機選單；預覽未上架課 → /course（創作者預覽 banner）</td></tr>
+        <tr><td><a href="/academy-admin">/academy-admin?tab=…</a></td><td>Admin</td><td>帳號選單「課程管理（Admin）」；審核動線：Studio 送審 → 待審 badge → 通過即上架前台／退回理由回寫 Studio</td></tr>
+      </tbody>
+    </table>
+    <div class="callout callout-info"><i class="ri-links-line"></i><p style="margin:0">URL 約定：<code>/course?id=</code>（無效自動回探索）、<code>/classroom?id=&amp;lesson=</code>（lesson 省略＝接上次進度）、<code>/academy?career=pm,finance</code>（給職缺頁／履歷健檢帶入預選）、後台 <code>?tab=</code> 直達分頁。PRD 整合章 §3 的 8 個入口：Navbar／帳號選單／Footer／活動頁 demo 已做，個人頁／職缺頁／履歷健檢／公司頁／面試心得／AI 推薦頁預留（指向同一組 URL 即可）。</p></div>
 
     <p><b>一句話定位：</b>職涯導向課程平台（對標 Hahow 但不做泛知識）。課程綁五類標籤（職涯方向 / 技能 / 年級 / 求職階段 / 成果），與職缺、履歷健檢、諮詢、活動互相導流；講師＝既有認證創作者，V1 金流用 Mock Payment 但資料流完整（Order → Payment → Enrollment → RevenueRecord）。</p>
 
-    <h3>17.1 現在實作就該預留的 6 件事（重點）</h3>
+    <h3>17.2 現在實作就該預留的 6 件事（重點）</h3>
     <p>Academy 本體晚點做沒關係，但下面這些「現在正在做的系統」設計時多想一步，未來就能直接共用：</p>
     <table class="spec">
       <thead><tr><th>預留點</th><th>現況（本次交接）</th><th>預留做法</th></tr></thead>
@@ -475,11 +489,15 @@ interface ActivityData { <span class="c">/* …現有… */</span> <span class="
       </tbody>
     </table>
 
-    <h3>17.2 新增資料（全部是新 collection，不動既有）</h3>
+    <h3>17.3 新增資料（全部是新 collection，不動既有）</h3>
 <pre class="code"><span class="c">// Academy 專用（未來新增；User/Auth/Order/Payment/Notification/Tag 共用主平台）</span>
 Courses / CourseSections / CourseLessons / LessonResources
 Enrollments / CourseProgress / CourseComments / CourseAnnouncements
 RevenueRecords / CreatorPayouts / CreatorProfiles / CourseReviews / AdminReviewLogs
+
+<span class="c">// 字幕（V1 單語中文；2026-07-02 由「不做」改為 V1 需求）</span>
+<span class="plus">lesson.subtitles: { t: number /*秒*/, text: string }[]</span>   <span class="c">// 原型 cue 模型</span>
+<span class="c">// 正式版：講師逐單元上傳 SRT/VTT → 解析為 cue；LessonVideos.subtitleTracks[]（多語預留）；CC 開關偏好存使用者設定</span>
 
 <span class="c">// 分潤紀錄（每筆付款成功自動建立；預設抽成 15%，可依創作者 / 課程覆寫）</span>
 RevenueRecord {
@@ -490,20 +508,20 @@ RevenueRecord {
   paymentStatus, payoutStatus, paidAt, payoutAt
 }</pre>
 
-    <h3>17.3 V1 購買資料流（Mock 金流、資料先完整）</h3>
+    <h3>17.4 V1 購買資料流（Mock 金流、資料先完整）</h3>
 <pre class="code">點購買 → Order(<span class="s">pending</span>) → Payment(<span class="s">pending</span>, FakeProvider)
   → 「模擬付款成功」→ Payment(<span class="s">paid</span>) → Order(<span class="s">paid</span>)
   → 建 Enrollment（取得觀看權限）→ 建 RevenueRecord（分潤）</pre>
     <div class="callout callout-info"><i class="ri-links-line"></i><p style="margin:0">和 §6 活動金流是<b>同一套代收代付思路</b>：學生付款 → 平台代收 → 依分潤撥給創作者。所以排程上建議<b>等活動金流（§6 / §14.1）穩定後再排 Academy</b>，屆時課程金流直接重用同一套 Provider 抽象與結算後台。</p></div>
 
-    <h3>17.4 推薦 API（跨模組整合的核心）</h3>
+    <h3>17.5 推薦 API（跨模組整合的核心）</h3>
 <pre class="code"><span class="c">// 職缺頁「申請前建議補強」/ 履歷健檢「下一步建議」/ 活動頁「延伸學習資源」共用一支</span>
 GET /recommendations/courses?source_type=<span class="s">job|company|interview_review|resume_review|event|consultation|profile|career_map</span>&source_id=…
 <span class="c">// 回傳 { courseId, title, reason, matchedTags, priorityScore }</span>
 <span class="c">// 匹配：Job.requiredSkills ↔ Course.skillTags；Job.category ↔ Course.careerTags；ResumeReview.weaknessTags ↔ Course.skillTags/outcomeTags</span></pre>
     <div class="callout callout-info"><i class="ri-eye-line"></i><p style="margin:0">推薦一樣要<b>標出原因</b>（「此職缺要求產品企劃、使用者訪談…該課程可補足」）—— 與 §16 活動個人化同一個透明推薦原則。</p></div>
 
-    <h3>17.5 範圍速記</h3>
+    <h3>17.6 範圍速記</h3>
     <table class="spec">
       <thead><tr><th>V1 做</th><th>V1 不做（結構預留）</th></tr></thead>
       <tbody>

@@ -171,12 +171,14 @@
           '<div class="pv-art" style="' + I.covStyle(c) + ';opacity:.92"><i class="' + c.icon + '"></i></div>' +
           '<div class="pv-title">' + I.esc(cur.title) + '</div>' +
           '<button class="ax-playBig" id="bigPlay" title="播放"><i class="ri-play-fill"></i></button>' +
+          '<div class="ax-ccBox" id="ccBox" style="display:' + (I.ccOn() ? 'flex' : 'none') + '"><span id="ccText"></span></div>' +
           '<div class="ax-pvCtrl">' +
             '<input type="range" class="ax-seek" id="seek" min="0" max="' + dur(cur) + '" value="' + t + '" step="1" />' +
             '<div class="ax-pvBtns">' +
               '<button id="ctlPlay" title="播放/暫停"><i class="ri-play-fill"></i></button>' +
               '<span id="tlabel">' + fmtT(t) + ' / ' + fmtT(dur(cur)) + '</span>' +
               '<span class="spacer"></span>' +
+              '<button id="ccBtn" class="' + (I.ccOn() ? '' : 'ccOff') + '" title="字幕開關"><i class="ri-closed-captioning-' + (I.ccOn() ? 'fill' : 'line') + '"></i></button>' +
               '<button class="ax-speed" id="spd">' + speed + 'x</button>' +
             '</div>' +
           '</div>' +
@@ -200,11 +202,22 @@
       '</div><div>' + playlistHTML() + '</div></div>';
     wire();
     updateCtrl();
+    updateBar();
   }
 
   function updateBar(){
     const s = document.getElementById("seek"); if (s) s.value = t;
     const l = document.getElementById("tlabel"); if (l) l.textContent = fmtT(t) + " / " + fmtT(dur(cur));
+    updateCC();
+  }
+  function updateCC(){
+    const box = document.getElementById("ccBox");
+    const txt = document.getElementById("ccText");
+    if (!box || !txt) return;
+    if (!I.ccOn()) { box.style.display = "none"; return; }
+    const cue = I.cueAt(cur, t);
+    box.style.display = cue ? "flex" : "none";
+    txt.textContent = cue;
   }
   function updateCtrl(){
     const big = document.getElementById("bigPlay");
@@ -219,6 +232,14 @@
     document.getElementById("ctlPlay").onclick = () => playing ? pause() : play();
     document.getElementById("seek").oninput = e => { t = +e.target.value; updateBar(); saveProgress(); };
     document.getElementById("spd").onclick = () => { speed = speed === 1 ? 1.5 : (speed === 1.5 ? 2 : 1); document.getElementById("spd").textContent = speed + "x"; };
+    document.getElementById("ccBtn").onclick = () => {
+      I.setCC(!I.ccOn());
+      const b = document.getElementById("ccBtn");
+      b.classList.toggle("ccOff", !I.ccOn());
+      b.innerHTML = '<i class="ri-closed-captioning-' + (I.ccOn() ? 'fill' : 'line') + '"></i>';
+      updateCC();
+      CZ.toast(I.ccOn() ? "字幕已開啟" : "字幕已關閉");
+    };
     document.getElementById("doneBtn").onclick = () => { const r = I.markLessonDone(c.id, cur.id); updateAll(); if (r.justCompleted) courseDone(); else CZ.toast("已標記完成"); };
     document.getElementById("prevBtn").onclick = () => { const l = prevLesson(); if (l && canPlay(l)) loadLesson(l); else if (l) CZ.toast("此單元需購買後觀看"); };
     document.getElementById("nextBtn").onclick = () => { const l = nextLesson(); if (l && canPlay(l)) loadLesson(l); else if (l) CZ.toast("此單元需購買後觀看"); };

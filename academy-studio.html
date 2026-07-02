@@ -225,6 +225,7 @@
               '<label class="ck"><input type="checkbox" data-lsp="' + si + '|' + li + '"' + (l.preview ? ' checked' : '') + '> 試看</label>' +
               '<button class="btn btn-white btn-small upBtn' + (l.video ? ' ok' : '') + '" data-lsv="' + si + '|' + li + '"><i class="' + (l.video ? 'ri-checkbox-circle-line' : 'ri-video-upload-line') + '"></i> ' + (l.video ? '影片已上傳' : '上傳影片') + '</button>' +
               '<button class="btn btn-white btn-small" data-lsmat="' + si + '|' + li + '"><i class="ri-attachment-2"></i> 教材(' + (l.materials || []).length + ')</button>' +
+              '<button class="btn btn-white btn-small' + ((l.subtitles || []).length ? ' upBtn ok' : '') + '" data-lscc="' + si + '|' + li + '"><i class="ri-closed-captioning-line"></i> 字幕' + ((l.subtitles || []).length ? '(' + l.subtitles.length + ')' : '') + '</button>' +
               '<button class="ax-iconBtn" data-lsrm="' + si + '|' + li + '" title="刪除單元"><i class="ri-delete-bin-line"></i></button>' +
             '</div>').join("") +
           '<div class="ax-addRow"><button class="btn btn-ghost btn-small" data-lsadd="' + si + '"><i class="ri-add-line"></i> 新增單元</button></div>' +
@@ -457,6 +458,35 @@
           CZ.closeModal(); CZ.toast("教材已加入"); render();
         };
         document.querySelectorAll("[data-matrm]").forEach(x => x.onclick = () => { lesson.materials.splice(+x.dataset.matrm, 1); CZ.closeModal(); render(); });
+      });
+      document.querySelectorAll("[data-lscc]").forEach(el => el.onclick = () => {
+        collectWizardInputs();
+        const [s, l] = el.dataset.lscc.split("|");
+        const lesson = draft.sections[+s].lessons[+l];
+        CZ.modal('<h3>單元字幕：' + I.esc(lesson.title || "未命名單元") + '</h3>' +
+          '<p style="font-size:12.5px;color:#8a94a3;margin:0 0 10px">每行一句：<code>分:秒 字幕文字</code>（例 <code>0:15 歡迎回來</code>）。沒填字幕的單元，播放器會顯示示範字幕；正式平台支援直接上傳 SRT／VTT 或自動轉錄。</p>' +
+          '<textarea class="textArea" id="ccLines" rows="8" placeholder="0:00 開場白&#10;0:20 第一個重點…" style="font-family:Menlo,monospace;font-size:12.5px">' + I.esc(I.cueLinesOf(lesson)) + '</textarea>' +
+          '<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap">' +
+          '<button class="btn btn-white btn-small" id="ccSrt"><i class="ri-upload-2-line"></i> 模擬上傳 SRT</button>' +
+          '<span style="flex:1"></span>' +
+          '<button class="btn btn-white btn-small" onclick="CZ.closeModal()">取消</button>' +
+          '<button class="btn btn-small" id="ccSave"><i class="ri-save-3-line"></i> 儲存字幕</button></div>');
+        document.getElementById("ccSrt").onclick = () => {
+          const dur = Math.max(1, lesson.mins || 10);
+          document.getElementById("ccLines").value =
+            "0:00 " + (lesson.title || "本單元") + "，我們開始吧。\n" +
+            "0:25 先講結論，再拆步驟 —— 你可以先記住這個框架。\n" +
+            Math.floor(dur / 2) + ":00 到這裡是第一個重點，卡住的話回看一次再往下。\n" +
+            Math.max(1, dur - 1) + ":10 最後我們把今天的內容收斂成一頁筆記。";
+          CZ.toast("已模擬解析 SRT → 逐句 cue（正式平台直接吃 SRT/VTT 檔）");
+        };
+        document.getElementById("ccSave").onclick = () => {
+          const cues = I.parseCueLines(document.getElementById("ccLines").value);
+          lesson.subtitles = cues;
+          CZ.closeModal();
+          CZ.toast(cues.length ? "已儲存 " + cues.length + " 句字幕" : "已清除自訂字幕（將顯示示範字幕）");
+          render();
+        };
       });
       wireDnD();
     }

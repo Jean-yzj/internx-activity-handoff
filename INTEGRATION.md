@@ -33,7 +33,7 @@
 - §8 分階段 · §9 驗收標準 · §18 本機預覽/部署
 
 **職涯學院 Academy（原型已完成，整併主平台為後續排程）**
-- §20 InternX Academy 課程平台：原型頁面＋資料層＋預留事項（完整 PRD 見 `ACADEMY-PRD.md`）
+- §20 InternX Academy 課程平台：原型頁面＋**§20.1 入口地圖（各頁怎麼進）**＋資料層（含字幕）＋預留事項（完整 PRD 見 `ACADEMY-PRD.md`）
 
 ---
 
@@ -822,16 +822,58 @@ mockup 以 GitHub Pages 部署（main 分支 / 根目錄）。這份 repo 與 in
 |---|---|---|
 | 課程探索 | `/academy` | 五類標籤篩選（職涯方向／求職階段／年級／價格／特性）＋ PRD §3.1 完整課程卡 |
 | 課程詳情 | `/course?id=…` | PRD §3.2 的 18 區塊＋**Mock 購買全流程**（Order→Payment→Enrollment→RevenueRecord，含失敗重試） |
-| 教室播放器 | `/classroom?id=…` | 模擬播放＋進度記錄、試看模式、教材下載、單元留言（讚／回覆／檢舉）、公告、完課→加入個人頁/職涯地圖 |
+| 教室播放器 | `/classroom?id=…` | 模擬播放＋進度記錄、**字幕（CC 可開關、偏好記憶）**、試看模式、教材下載、單元留言（讚／回覆／檢舉）、公告、完課→加入個人頁/職涯地圖 |
 | 我的課程 | `/my-courses` | 進行中／已完成／收藏／下載紀錄 |
 | 創作者後台 | `/academy-studio` | Dashboard／我的課程（狀態機）／4 步開課精靈（含章節拖曳排序）／收益／留言管理 |
 | 管理後台 | `/academy-admin` | 課程審核（通過/退回/下架/精選）／創作者管理（申請/停權/個別分潤）／訂單（退款）／收益（撥款/匯出）／分潤設定 |
 
-**資料層**：`assets/academy/academy.js` —— localStorage 持久化 DB＋PaymentProvider 抽象層（`createPayment / verifyPayment / refundPayment / getPaymentStatus`，V1 = FakePay）。欄位命名對齊 PRD §9／§11，可直接翻成 Firestore collections。
+**資料層**：`assets/academy/academy.js` —— localStorage 持久化 DB＋PaymentProvider 抽象層（`createPayment / verifyPayment / refundPayment / getPaymentStatus`，V1 = FakePay）。欄位命名對齊 PRD §9／§11，可直接翻成 Firestore collections。**字幕**：`lesson.subtitles = [{ t: 秒, text }]`（逐 cue）；正式版＝講師逐單元上傳 SRT／VTT 解析為 cue（`LessonVideos.subtitleTracks[]`，多語預留），播放器 CC 開關偏好存使用者設定。
 
 **一句話定位**：職涯導向課程平台（對標 Hahow 但只做職涯／實習準備）。課程綁五類標籤（職涯方向 / 技能 / 年級 / 求職階段 / 成果），與職缺、履歷健檢、諮詢、活動互相導流；講師＝既有 `verified-creator`（同一帳號、共用審核）；V1 金流用 Mock Payment，但 Order → Payment → Enrollment → RevenueRecord 資料流要完整。
 
-### 20.1 現在實作就該預留的事（對照本文件章節）
+### 20.1 入口地圖（Academy 各頁彼此怎麼進；格式同 §1.3）
+
+> 動線總圖：**學生** 主導覽「職涯學院」→ 探索 → 課程頁 → 購買 → 教室 → 我的課程；**創作者** 帳號選單「課程後台」→ 開課精靈 → 送審；**Admin** 帳號選單「課程管理」→ 審核 → 上架回到前台。以下每頁列出「所有」進入方式。
+
+**學生端**
+
+| 目的地 | 進入方式 |
+|---|---|
+| 課程探索 [`/academy`](https://internx-activity-handoff.zeabur.app/academy) | ① 全站主導覽列「職涯學院」tab（每頁都有；手機＝右上漢堡選單同項）② Footer「職涯學院（課程）」③ 活動報名頁 [`/attendee`](https://internx-activity-handoff.zeabur.app/attendee)「延伸學習資源」→「看更多職涯課程」④ 課程頁左上麵包屑「職涯學院」⑤ 我的課程麵包屑 |
+| 課程詳情 [`/course?id=…`](https://internx-activity-handoff.zeabur.app/course?id=c-ba) | ① `/academy` 點任一課程卡 ② `/attendee` 延伸學習資源的推薦卡（帶推薦原因）③ 其他課程頁「推薦搭配」的延伸課程 ④ `/my-courses` 每列「課程頁」⑤ 教室頂欄「課程介紹」⑥ 完課 modal 的下一步推薦 |
+| 教室 [`/classroom?id=…`](https://internx-activity-handoff.zeabur.app/classroom?id=c-ba) | ① 課程頁購買成功 modal「進入教室」② 課程頁（已購）「開始／繼續上課」③ 課程頁章節列表點「免費試看」單元（**未購買也可進，試看模式**：非試看單元上鎖、留言/教材鎖定、看完跳購買 CTA）④ `/academy` 頂部「繼續上課」進度條 ⑤ `/my-courses`「繼續上課／複習」（自動接上次看到的單元）|
+| 我的課程 [`/my-courses`](https://internx-activity-handoff.zeabur.app/my-courses) | ① 右上頭像帳號選單「我的課程」② 手機選單同項 ③ Footer「我的課程」④ 課程頁（已購）「我的課程」⑤ 購買成功 modal「我的課程」|
+
+**創作者端**
+
+| 目的地 | 進入方式 |
+|---|---|
+| 課程後台 [`/academy-studio`](https://internx-activity-handoff.zeabur.app/academy-studio) | ① 帳號選單「主辦 / 創作者」區 →「課程後台（開課）」② 手機選單同項（正式平台：需 `verified-creator`，一般學生不顯示此項）|
+| 開課精靈 | Studio 側欄「建立新課程」；「我的課程」分頁右上「建立課程」；每堂課「編輯」（載入既有內容續編）|
+| 預覽未上架課程 | Studio 我的課程「預覽」→ `/course?id=…`（草稿/審核中/退回顯示**創作者預覽 banner**；不會出現在 `/academy` 公開列表）|
+| 講師主頁 `/creator` | Studio 側欄「我的講師主頁」；課程頁講師列「講師主頁」按鈕 |
+
+**Admin**
+
+| 目的地 | 進入方式 |
+|---|---|
+| 課程管理後台 [`/academy-admin`](https://internx-activity-handoff.zeabur.app/academy-admin) | 帳號選單「交接 / 平台」區 →「課程管理（Admin）」（正式平台：僅 admin role 顯示；demo 恆顯示）|
+| 審核動線 | Studio 送審 → Admin「課程審核」分頁（tab 帶待審數 badge）→「審核內容」展開**職涯導向欄位檢查** → 通過＝立即出現在 `/academy`；退回＝理由回寫 Studio「我的課程」該課列 |
+| 前台／活動後台互跳 | Admin 側欄「職涯學院前台」→ `/academy`、「活動後台」→ `/backstage` |
+
+**URL 參數（demo 與正式版共用約定）**
+
+| 頁 | 參數 |
+|---|---|
+| `/course` | `id`＝課程 ID（必填；無效自動回 `/academy`）|
+| `/classroom` | `id`＝課程 ID（必填）；`lesson`＝單元 ID（選填，預設＝上次觀看 → 第一個未完成 → 第一個可播）|
+| `/academy` | `career`＝職涯方向 key（逗號可多個），預選篩選 chips —— 給職缺頁／履歷健檢頁帶入用 |
+| `/academy-studio` | `tab`＝`dash / courses / wizard / revenue / comments` 直達分頁 |
+| `/academy-admin` | `tab`＝`review / creators / orders / revenue / settings` 直達分頁 |
+
+**正式平台入口對應（PRD 整合章 §3 的 8 個入口）**：主導覽 Navbar ✅、帳號選單 ✅、Footer ✅、活動詳情頁 ✅（demo 已做）；個人頁側邊欄、職缺詳情頁推薦區、履歷健檢結果頁、公司頁、面試心得頁、AI 推薦頁 ⏳（結構已預留：都指向 `/academy?career=…` 或 `/course?id=…`，接上推薦 API 即可）。
+
+### 20.2 現在實作就該預留的事（對照本文件章節）
 
 | 預留點 | 現況（本次交接） | 預留做法 |
 |---|---|---|
@@ -842,12 +884,12 @@ mockup 以 GitHub Pages 部署（main 分支 / 根目錄）。這份 repo 與 in
 | **Navbar / 入口** | 現有主導覽 6 tabs | 預留「職涯學院」入口位；職缺頁 / 履歷健檢結果頁 / 活動頁預留「推薦課程」區塊 |
 | **通知** | 站內＋Email 基建既有（§15） | 課程公告 / 購買 / 審核通知接同一 Notification，不另建 |
 
-### 20.2 未來新增的資料與 API（全部新增、不動既有）
+### 20.3 未來新增的資料與 API（全部新增、不動既有）
 
 - **新 collections**：Courses / CourseSections / CourseLessons / LessonResources / Enrollments / CourseProgress / CourseComments / CourseAnnouncements / RevenueRecords / CreatorPayouts / CreatorProfiles / CourseReviews / AdminReviewLogs。User / Auth / Order / Payment / Notification / Tag 共用主平台。
 - **分潤**：每筆付款成功自動建 RevenueRecord（gross / feeRate / feeAmount / creatorIncome / payoutStatus…）；預設抽成 15%，可依創作者、課程覆寫。
 - **推薦 API**：`GET /recommendations/courses?source_type=job|company|interview_review|resume_review|event|consultation|profile|career_map` —— 職缺頁「申請前建議補強」、履歷健檢「下一步建議」、活動頁「延伸學習資源」共用一支，回傳需帶推薦原因（與活動個人化同一個透明推薦原則）。
 
-### 20.3 排程建議
+### 20.4 排程建議
 
 課程金流與活動金流是**同一套代收代付思路**（學生付款 → 平台代收 → 依分潤撥給創作者），建議等活動金流（§6、spec §14.1 撥款結算）穩定後再排 Academy，屆時直接重用 Provider 抽象與結算後台。
