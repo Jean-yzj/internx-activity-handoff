@@ -32,6 +32,9 @@
 **收尾**
 - §8 分階段 · §9 驗收標準 · §18 本機預覽/部署
 
+**未來（預告，不在本次範圍）**
+- §20 InternX Academy 職涯課程平台（低優先；完整 PRD 見 `ACADEMY-PRD.md`）
+
 ---
 
 ## 0. 怎麼用這份文件
@@ -805,3 +808,34 @@ mockup 以 GitHub Pages 部署（main 分支 / 根目錄）。這份 repo 與 in
 | 16 | **當天流程 `agenda[]`**：編輯器「活動內容」可新增時段（時間 / 標題 / 說明），報名頁顯示 | 報名頁原本只有寫死範例 | §1.1 編輯器 | 新增 `activity.agenda: {time,title,desc}[]`；報名頁 `if(agenda.length)` 才顯示 |
 
 **一句話：** 真正「新發明」的後端只有票券引擎、報名者審核狀態機、平台金流串接、相關 Cloud Functions 與規則；其餘（活動本體、報名表單、發布審核、professional 後台、部落格、話題牆、標章顯示）都是**把既有系統接起來**。
+
+---
+
+## 20. 未來功能預告：InternX Academy 職涯課程平台（低優先、未排程）
+
+> **狀態：規劃中，優先級靠後，不在本次交接的實作範圍，短期內不會併入。**
+> 現在**不用寫任何 Academy 程式碼**。放進來是讓工程端先知道方向，並在目前實作時把擴充點預留好，避免未來重工。
+> 完整 PRD（含與主平台的整合設計）：`ACADEMY-PRD.md`（交接首頁 `/handoff` 可線上閱讀）；工程速查：[spec §17](/spec)。
+
+**一句話定位**：職涯導向課程平台（對標 Hahow 但只做職涯／實習準備）。課程綁五類標籤（職涯方向 / 技能 / 年級 / 求職階段 / 成果），與職缺、履歷健檢、諮詢、活動互相導流；講師＝既有 `verified-creator`（同一帳號、共用審核）；V1 金流用 Mock Payment，但 Order → Payment → Enrollment → RevenueRecord 資料流要完整。
+
+### 20.1 現在實作就該預留的事（對照本文件章節）
+
+| 預留點 | 現況（本次交接） | 預留做法 |
+|---|---|---|
+| **金流資料模型** | §6 / spec §14.1：代收代付、結算以「活動」為單位 | Order / Payment / 結算紀錄加 `itemType: 'activity'／'course'`（＋ `itemId`），欄位命名不要綁死 activity |
+| **Payment Provider 抽象層** | 活動金流待串（§6） | 先定 interface：`createPayment / verifyPayment / refundPayment / getPaymentStatus`；未來換正式金流（ECPay / NewebPay / Stripe / TapPay）只換 Provider、不重寫購買流程 |
+| **標籤系統** | spec §16 剛加 `industryTags`（活動）、重用 `INDUSTRY_CATEGORIES` | 課程職涯標籤用同一組 key；技能 / 年級 / 求職階段 / 成果標籤設計成通用 Tag，職缺・履歷健檢・課程共用 |
+| **講師身分** | verified-role 申請＋審核既有（§10.1） | 課程講師＝`verified-creator`，不另開帳號系統 —— 現行設計已滿足，不要分岔 |
+| **Navbar / 入口** | 現有主導覽 6 tabs | 預留「職涯學院」入口位；職缺頁 / 履歷健檢結果頁 / 活動頁預留「推薦課程」區塊 |
+| **通知** | 站內＋Email 基建既有（§15） | 課程公告 / 購買 / 審核通知接同一 Notification，不另建 |
+
+### 20.2 未來新增的資料與 API（全部新增、不動既有）
+
+- **新 collections**：Courses / CourseSections / CourseLessons / LessonResources / Enrollments / CourseProgress / CourseComments / CourseAnnouncements / RevenueRecords / CreatorPayouts / CreatorProfiles / CourseReviews / AdminReviewLogs。User / Auth / Order / Payment / Notification / Tag 共用主平台。
+- **分潤**：每筆付款成功自動建 RevenueRecord（gross / feeRate / feeAmount / creatorIncome / payoutStatus…）；預設抽成 15%，可依創作者、課程覆寫。
+- **推薦 API**：`GET /recommendations/courses?source_type=job|company|interview_review|resume_review|event|consultation|profile|career_map` —— 職缺頁「申請前建議補強」、履歷健檢「下一步建議」、活動頁「延伸學習資源」共用一支，回傳需帶推薦原因（與活動個人化同一個透明推薦原則）。
+
+### 20.3 排程建議
+
+課程金流與活動金流是**同一套代收代付思路**（學生付款 → 平台代收 → 依分潤撥給創作者），建議等活動金流（§6、spec §14.1 撥款結算）穩定後再排 Academy，屆時直接重用 Provider 抽象與結算後台。

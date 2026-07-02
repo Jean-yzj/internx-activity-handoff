@@ -185,6 +185,13 @@
         <p>創作者專區那站的「完整流程圖」：申請認證 → 審核 → 發標章 → 主頁串接。另開分頁。</p>
         <span class="go">到 creator-zone →</span>
       </a>
+      <a class="demoCard docCard" href="#doc" onclick="loadDoc('/ACADEMY-PRD.md')">
+        <span class="tagKind tagDoc">未來功能</span>
+        <div class="ic"><i class="ri-graduation-cap-line"></i></div>
+        <h3>Academy 課程平台 <span class="tag">預告・低優先</span></h3>
+        <p>職涯導向課程平台 PRD：未排程、暫不實作，先讓工程端知道方向與「現在要預留什麼」（spec §17）。</p>
+        <span class="go">讀 PRD →</span>
+      </a>
     </div>
   </div>
 
@@ -196,6 +203,7 @@
     <div class="docToolbar" style="gap:8px;flex-wrap:wrap">
       <button class="btn btn-small docTab" data-doc="/INTEGRATION.md"><i class="ri-ticket-2-line"></i> 活動報名串接</button>
       <button class="btn btn-white btn-small docTab" data-doc="/CREATOR-HANDOFF.md"><i class="ri-quill-pen-line"></i> 創作者專區串接</button>
+      <button class="btn btn-white btn-small docTab" data-doc="/ACADEMY-PRD.md"><i class="ri-graduation-cap-line"></i> 課程平台 PRD（未來）</button>
       <a class="btn btn-white btn-small" id="dlMd" href="/INTEGRATION.md" download style="margin-left:auto"><i class="ri-download-line"></i> 下載 Markdown</a>
     </div>
     <div id="docBody"><p class="muted">載入串接說明中⋯</p></div>
@@ -251,7 +259,9 @@
   function loadDoc(path){
     document.querySelectorAll(".docTab").forEach(b=>{ b.classList.toggle("btn-white", b.dataset.doc !== path); });
     var dl = document.getElementById("dlMd"); if (dl) dl.href = path;
-    var a = ARCH[path]; if (a){ var im=document.getElementById("archImg"); var cp=document.getElementById("archCap"); if(im) im.src=a[0]; if(cp) cp.textContent=a[1]; }
+    var a = ARCH[path]; var fig = document.querySelector(".archFig");
+    if (fig) fig.style.display = a ? "" : "none"; // 沒有架構圖的文件（如 Academy PRD）不顯示上一份文件的圖
+    if (a){ var im=document.getElementById("archImg"); var cp=document.getElementById("archCap"); if(im) im.src=a[0]; if(cp) cp.textContent=a[1]; }
     document.getElementById("docBody").innerHTML = '<p class="muted">載入中⋯</p>';
     fetch(path + (path.includes("?") ? "&" : "?") + "v=" + Date.now()).then(r=>r.text()).then(md=>{
       md = md.replace(/^#\s+.*\n/, ""); // drop first H1 (hero already shows the title)

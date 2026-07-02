@@ -36,6 +36,7 @@ demo into one site, one nav, one model. Visual system mirrors the real InternX a
 | `integration.html` `/integration` | 整合動線：接進實習通的位置與點擊路徑 |
 | `spec.html` `/spec` | 工程規格：資料模型、驗證、改動清單、驗收 |
 | `INTEGRATION.md` | 工程交接文件：活動票券＋審核＋金流＋部落格＋verified-role |
+| `ACADEMY-PRD.md` | **未來功能（低優先、未排程）**：InternX Academy 職涯課程平台 PRD；現在要預留的擴充點見 spec §17 / INTEGRATION §20 |
 
 活動頁用 `assets/style.css`；創作者頁用 `assets/cz/`（兩套 CSS 並存，token 相同），共用同一條導覽。
 
