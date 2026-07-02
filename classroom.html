@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>教室｜職涯學院 · InternX 實習通</title>
+<link rel="icon" href="/assets/cz/favicon.png" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" />
+<link rel="stylesheet" href="/assets/cz/app.css" />
+<link rel="stylesheet" href="/assets/academy/academy.css" />
+<style>
+  .roomTabs { display: flex; gap: 4px; border-bottom: 1px solid #e7eaf0; margin-bottom: 14px; flex-wrap: wrap; }
+  .roomTab { border: none; background: none; font-size: 14px; font-weight: 600; color: #7a8698; padding: 10px 14px; cursor: pointer; border-bottom: 2.5px solid transparent; display: inline-flex; align-items: center; gap: 6px; }
+  .roomTab.active { color: var(--theme-color-black); border-bottom-color: var(--theme-color); }
+  .roomPane { display: none; }
+  .roomPane.active { display: block; }
+  .doneFlash { animation: doneFlash 1s ease; }
+  @keyframes doneFlash { 0% { background: #e4f9e8; } 100% { background: transparent; } }
+</style>
+</head>
+<body data-page="classroom" data-nav="academy">
+
+<main>
+  <div class="cz-container ax-page" id="page"></div>
+</main>
+
+<script src="/assets/cz/data.js"></script>
+<script src="/assets/cz/app.js"></script>
+<script src="/assets/academy/academy.js"></script>
+<script>
+(function(){
+  const I = window.IXA;
+  const c = I.getCourse(I.qs("id"));
+  if (!c) { location.replace("/academy"); return; }
+  document.title = c.title + "｜教室 · InternX 實習通";
+  const enrolled = I.isEnrolled(c.id);
+  const lessons = I.lessonsOf(c);
+  const canPlay = l => enrolled || l.preview;
+
+  // 起始單元：網址指定 → 上次看到 → 第一個未完成 → 第一個可播
+  let cur = lessons.find(l => l.id === I.qs("lesson") && canPlay(l))
+    || lessons.find(l => l.id === I.prog(c.id).lastLesson && canPlay(l))
+    || lessons.find(l => canPlay(l) && !I.prog(c.id).watched[l.id])
+    || lessons.find(canPlay);
+  if (!cur) { location.replace("/course?id=" + c.id); return; }
+
+  /* ---------- 播放器狀態（demo 模擬播放：時間軸加速前進） ---------- */
+  let t = 0, playing = false, speed = 1, timer = null, lastSave = 0;
+  const dur = l => l.mins * 60;
+  function loadLesson(l){
+    stop();
+    cur = l;
+    const pct = I.prog(c.id).lessons[l.id] || 0;
+    t = pct >= 100 ? 0 : dur(l) * pct / 100;
+    render();
+  }
+  function stop(){ playing = false; if (timer) { clearInterval(timer); timer = null; } }
+  function play(){
+    if (playing) return;
+    playing = true;
+    timer = setInterval(() => {
+      t += 0.25 * speed * 10; // demo：模擬播放，時間軸加速前進
+      if (t >= dur(cur)) { t = dur(cur); finishLesson(); return; }
+      updateBar();
+      if (Date.now() - lastSave > 2000) { lastSave = Date.now(); saveProgress(); }
+    }, 250);
+    updateCtrl();
+  }
+  function pause(){ stop(); saveProgress(); updateCtrl(); }
+  function saveProgress(){
+    if (!enrolled && !cur.preview) return;
+    const r = I.setLessonPct(c.id, cur.id, t / dur(cur) * 100);
+    if (r.justCompleted) courseDone();
+  }
+  function finishLesson(){
+    stop();
+    const r = I.setLessonPct(c.id, cur.id, 100);
+    updateAll();
+    if (r.justCompleted) { courseDone(); return; }
+    const next = nextLesson();
+    if (next && canPlay(next)) {
+      CZ.toast("已完成「" + cur.title + "」，自動前往下一堂");
+      setTimeout(() => loadLesson(next), 900);
+    } else if (!enrolled) {
+      CZ.modal('<div class="modalHero"><div class="esIcon" style="background:var(--theme-white);color:var(--theme-color)"><i class="ri-lock-unlock-line"></i></div></div>' +
+        '<h3>試看結束</h3><p style="text-align:center;font-size:14px;color:#5b6b7e;margin:0 0 16px">喜歡這堂課嗎？購買後解鎖全部 ' + lessons.length + ' 個單元與教材。</p>' +
+        '<div style="display:flex;gap:10px;justify-content:center"><button class="btn btn-white btn-small" onclick="CZ.closeModal()">再想想</button><a class="btn btn-small" href="/course?id=' + c.id + '"><i class="ri-shopping-cart-2-line"></i> 前往購買</a></div>');
+    }
+  }
+  const idxOf = () => lessons.indexOf(cur);
+  const nextLesson = () => lessons[idxOf() + 1];
+  const prevLesson = () => lessons[idxOf() - 1];
+
+  /* ---------- 完課祝賀（整合：個人頁 / 職涯地圖 / 下一步，PRD 整合 §2.6） ---------- */
+  function courseDone(){
+    const p = I.prog(c.id);
+    const next = (c.pairWith || []).slice(0, 2);
+    CZ.modal('<div class="modalHero"><div class="esIcon" style="background:#e4f9e8;color:#1a8a35;font-size:26px"><i class="ri-trophy-line"></i></div></div>' +
+      '<h3>🎉 恭喜完成「' + I.esc(c.title) + '」</h3>' +
+      '<p style="text-align:center;font-size:13.5px;color:#5b6b7e;margin:0 0 14px">完成 ' + lessons.length + ' 個單元' + (c.artifacts.length ? '，你的成果：' + I.esc(c.artifacts[0].t) : '') + '</p>' +
+      (p.addedToProfile ? '' :
+        '<div class="ax-orderBox"><div class="kv"><span><i class="ri-user-star-line"></i> 加入實習通個人頁</span><b>已完成課程＋技能標籤</b></div>' +
+        '<div class="kv"><span><i class="ri-route-line"></i> 加入職涯地圖</span><b>新增課程節點 → 接作品與職缺</b></div></div>') +
+      '<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:4px">' +
+      (p.addedToProfile ? '<span class="atg paid"><i class="ri-check-line"></i> 已加入個人頁</span>' :
+        '<button class="btn btn-small" id="addProfile"><i class="ri-user-add-line"></i> 加入個人頁＋職涯地圖</button>') +
+      '<button class="btn btn-white btn-small" onclick="CZ.closeModal()">先不用</button></div>' +
+      (next.length ? '<div class="sectionLabel" style="margin-top:18px">建議的下一步</div><div style="display:flex;flex-direction:column;gap:8px">' +
+        next.map(x => '<a class="dd-button" href="' + x.href + '"' + (x.ext ? ' target="_blank" rel="noopener"' : '') + '><i class="ri-arrow-right-line"></i> ' + I.esc(x.title) + '</a>').join("") + '</div>' : ''));
+    const b = document.getElementById("addProfile");
+    b && (b.onclick = () => { I.addToProfile(c.id, true); CZ.closeModal(); CZ.toast("已加入個人頁與職涯地圖（demo：對應 CourseCompletion → CareerMapNode）"); updateAll(); });
+  }
+
+  /* ---------- render ---------- */
+  const fmtT = s => { s = Math.round(s); return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); };
+  function playlistHTML(){
+    const p = I.prog(c.id);
+    const doneN = lessons.filter(l => p.watched[l.id]).length;
+    return '<div class="ax-playlist"><div class="ax-plHead"><div class="t">' + I.esc(c.title) + '</div>' +
+      '<div class="s"><span>' + doneN + '/' + lessons.length + ' 單元</span><div class="pbar' + (doneN === lessons.length ? ' done' : '') + '"><i style="width:' + I.coursePct(c.id) + '%"></i></div><span>' + I.coursePct(c.id) + '%</span></div></div>' +
+      c.sections.map(s => '<div class="ax-plSec">' + I.esc(s.title) + '</div>' +
+        s.lessons.map(l => {
+          const locked = !canPlay(l);
+          const icon = p.watched[l.id] ? "ri-checkbox-circle-fill" : (locked ? "ri-lock-line" : "ri-play-circle-line");
+          return '<div class="ax-plRow' + (l.id === cur.id ? ' cur' : '') + (p.watched[l.id] ? ' done' : '') + (locked ? ' locked' : '') + '" data-ls="' + l.id + '">' +
+            '<i class="pli ' + icon + '"></i><span class="plt">' + I.esc(l.title) + (l.preview && !enrolled ? ' <span class="prev" style="font-size:10.5px;font-weight:700;color:var(--theme-color)">試看</span>' : '') + '</span><span class="plm">' + l.mins + ' 分</span></div>';
+        }).join("")).join("") + '</div>';
+  }
+  function cmtHTML(m){
+    return '<div class="ax-cmt" id="cmt-' + m.id + '">' + I.avatarHTML(m.userId, 36) +
+      '<div class="cbody"><div class="ch"><span class="cn">' + I.esc(m.userName) + '</span>' +
+      (m.pinned ? '<span class="ax-pinBadge"><i class="ri-pushpin-line"></i> 講師置頂</span>' : '') +
+      (m.solved ? '<span class="ax-solvedBadge"><i class="ri-check-double-line"></i> 已解答</span>' : '') +
+      '<span class="cd">' + I.timeAgo(m.createdAt) + '</span></div>' +
+      '<div class="ct">' + I.esc(m.text) + '</div>' +
+      '<div class="cacts">' +
+        '<button data-like="' + m.id + '" class="' + (m.likedByMe ? 'liked' : '') + '"><i class="' + (m.likedByMe ? 'ri-heart-fill' : 'ri-heart-line') + '"></i> ' + m.likes + '</button>' +
+        '<button data-reply="' + m.id + '"><i class="ri-chat-1-line"></i> 回覆</button>' +
+        '<button data-report="' + m.id + '"><i class="ri-flag-2-line"></i> 檢舉</button>' +
+      '</div>' +
+      m.replies.map(r => '<div class="ax-reply">' + I.avatarHTML(r.userId, 30) + '<div><div class="rn">' + I.esc(r.userName) + (r.isCreator ? ' <span class="ax-pinBadge">講師</span>' : '') + ' <span class="cd">' + I.timeAgo(r.createdAt) + '</span></div><div class="rt">' + I.esc(r.text) + '</div></div></div>').join("") +
+      '<div class="ax-cmtInput" id="replyBox-' + m.id + '" style="display:none;margin-top:10px"><textarea class="textArea" rows="1" placeholder="回覆…"></textarea><button class="btn btn-small" data-sendreply="' + m.id + '">送出</button></div>' +
+      '</div></div>';
+  }
+  function paneQA(){
+    const list = I.commentsOf(c.id, cur.id);
+    return '<div class="ax-cmtInput"><textarea class="textArea" id="cmtText" rows="2" placeholder="對「' + I.esc(cur.title) + '」發問或分享心得…（講師每週固定回覆）"></textarea><button class="btn btn-small" id="cmtSend" style="align-self:flex-end"><i class="ri-send-plane-line"></i> 送出</button></div>' +
+      (list.length ? list.map(cmtHTML).join("") : '<p class="ax-muted" style="font-size:13.5px;padding:14px 0">這個單元還沒有留言，當第一個發問的人吧。</p>');
+  }
+  function paneAnnc(){
+    const list = I.db().announcements.filter(a => a.courseId === c.id).sort((a, b) => b.createdAt - a.createdAt);
+    if (!list.length) return '<p class="ax-muted" style="font-size:13.5px">目前沒有公告。</p>';
+    return list.map(a => '<div class="ax-annc"><div class="ah"><span class="atg pending">' + I.esc(a.type) + '</span><span class="at2">' + I.esc(a.title) + '</span><span class="ax-muted" style="font-size:12px">' + I.timeAgo(a.createdAt) + '</span></div><div class="ab">' + I.esc(a.body) + '</div></div>').join("");
+  }
+  function paneMats(){
+    const mats = I.materialsOf(c);
+    if (!mats.length) return '<p class="ax-muted" style="font-size:13.5px">本課程沒有可下載教材。</p>';
+    if (!enrolled) return '<p class="ax-muted" style="font-size:13.5px"><i class="ri-lock-line"></i> 教材購課後可下載。</p>';
+    return mats.map(m => '<div class="ax-matRow"><div class="mi"><i class="' + (I.MAT_ICON[m.t] || "ri-file-3-line") + '"></i></div><div class="mt">' + I.esc(m.n) + '<div class="ms" style="font-weight:400">' + I.esc(m.lessonTitle) + '</div></div><button class="btn btn-white btn-small" data-dl="' + I.esc(m.n) + '"><i class="ri-download-2-line"></i> 下載</button></div>').join("");
+  }
+
+  function render(){
+    const p = I.prog(c.id);
+    document.getElementById("page").innerHTML =
+      '<div class="ax-roomTop"><a class="btn btn-white btn-small" href="/course?id=' + c.id + '"><i class="ri-arrow-left-line"></i> 課程介紹</a>' +
+      '<h1>' + I.esc(c.title) + '</h1>' +
+      '<span class="atg ' + (p.completedAt ? 'paid' : 'free') + '">' + (p.completedAt ? '已完課' : '進度 ' + I.coursePct(c.id) + '%') + '</span></div>' +
+      (!enrolled ? '<div class="ax-previewNote"><i class="ri-eye-line"></i><div><b>試看模式</b> —— 你可以觀看標示「試看」的單元；<a href="/course?id=' + c.id + '" style="color:var(--theme-color);font-weight:600">購買課程</a>解鎖全部單元、教材與留言。</div></div>' : '') +
+      '<div class="ax-roomGrid"><div>' +
+        '<div class="ax-player" id="player">' +
+          '<div class="pv-art" style="' + I.covStyle(c) + ';opacity:.92"><i class="' + c.icon + '"></i></div>' +
+          '<div class="pv-title">' + I.esc(cur.title) + '</div>' +
+          '<button class="ax-playBig" id="bigPlay" title="播放"><i class="ri-play-fill"></i></button>' +
+          '<div class="ax-pvCtrl">' +
+            '<input type="range" class="ax-seek" id="seek" min="0" max="' + dur(cur) + '" value="' + t + '" step="1" />' +
+            '<div class="ax-pvBtns">' +
+              '<button id="ctlPlay" title="播放/暫停"><i class="ri-play-fill"></i></button>' +
+              '<span id="tlabel">' + fmtT(t) + ' / ' + fmtT(dur(cur)) + '</span>' +
+              '<span class="spacer"></span>' +
+              '<button class="ax-speed" id="spd">' + speed + 'x</button>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="ax-lessonBar">' +
+          '<h2>' + I.esc(cur.title) + '</h2>' +
+          '<button class="btn btn-white btn-small" id="prevBtn" ' + (prevLesson() ? '' : 'disabled') + '><i class="ri-skip-back-line"></i> 上一堂</button>' +
+          '<button class="btn btn-white btn-small" id="doneBtn"' + (p.watched[cur.id] ? ' disabled' : '') + '><i class="ri-check-line"></i> ' + (p.watched[cur.id] ? '已完成' : '標記完成') + '</button>' +
+          '<button class="btn btn-small" id="nextBtn" ' + (nextLesson() ? '' : 'disabled') + '>下一堂 <i class="ri-skip-forward-line"></i></button>' +
+        '</div>' +
+        '<div class="ax-roomTabs">' +
+          '<div class="roomTabs">' +
+            '<button class="roomTab active" data-rt="qa"><i class="ri-chat-3-line"></i> 單元留言</button>' +
+            '<button class="roomTab" data-rt="annc"><i class="ri-megaphone-line"></i> 課程公告</button>' +
+            '<button class="roomTab" data-rt="mats"><i class="ri-folder-download-line"></i> 教材下載</button>' +
+          '</div>' +
+          '<div class="roomPane active" data-rp="qa">' + (enrolled ? paneQA() : '<p class="ax-muted" style="font-size:13.5px"><i class="ri-lock-line"></i> 留言區購課後開放。</p>') + '</div>' +
+          '<div class="roomPane" data-rp="annc">' + paneAnnc() + '</div>' +
+          '<div class="roomPane" data-rp="mats">' + paneMats() + '</div>' +
+        '</div>' +
+      '</div><div>' + playlistHTML() + '</div></div>';
+    wire();
+    updateCtrl();
+  }
+
+  function updateBar(){
+    const s = document.getElementById("seek"); if (s) s.value = t;
+    const l = document.getElementById("tlabel"); if (l) l.textContent = fmtT(t) + " / " + fmtT(dur(cur));
+  }
+  function updateCtrl(){
+    const big = document.getElementById("bigPlay");
+    const ctl = document.getElementById("ctlPlay");
+    if (big) big.style.display = playing ? "none" : "grid";
+    if (ctl) ctl.innerHTML = playing ? '<i class="ri-pause-fill"></i>' : '<i class="ri-play-fill"></i>';
+  }
+  function updateAll(){ render(); }
+
+  function wire(){
+    document.getElementById("bigPlay").onclick = play;
+    document.getElementById("ctlPlay").onclick = () => playing ? pause() : play();
+    document.getElementById("seek").oninput = e => { t = +e.target.value; updateBar(); saveProgress(); };
+    document.getElementById("spd").onclick = () => { speed = speed === 1 ? 1.5 : (speed === 1.5 ? 2 : 1); document.getElementById("spd").textContent = speed + "x"; };
+    document.getElementById("doneBtn").onclick = () => { const r = I.markLessonDone(c.id, cur.id); updateAll(); if (r.justCompleted) courseDone(); else CZ.toast("已標記完成"); };
+    document.getElementById("prevBtn").onclick = () => { const l = prevLesson(); if (l && canPlay(l)) loadLesson(l); else if (l) CZ.toast("此單元需購買後觀看"); };
+    document.getElementById("nextBtn").onclick = () => { const l = nextLesson(); if (l && canPlay(l)) loadLesson(l); else if (l) CZ.toast("此單元需購買後觀看"); };
+    document.querySelectorAll("[data-ls]").forEach(r => r.onclick = () => {
+      const l = lessons.find(x => x.id === r.dataset.ls);
+      if (!canPlay(l)) { CZ.toast("此單元需購買後觀看"); return; }
+      loadLesson(l);
+    });
+    // tabs
+    document.querySelectorAll(".roomTab").forEach(b => b.onclick = () => {
+      document.querySelectorAll(".roomTab").forEach(x => x.classList.toggle("active", x === b));
+      document.querySelectorAll(".roomPane").forEach(x => x.classList.toggle("active", x.dataset.rp === b.dataset.rt));
+    });
+    // 留言
+    const send = document.getElementById("cmtSend");
+    send && (send.onclick = () => {
+      const ta = document.getElementById("cmtText");
+      const txt = ta.value.trim();
+      if (!txt) { CZ.toast("先寫點內容吧"); return; }
+      I.addComment(c.id, cur.id, txt);
+      render();
+      CZ.toast("留言已送出，講師會在每週固定時段回覆");
+    });
+    document.querySelectorAll("[data-like]").forEach(b => b.onclick = () => { I.toggleCmtLike(b.dataset.like); render(); });
+    document.querySelectorAll("[data-reply]").forEach(b => b.onclick = () => {
+      const box = document.getElementById("replyBox-" + b.dataset.reply);
+      box.style.display = box.style.display === "none" ? "flex" : "none";
+      box.querySelector("textarea").focus();
+    });
+    document.querySelectorAll("[data-sendreply]").forEach(b => b.onclick = () => {
+      const box = document.getElementById("replyBox-" + b.dataset.sendreply);
+      const txt = box.querySelector("textarea").value.trim();
+      if (!txt) return;
+      I.addReply(b.dataset.sendreply, txt, false);
+      render();
+    });
+    document.querySelectorAll("[data-report]").forEach(b => b.onclick = () => {
+      CZ.modal('<div class="modalHero"><div class="esIcon" style="background:#fde8e6;color:#d8392b"><i class="ri-flag-2-line"></i></div></div>' +
+        '<h3>檢舉留言</h3>' +
+        '<div class="modalField"><b>檢舉原因</b><select class="input" id="rptR" style="margin-top:6px"><option>不當或冒犯內容</option><option>廣告或垃圾訊息</option><option>不實資訊</option><option>其他</option></select></div>' +
+        '<div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn btn-white btn-small" onclick="CZ.closeModal()">取消</button><button class="btn btn-small" style="background:#d8392b" onclick="CZ.closeModal();CZ.toast(\'檢舉已送出，平台將於 24 小時內審核\')">送出檢舉</button></div>');
+    });
+    document.querySelectorAll("[data-dl]").forEach(b => b.onclick = () => { I.downloadMaterial(c.id, b.dataset.dl); CZ.toast("教材已下載（demo 為示範檔）"); });
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>

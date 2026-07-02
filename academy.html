@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>職涯學院 · 課程探索｜InternX 實習通</title>
+<link rel="icon" href="/assets/cz/favicon.png" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" />
+<link rel="stylesheet" href="/assets/cz/app.css" />
+<link rel="stylesheet" href="/assets/academy/academy.css" />
+<style>
+  .acaHero { background: linear-gradient(120deg, #eaf4ff, #fff6ef); border: 1px solid #dcebff; border-radius: 18px; padding: 26px 28px; margin-bottom: 22px; display: flex; align-items: center; gap: 20px; }
+  .acaHero .ht { flex: 1; min-width: 0; }
+  .acaHero h1 { font-size: 26px; color: #11243f; margin: 0 0 8px; }
+  .acaHero p { font-size: 14.5px; color: #40536b; margin: 0; line-height: 1.75; max-width: 640px; }
+  .acaHero .stats { display: flex; gap: 22px; flex-shrink: 0; }
+  .acaHero .stats div { text-align: center; }
+  .acaHero .stats b { display: block; font-family: "Poppins", "Noto Sans TC"; font-size: 22px; color: var(--theme-color); }
+  .acaHero .stats span { font-size: 12px; color: #6b7d93; }
+  .myStrip { display: flex; align-items: center; gap: 12px; background: #fff; border: 1px solid #e7eaf0; border-radius: 14px; padding: 12px 16px; margin-bottom: 20px; flex-wrap: wrap; }
+  .myStrip .t { font-size: 13.5px; font-weight: 600; color: #11243f; display: flex; align-items: center; gap: 7px; }
+  .myStrip .pbar { flex: 1; min-width: 120px; max-width: 260px; }
+  .myStrip .pct { font-size: 12.5px; color: #5b6b7e; white-space: nowrap; }
+  @media (max-width: 760px) { .acaHero { flex-direction: column; align-items: flex-start; } .acaHero .stats { gap: 26px; } }
+</style>
+</head>
+<body data-page="academy" data-nav="academy">
+
+<main>
+  <div class="cz-container ax-page">
+
+    <div class="acaHero">
+      <div class="ht">
+        <h1><i class="ri-graduation-cap-line" style="color:var(--theme-color)"></i> 職涯學院</h1>
+        <p>不是又一個課程平台 —— 每堂課都告訴你：<b>對應什麼職缺、補足什麼求職能力、學完能產出什麼履歷成果</b>。講師都是走過同一條路的學長姐與業界 Mentor。</p>
+      </div>
+      <div class="stats" id="heroStats"></div>
+    </div>
+
+    <div class="myStrip" id="continueStrip" style="display:none"></div>
+
+    <div class="ax-label"><i class="ri-focus-3-line"></i> 你想走的職涯方向（可複選）</div>
+    <div class="ax-chips" id="careerChips"></div>
+
+    <div class="ax-label"><i class="ri-route-line"></i> 你現在的求職階段</div>
+    <div class="ax-chips" id="stageChips"></div>
+
+    <div class="ax-label"><i class="ri-equalizer-line"></i> 快篩</div>
+    <div class="ax-chips" id="qfRow">
+      <span class="ax-qf" data-qf="free"><i class="ri-price-tag-3-line"></i> 免費</span>
+      <span class="ax-qf" data-qf="under1k"><i class="ri-money-dollar-circle-line"></i> 千元有找</span>
+      <span class="ax-qf" data-qf="artifact"><i class="ri-file-user-line"></i> 可產出履歷作品</span>
+      <span class="ax-qf" data-qf="materials"><i class="ri-folder-download-line"></i> 有教材</span>
+      <span class="ax-qf" data-qf="homework"><i class="ri-edit-box-line"></i> 有作業</span>
+    </div>
+
+    <div class="ax-searchRow">
+      <input class="input" id="q" placeholder="搜尋課程、技能或講師，例如「SQL」「面試」「張哲瑋」" />
+      <select class="input ax-sort" id="gradeSel">
+        <option value="">全部年級</option>
+      </select>
+      <select class="input ax-sort" id="sortSel">
+        <option value="rec">推薦排序</option>
+        <option value="new">最新上架</option>
+        <option value="students">最多人購買</option>
+        <option value="priceAsc">價格低 → 高</option>
+      </select>
+    </div>
+
+    <div class="feedHead" style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:22px 0 4px">
+      <h2 style="font-size:18px;color:#11243f;margin:0;display:flex;align-items:center;gap:7px"><i class="ri-sparkling-2-line" style="color:var(--complementary-color)"></i> 課程</h2>
+      <span style="font-size:13px;color:#8a94a3" id="cnt"></span>
+    </div>
+    <div class="ax-grid" id="grid"></div>
+    <div class="emptyState" id="empty" style="display:none;text-align:center;padding:40px;border:1px dashed #d8dee8;border-radius:14px;color:#889">
+      <i class="ri-inbox-line" style="font-size:28px"></i>
+      <p style="margin:8px 0 0;font-size:14px">沒有符合條件的課程，試著放寬篩選。</p>
+    </div>
+
+    <div style="background:#f9fafb;border:1px solid #eee;border-radius:12px;padding:14px 16px;margin-top:30px;font-size:13px;color:#556;line-height:1.7">
+      <b style="color:#11243f"><i class="ri-route-line" style="color:var(--theme-color)"></i> 給工程師：這頁怎麼接</b><br>
+      課程卡欄位對齊 <code style="font-size:12px">ACADEMY-PRD.md §3.1</code>（講師身份 / 年級 / 職涯方向 / 技能 / 教材・作業・履歷作品・Q&amp;A / 購買人數 / 完成率）。篩選用五類標籤（<code style="font-size:12px">careerTags / skillTags / gradeTags / stageTags / outcomeTags</code>），與職缺、履歷健檢共用同一組 key。資料層見 <code style="font-size:12px">assets/academy/academy.js</code>，規格見 <a href="/spec" style="color:var(--theme-color)">工程規格 §17</a>。
+    </div>
+  </div>
+</main>
+
+<script src="/assets/cz/data.js"></script>
+<script src="/assets/cz/app.js"></script>
+<script src="/assets/academy/academy.js"></script>
+<script>
+(function(){
+  const I = window.IXA;
+  const sel = { careers: new Set(), stages: new Set(), qf: {}, grade: "", q: "", sort: "rec" };
+  // 從網址帶入職涯方向（職缺頁 / 活動頁推薦點過來）
+  (I.qs("career") || "").split(",").filter(Boolean).forEach(k => sel.careers.add(k));
+
+  // hero 統計
+  (function(){
+    const pub = I.published();
+    const students = pub.reduce((s,c)=> s + I.courseStats(c.id).students, 0);
+    const creators = new Set(pub.map(c=>c.creatorId)).size;
+    document.getElementById("heroStats").innerHTML =
+      "<div><b>"+pub.length+"</b><span>堂職涯課程</span></div>" +
+      "<div><b>"+creators+"</b><span>位業界講師</span></div>" +
+      "<div><b>"+students.toLocaleString("zh-TW")+"</b><span>人次學習</span></div>";
+  })();
+
+  // 繼續上課 strip
+  (function(){
+    const list = I.myEnrollments()
+      .map(e => ({ c: I.getCourse(e.courseId), p: I.prog(e.courseId) }))
+      .filter(x => x.c && !x.p.completedAt && x.p.lastAt)
+      .sort((a,b)=> b.p.lastAt - a.p.lastAt);
+    if (!list.length) return;
+    const { c } = list[0];
+    const pct = I.coursePct(c.id);
+    const el = document.getElementById("continueStrip");
+    el.style.display = "flex";
+    el.innerHTML = '<span class="t"><i class="ri-play-circle-line" style="color:var(--theme-color)"></i> 繼續上課：'+I.esc(c.title)+'</span>' +
+      '<div class="pbar"><i style="width:'+pct+'%"></i></div><span class="pct">'+pct+'%</span>' +
+      '<a class="btn btn-small" href="/classroom?id='+c.id+'" style="margin-left:auto"><i class="ri-arrow-right-line"></i> 進入教室</a>';
+  })();
+
+  // 篩選 chips
+  function renderChips(){
+    document.getElementById("careerChips").innerHTML = I.CAREERS.map(c =>
+      '<span class="ax-chip '+(sel.careers.has(c.key)?'on':'')+'" data-k="'+c.key+'">'+(sel.careers.has(c.key)?'<i class="ri-check-line"></i>':'<i class="'+c.icon+'"></i>')+' '+c.label+'</span>').join("");
+    document.querySelectorAll("#careerChips .ax-chip").forEach(el => el.onclick = () => {
+      const k = el.dataset.k; sel.careers.has(k) ? sel.careers.delete(k) : sel.careers.add(k); renderChips(); renderGrid();
+    });
+    document.getElementById("stageChips").innerHTML = I.STAGES.map(s =>
+      '<span class="ax-chip '+(sel.stages.has(s.key)?'on':'')+'" data-k="'+s.key+'">'+(sel.stages.has(s.key)?'<i class="ri-check-line"></i> ':'')+s.label+'</span>').join("");
+    document.querySelectorAll("#stageChips .ax-chip").forEach(el => el.onclick = () => {
+      const k = el.dataset.k; sel.stages.has(k) ? sel.stages.delete(k) : sel.stages.add(k); renderChips(); renderGrid();
+    });
+  }
+  I.GRADES.forEach(g => { const o = document.createElement("option"); o.value = g; o.textContent = "適合" + g; document.getElementById("gradeSel").appendChild(o); });
+
+  function match(c){
+    if (sel.careers.size && c.careers.length && !c.careers.some(k => sel.careers.has(k))) return false;
+    if (sel.stages.size && c.stages.length && !c.stages.some(k => sel.stages.has(k))) return false;
+    if (sel.grade && c.grades.length && !c.grades.includes(sel.grade)) return false;
+    if (sel.qf.free && I.currentPrice(c) !== 0) return false;
+    if (sel.qf.under1k && !(I.currentPrice(c) > 0 && I.currentPrice(c) <= 1000)) return false;
+    if (sel.qf.artifact && !c.resumeArtifact) return false;
+    if (sel.qf.materials && !c.hasMaterials) return false;
+    if (sel.qf.homework && !c.hasHomework) return false;
+    if (sel.q) {
+      const hay = (c.title + c.subtitle + (c.skills||[]).join("") + (I.USERS[c.creatorId]||{}).name + c.creatorTitle).toLowerCase();
+      if (!hay.includes(sel.q.toLowerCase())) return false;
+    }
+    return true;
+  }
+  function score(c){
+    let s = 0;
+    if (c.featured) s += 50;
+    if (sel.careers.size && c.careers.some(k => sel.careers.has(k))) s += 100;
+    if (sel.stages.size && c.stages.some(k => sel.stages.has(k))) s += 40;
+    s += Math.min(30, I.courseStats(c.id).students / 20);
+    return s;
+  }
+  function renderGrid(){
+    let list = I.published().filter(match);
+    if (sel.sort === "rec") list = list.map(c=>({c,s:score(c)})).sort((a,b)=>b.s-a.s).map(o=>o.c);
+    if (sel.sort === "new") list.sort((a,b)=> b.publishedAt - a.publishedAt);
+    if (sel.sort === "students") list.sort((a,b)=> I.courseStats(b.id).students - I.courseStats(a.id).students);
+    if (sel.sort === "priceAsc") list.sort((a,b)=> I.currentPrice(a) - I.currentPrice(b));
+    document.getElementById("grid").innerHTML = list.map(I.courseCardHTML).join("");
+    document.getElementById("empty").style.display = list.length ? "none" : "block";
+    document.getElementById("cnt").textContent =
+      (sel.careers.size ? "已選 " + sel.careers.size + " 個方向 · " : "") + list.length + " 堂課";
+    I.wireFavs(document.getElementById("grid"));
+  }
+
+  document.querySelectorAll("#qfRow .ax-qf").forEach(b => b.onclick = () => {
+    sel.qf[b.dataset.qf] = !sel.qf[b.dataset.qf]; b.classList.toggle("on", !!sel.qf[b.dataset.qf]); renderGrid();
+  });
+  document.getElementById("q").addEventListener("input", e => { sel.q = e.target.value.trim(); renderGrid(); });
+  document.getElementById("gradeSel").addEventListener("change", e => { sel.grade = e.target.value; renderGrid(); });
+  document.getElementById("sortSel").addEventListener("change", e => { sel.sort = e.target.value; renderGrid(); });
+
+  renderChips(); renderGrid();
+})();
+</script>
+</body>
+</html>

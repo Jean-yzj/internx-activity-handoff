@@ -18,9 +18,10 @@
   /* ---------- TopBar ---------- */
   function buildTopBar() {
     const cur = location.pathname.replace(/\.html$/, "").replace(/\/+$/, "");
+    const nav = document.body.dataset.nav || "";
     const tabs = D.navTabs.map(t => {
       const a = t.href.split("?")[0].replace(/\/+$/, "");
-      const sel = (a === cur || (a.length > 1 && cur.startsWith(a))) ? "selected" : "";
+      const sel = (a === cur || (a.length > 1 && cur.startsWith(a)) || (t.key && t.key === nav)) ? "selected" : "";
       const tgt = t.external ? `target="_blank" rel="noopener"` : "";
       return `<a class="topBarTab ${sel}" href="${t.href}" ${tgt}><i class="ri-${t.icon}"></i><span class="tabText">${t.text}</span></a>`;
     }).join("");
@@ -63,6 +64,7 @@
             <a class="dd-button" href="https://internx.me/zh-tw/share" target="_blank" rel="noopener"><i class="ri-file-add-line"></i> 分享心得</a>
             <a class="dd-button" href="https://internx.me/zh-tw/dashboard/activity-bookmark" target="_blank" rel="noopener"><i class="ri-heart-line"></i> 收藏活動</a>
             <a class="dd-button" href="https://internx.me/zh-tw/dashboard/connection" target="_blank" rel="noopener"><i class="ri-group-2-line"></i> 我的小夥伴</a>
+            <a class="dd-button" href="/my-courses"><i class="ri-book-marked-line"></i> 我的課程</a>
             <a class="dd-button" href="https://internx.me/zh-tw/dashboard/account-settings" target="_blank" rel="noopener"><i class="ri-settings-3-line"></i> 帳號設定</a>
             <a class="dd-button" href="/register"><i class="ri-verified-badge-line"></i> 申請認證標章</a>
           </div>
@@ -71,12 +73,14 @@
             <a class="dd-button" href="/host"><i class="ri-store-2-line"></i> 主辦單位入口</a>
             <a class="dd-button" href="/backstage"><i class="ri-dashboard-3-line"></i> 認證帳號後台</a>
             <a class="dd-button" href="/editor"><i class="ri-add-circle-line"></i> 建立活動</a>
+            <a class="dd-button" href="/academy-studio"><i class="ri-video-add-line"></i> 課程後台（開課）</a>
             <a class="dd-button" href="/blog-editor"><i class="ri-quill-pen-line"></i> 撰寫新文章</a>
             <a class="dd-button" href="/club"><i class="ri-group-line"></i> 社團主頁</a>
           </div>
           <div class="sectionLabel">交接 / 平台</div>
           <div class="dd-card">
             <a class="dd-button" href="/directory"><i class="ri-compass-3-line"></i> 探索創作者</a>
+            <a class="dd-button" href="/academy-admin"><i class="ri-shield-star-line"></i> 課程管理（Admin）</a>
             <a class="dd-button" href="/spec"><i class="ri-file-list-3-line"></i> 工程交接文件</a>
           </div>
           <a class="dd-logout" href="#" onclick="CZ.toast('Demo 不含登入功能');return false"><i class="ri-logout-box-line"></i> 登出</a>
@@ -102,11 +106,13 @@
           <a href="https://internx.me/zh-tw/dashboard/milestones" target="_blank" rel="noopener"><i class="ri-medal-line"></i>里程碑徽章</a>
           <a href="https://internx.me/zh-tw/share" target="_blank" rel="noopener"><i class="ri-file-add-line"></i>分享心得</a>
           <a href="https://internx.me/zh-tw/dashboard/activity-bookmark" target="_blank" rel="noopener"><i class="ri-heart-line"></i>收藏活動</a>
+          <a href="/my-courses"><i class="ri-book-marked-line"></i>我的課程</a>
           <a href="/register"><i class="ri-verified-badge-line"></i>申請認證標章</a>
           <div style="height:1px;background:#eee;margin:10px 0"></div>
           <a href="/host"><i class="ri-store-2-line"></i>主辦單位入口</a>
           <a href="/backstage"><i class="ri-dashboard-3-line"></i>認證帳號後台</a>
           <a href="/editor"><i class="ri-add-circle-line"></i>建立活動</a>
+          <a href="/academy-studio"><i class="ri-video-add-line"></i>課程後台（開課）</a>
           <a href="/club"><i class="ri-group-line"></i>社團主頁</a>
           <a href="/directory"><i class="ri-compass-3-line"></i>探索創作者</a>
           <a href="/spec"><i class="ri-file-list-3-line"></i>工程交接文件</a>
@@ -159,6 +165,8 @@
               <li><a href="https://internx.me/zh-tw/dashboard/forum" target="_blank" rel="noopener">開放式實習論壇</a></li>
               <li><a href="https://internx.me/zh-tw/dashboard/connection" target="_blank" rel="noopener">人脈與小夥伴</a></li>
               <li><a href="https://internx.me/zh-tw/dashboard/activities" target="_blank" rel="noopener">職涯活動媒人婆</a></li>
+              <li><a href="/academy">職涯學院（課程）</a></li>
+              <li><a href="/my-courses">我的課程</a></li>
             </ul>
           </div>
           <div class="footerColumn">

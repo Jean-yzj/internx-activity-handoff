@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" />
 <link rel="stylesheet" href="/assets/cz/app.css" />
 <link rel="stylesheet" href="/assets/style.css" />
+<link rel="stylesheet" href="/assets/academy/academy.css" />
 </head>
 <body data-cz data-page="attendee">
 
@@ -116,6 +117,14 @@
       </div>
     </aside>
   </div>
+
+  <!-- 延伸學習資源（活動 ↔ 課程互相導流；對應 ACADEMY-PRD 整合 §2.5） -->
+  <section class="ix-card" id="extendLearn" style="margin-top:22px">
+    <h2 style="display:flex;align-items:center;gap:8px"><i class="ri-graduation-cap-line" style="color:var(--theme-color)"></i> 延伸學習資源</h2>
+    <p class="form-note" style="margin:4px 0 14px">活動是一次性的，準備是連續的 —— 參加完這場活動，可以用這些課程把方向變成能力。</p>
+    <div class="ax-pairGrid" id="extendGrid"></div>
+    <p style="margin:12px 0 0;font-size:13px"><a href="/academy" style="color:var(--theme-color);font-weight:600">看更多職涯課程 <i class="ri-arrow-right-line"></i></a></p>
+  </section>
 
   <p style="text-align:center;color:var(--text-faint);font-size:13px;margin-top:22px">
     <i class="ri-arrow-left-right-line"></i> 想改活動內容、表單或票券？回到 <a href="editor.html">主辦方編輯器</a> 編輯後點「預覽報名頁」
@@ -322,6 +331,23 @@ renderTickets();
   const cta=document.getElementById('cta');
   cta.innerHTML = `<i class="ri-send-plane-line"></i> ${isReview?'送出報名（送審）':'送出報名'}`;
   cta.onclick = ()=> toast(isReview ? '（示意）已送出報名，待主辦方審核後付款' : '（示意）已送出報名');
+})();
+</script>
+<script src="/assets/academy/academy.js"></script>
+<script>
+/* 延伸學習資源：活動 → 課程導流（推薦要標原因，同活動個人化的透明推薦原則） */
+(function(){
+  const I = window.IXA; if (!I) return;
+  const RECS = [
+    { id: "c-linkedin", why: "交流活動後，用 Networking 課把認識的人變成人脈" },
+    { id: "c-pm",       why: "想把點子做成企劃？從 0 寫出一份產品企劃書" },
+  ];
+  document.getElementById("extendGrid").innerHTML = RECS.map(r => {
+    const c = I.getCourse(r.id); if (!c) return "";
+    return '<a class="ax-pair" href="/course?id=' + c.id + '">' +
+      '<div class="pi" style="background:' + c.color + '1a;color:' + c.color + '"><i class="' + c.icon + '"></i></div>' +
+      '<div><div class="pk">' + I.esc(r.why) + '</div><div class="pt">' + I.esc(c.title) + ' · ' + I.money(I.currentPrice(c)) + '</div></div></a>';
+  }).join("");
 })();
 </script>
 </body>

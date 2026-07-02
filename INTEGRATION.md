@@ -32,8 +32,8 @@
 **收尾**
 - §8 分階段 · §9 驗收標準 · §18 本機預覽/部署
 
-**未來（預告，不在本次範圍）**
-- §20 InternX Academy 職涯課程平台（低優先；完整 PRD 見 `ACADEMY-PRD.md`）
+**職涯學院 Academy（原型已完成，整併主平台為後續排程）**
+- §20 InternX Academy 課程平台：原型頁面＋資料層＋預留事項（完整 PRD 見 `ACADEMY-PRD.md`）
 
 ---
 
@@ -811,11 +811,23 @@ mockup 以 GitHub Pages 部署（main 分支 / 根目錄）。這份 repo 與 in
 
 ---
 
-## 20. 未來功能預告：InternX Academy 職涯課程平台（低優先、未排程）
+## 20. InternX Academy 職涯課程平台（原型已完成；主平台整併後續排程）
 
-> **狀態：規劃中，優先級靠後，不在本次交接的實作範圍，短期內不會併入。**
-> 現在**不用寫任何 Academy 程式碼**。放進來是讓工程端先知道方向，並在目前實作時把擴充點預留好，避免未來重工。
+> **狀態更新：本 repo 已含完整可操作原型**（純前端＋localStorage，零建置）。整併進 internx.me 主平台仍屬後續排程（低優先），但介面、資料流與欄位已可直接當規格用。
 > 完整 PRD（含與主平台的整合設計）：`ACADEMY-PRD.md`（交接首頁 `/handoff` 可線上閱讀）；工程速查：[spec §17](/spec)。
+
+**原型頁面**：
+
+| 頁 | 路徑 | 內容 |
+|---|---|---|
+| 課程探索 | `/academy` | 五類標籤篩選（職涯方向／求職階段／年級／價格／特性）＋ PRD §3.1 完整課程卡 |
+| 課程詳情 | `/course?id=…` | PRD §3.2 的 18 區塊＋**Mock 購買全流程**（Order→Payment→Enrollment→RevenueRecord，含失敗重試） |
+| 教室播放器 | `/classroom?id=…` | 模擬播放＋進度記錄、試看模式、教材下載、單元留言（讚／回覆／檢舉）、公告、完課→加入個人頁/職涯地圖 |
+| 我的課程 | `/my-courses` | 進行中／已完成／收藏／下載紀錄 |
+| 創作者後台 | `/academy-studio` | Dashboard／我的課程（狀態機）／4 步開課精靈（含章節拖曳排序）／收益／留言管理 |
+| 管理後台 | `/academy-admin` | 課程審核（通過/退回/下架/精選）／創作者管理（申請/停權/個別分潤）／訂單（退款）／收益（撥款/匯出）／分潤設定 |
+
+**資料層**：`assets/academy/academy.js` —— localStorage 持久化 DB＋PaymentProvider 抽象層（`createPayment / verifyPayment / refundPayment / getPaymentStatus`，V1 = FakePay）。欄位命名對齊 PRD §9／§11，可直接翻成 Firestore collections。
 
 **一句話定位**：職涯導向課程平台（對標 Hahow 但只做職涯／實習準備）。課程綁五類標籤（職涯方向 / 技能 / 年級 / 求職階段 / 成果），與職缺、履歷健檢、諮詢、活動互相導流；講師＝既有 `verified-creator`（同一帳號、共用審核）；V1 金流用 Mock Payment，但 Order → Payment → Enrollment → RevenueRecord 資料流要完整。
 

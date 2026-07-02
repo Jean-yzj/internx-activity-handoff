@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>我的課程｜職涯學院 · InternX 實習通</title>
+<link rel="icon" href="/assets/cz/favicon.png" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" />
+<link rel="stylesheet" href="/assets/cz/app.css" />
+<link rel="stylesheet" href="/assets/academy/academy.css" />
+<style>
+  .mcTabs { display: flex; gap: 4px; border-bottom: 1px solid #e7eaf0; margin: 18px 0 16px; flex-wrap: wrap; }
+  .mcTab { border: none; background: none; font-size: 14px; font-weight: 600; color: #7a8698; padding: 10px 14px; cursor: pointer; border-bottom: 2.5px solid transparent; display: inline-flex; align-items: center; gap: 6px; }
+  .mcTab.active { color: var(--theme-color-black); border-bottom-color: var(--theme-color); }
+  .profileBox { background: linear-gradient(120deg, #eaf4ff, #fff); border: 1px solid #dcebff; border-radius: 14px; padding: 14px 16px; margin-bottom: 16px; font-size: 13.5px; color: #33506e; display: flex; gap: 9px; align-items: flex-start; }
+</style>
+</head>
+<body data-page="my-courses" data-nav="academy">
+
+<main>
+  <div class="cz-container ax-page">
+    <div class="ax-crumb"><a href="/academy"><i class="ri-graduation-cap-line"></i> 職涯學院</a><i class="ri-arrow-right-s-line"></i><span>我的課程</span></div>
+    <h1 class="ax-h1">我的課程</h1>
+    <p class="ax-sub">學習進度、收藏與教材下載紀錄。完成的課程可以加入個人頁與職涯地圖，變成履歷上的證據。</p>
+
+    <div class="ax-statRow" id="stats" style="margin-top:18px"></div>
+    <div class="mcTabs" id="tabs"></div>
+    <div id="body"></div>
+  </div>
+</main>
+
+<script src="/assets/cz/data.js"></script>
+<script src="/assets/cz/app.js"></script>
+<script src="/assets/academy/academy.js"></script>
+<script>
+(function(){
+  const I = window.IXA;
+  let tab = "all";
+
+  const my = () => I.myEnrollments().map(e => {
+    const c = I.getCourse(e.courseId);
+    return c ? { c, e, p: I.prog(c.id), pct: I.coursePct(c.id) } : null;
+  }).filter(Boolean).sort((a, b) => (b.p.lastAt || b.e.createdAt) - (a.p.lastAt || a.e.createdAt));
+
+  function renderStats(){
+    const list = my();
+    const doing = list.filter(x => !x.p.completedAt).length;
+    const done = list.filter(x => x.p.completedAt).length;
+    const mins = list.reduce((s, x) => s + I.lessonsOf(x.c).filter(l => x.p.watched[l.id]).reduce((t, l) => t + l.mins, 0), 0);
+    document.getElementById("stats").innerHTML =
+      '<div class="ax-statBox accent"><div class="l"><i class="ri-play-circle-line"></i> 學習中</div><div class="v">' + doing + '</div><div class="d">堂課程</div></div>' +
+      '<div class="ax-statBox"><div class="l"><i class="ri-checkbox-circle-line"></i> 已完成</div><div class="v">' + done + '</div><div class="d">堂課程</div></div>' +
+      '<div class="ax-statBox"><div class="l"><i class="ri-time-line"></i> 累積學習</div><div class="v">' + (mins >= 60 ? (mins / 60).toFixed(1) + ' 小時' : mins + ' 分') + '</div><div class="d">看完的單元時數</div></div>' +
+      '<div class="ax-statBox"><div class="l"><i class="ri-heart-line"></i> 收藏</div><div class="v">' + I.db().favorites.length + '</div><div class="d">想上的課</div></div>';
+  }
+
+  function rowHTML(x){
+    const { c, p, pct } = x;
+    const u = I.USERS[c.creatorId] || {};
+    const lastL = I.lessonsOf(c).find(l => l.id === p.lastLesson);
+    const doneRow = !!p.completedAt;
+    return '<div class="ax-row">' +
+      '<div class="thumb" style="' + I.covStyle(c) + '"><i class="' + c.icon + '"></i></div>' +
+      '<div class="rmain"><div class="rt">' + I.esc(c.title) +
+        (doneRow ? '<span class="atg paid"><i class="ri-check-double-line"></i> 已完課</span>' : '') +
+        (p.addedToProfile ? '<span class="atg free"><i class="ri-user-star-line"></i> 已加入個人頁</span>' : '') + '</div>' +
+      '<div class="rs">' + I.esc(u.name || "") + ' · ' + (doneRow ? '完成於 ' + I.dfull(p.completedAt) : (p.lastAt ? '上次觀看 ' + I.timeAgo(p.lastAt) + (lastL ? ' · ' + I.esc(lastL.title) : '') : '尚未開始')) + '</div>' +
+      '<div class="rbar"><div class="pbar' + (doneRow ? ' done' : '') + '"><i style="width:' + pct + '%"></i></div><span class="pct">' + pct + '%</span></div></div>' +
+      '<div class="racts">' +
+        (doneRow && !p.addedToProfile ? '<button class="btn btn-gold btn-small" data-addp="' + c.id + '"><i class="ri-user-add-line"></i> 加入個人頁</button>' : '') +
+        '<a class="btn btn-white btn-small" href="/course?id=' + c.id + '">課程頁</a>' +
+        '<a class="btn btn-small" href="/classroom?id=' + c.id + '"><i class="ri-play-circle-line"></i> ' + (doneRow ? '複習' : (pct > 0 ? '繼續上課' : '開始上課')) + '</a>' +
+      '</div></div>';
+  }
+  function favHTML(c){
+    return '<div class="ax-row">' +
+      '<div class="thumb" style="' + I.covStyle(c) + '"><i class="' + c.icon + '"></i></div>' +
+      '<div class="rmain"><div class="rt">' + I.esc(c.title) + '</div>' +
+      '<div class="rs">' + I.esc((I.USERS[c.creatorId] || {}).name || "") + ' · ' + I.esc(c.creatorTitle) + ' · ' + I.money(I.currentPrice(c)) + '</div></div>' +
+      '<div class="racts"><button class="btn btn-white btn-small" data-unfav="' + c.id + '"><i class="ri-heart-fill" style="color:#e0245e"></i> 移除</button>' +
+      '<a class="btn btn-small" href="/course?id=' + c.id + '">看課程 <i class="ri-arrow-right-line"></i></a></div></div>';
+  }
+
+  const EMPTY = (icon, text, cta) => '<div style="text-align:center;padding:44px 20px;border:1px dashed #d8dee8;border-radius:14px;color:#889">' +
+    '<i class="' + icon + '" style="font-size:30px"></i><p style="margin:10px 0 14px;font-size:14px">' + text + '</p>' + (cta || '') + '</div>';
+  const GO = '<a class="btn btn-small" href="/academy"><i class="ri-compass-3-line"></i> 探索課程</a>';
+
+  function render(){
+    renderStats();
+    const tabs = [["all", "全部課程", "ri-book-2-line"], ["doing", "進行中", "ri-play-circle-line"], ["done", "已完成", "ri-checkbox-circle-line"], ["fav", "收藏", "ri-heart-line"], ["dl", "下載紀錄", "ri-download-2-line"]];
+    document.getElementById("tabs").innerHTML = tabs.map(t => '<button class="mcTab ' + (tab === t[0] ? 'active' : '') + '" data-t="' + t[0] + '"><i class="' + t[2] + '"></i> ' + t[1] + '</button>').join("");
+    document.querySelectorAll(".mcTab").forEach(b => b.onclick = () => { tab = b.dataset.t; render(); });
+
+    const body = document.getElementById("body");
+    const list = my();
+    if (tab === "all" || tab === "doing" || tab === "done") {
+      const filtered = list.filter(x => tab === "all" ? true : (tab === "done" ? !!x.p.completedAt : !x.p.completedAt));
+      const doneUnadded = list.filter(x => x.p.completedAt && !x.p.addedToProfile).length;
+      body.innerHTML =
+        (tab !== "doing" && doneUnadded ? '<div class="profileBox"><i class="ri-lightbulb-flash-line" style="color:var(--theme-color)"></i><div>你有 ' + doneUnadded + ' 堂完成的課程還沒加入個人頁 —— 加入後會顯示在實習通個人頁與職涯地圖，投遞時是能力證據。</div></div>' : '') +
+        (filtered.length ? filtered.map(rowHTML).join("") : EMPTY("ri-book-open-line", tab === "done" ? "還沒有完成的課程，繼續加油！" : "還沒有課程，去職涯學院逛逛。", GO));
+      document.querySelectorAll("[data-addp]").forEach(b => b.onclick = () => { I.addToProfile(b.dataset.addp, true); CZ.toast("已加入個人頁與職涯地圖"); render(); });
+    }
+    if (tab === "fav") {
+      const favs = I.db().favorites.map(I.getCourse).filter(Boolean);
+      body.innerHTML = favs.length ? favs.map(favHTML).join("") : EMPTY("ri-heart-line", "還沒有收藏的課程。", GO);
+      document.querySelectorAll("[data-unfav]").forEach(b => b.onclick = () => { I.toggleFav(b.dataset.unfav); CZ.toast("已取消收藏"); render(); });
+    }
+    if (tab === "dl") {
+      const dls = I.db().downloads;
+      body.innerHTML = dls.length ?
+        '<div class="tableWrap"><table class="ax-table"><thead><tr><th>教材</th><th>課程</th><th>下載時間</th><th style="text-align:right">操作</th></tr></thead><tbody>' +
+        dls.map(d => { const c = I.getCourse(d.courseId); return '<tr><td data-label="教材" class="wrap"><i class="ri-file-3-line" style="color:#9aa7b8"></i> ' + I.esc(d.name) + '</td><td data-label="課程" class="wrap">' + I.esc(c ? c.title : "") + '</td><td data-label="時間">' + I.timeAgo(d.at) + '</td><td data-label="操作" style="text-align:right"><button class="btn btn-white btn-small" data-redl="' + d.courseId + '|' + I.esc(d.name) + '"><i class="ri-download-2-line"></i> 重新下載</button></td></tr>'; }).join("") +
+        '</tbody></table></div>' : EMPTY("ri-download-2-line", "還沒有下載過教材。", "");
+      document.querySelectorAll("[data-redl]").forEach(b => b.onclick = () => {
+        const [cid, name] = b.dataset.redl.split("|");
+        I.downloadMaterial(cid, name); CZ.toast("教材已下載");
+      });
+    }
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>

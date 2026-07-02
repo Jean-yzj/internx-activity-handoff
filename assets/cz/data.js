@@ -387,6 +387,7 @@ window.CZ_DATA = {
     { text: "話題牆", icon: "discuss-line", href: "https://staging.internx.me/zh-tw/dashboard/needs-wall", external: true },
     { text: "人脈", icon: "group-2-line", href: "https://internx.me/zh-tw/dashboard/connection", external: true },
     { text: "活動", icon: "suitcase-line", href: "/attendee" },
+    { text: "職涯學院", icon: "graduation-cap-line", href: "/academy", key: "academy" },
     { text: "心得", icon: "sparkling-line", href: "https://internx.me/zh-tw/dashboard/featured", external: true },
     { text: "創作者", icon: "quill-pen-line", href: "/creators", key: "creator" },
   ],

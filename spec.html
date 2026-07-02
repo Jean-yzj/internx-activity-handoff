@@ -456,8 +456,8 @@ interface ActivityData { <span class="c">/* …現有… */</span> <span class="
 
   <!-- 17. academy future feature (heads-up only) -->
   <section class="section">
-    <h2>17 · 未來功能預告：InternX Academy 職涯課程平台（低優先）</h2>
-    <div class="callout callout-problem"><i class="ri-time-line"></i><p style="margin:0"><b>狀態：規劃中・未排程・優先級靠後。</b>不屬於本次活動報名／創作者交接的實作範圍，短期內不會併入，<b>現在不用寫任何 Academy 程式碼</b>。放在這裡是讓工程端先知道方向，並在目前實作時把擴充點預留好，避免未來重工。完整需求見 <code class="coderef">ACADEMY-PRD.md</code>（<a href="/handoff#doc">交接首頁可線上閱讀</a>）。</p></div>
+    <h2>17 · InternX Academy 職涯課程平台（原型已完成；主平台整併後續排程）</h2>
+    <div class="callout callout-fix"><i class="ri-checkbox-circle-line"></i><p style="margin:0"><b>本 repo 已含完整可操作原型</b>：探索 <a href="/academy">/academy</a> → 詳情＋Mock 購買 <a href="/course?id=c-ba">/course</a> → 教室播放器 <a href="/classroom?id=c-ba">/classroom</a> → <a href="/my-courses">/my-courses</a>；創作者後台 <a href="/academy-studio">/academy-studio</a>（4 步開課精靈／收益／留言管理）、管理後台 <a href="/academy-admin">/academy-admin</a>（審核／訂單／收益／分潤）。資料層在 <code class="coderef">assets/academy/academy.js</code>：localStorage 持久化＋<b>PaymentProvider 抽象層（FakePay）</b>，Order → Payment → Enrollment → RevenueRecord 全流程真的會跑。<b>整併進 internx.me 主平台仍屬後續排程（低優先）</b>，完整需求見 <code class="coderef">ACADEMY-PRD.md</code>（<a href="/handoff#doc">交接首頁可線上閱讀</a>）；下面的預留事項仍然成立。</p></div>
 
     <p><b>一句話定位：</b>職涯導向課程平台（對標 Hahow 但不做泛知識）。課程綁五類標籤（職涯方向 / 技能 / 年級 / 求職階段 / 成果），與職缺、履歷健檢、諮詢、活動互相導流；講師＝既有認證創作者，V1 金流用 Mock Payment 但資料流完整（Order → Payment → Enrollment → RevenueRecord）。</p>
 

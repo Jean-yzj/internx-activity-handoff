@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>課程後台｜職涯學院 · InternX 實習通</title>
+<link rel="icon" href="/assets/cz/favicon.png" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" />
+<link rel="stylesheet" href="/assets/cz/app.css" />
+<link rel="stylesheet" href="/assets/academy/academy.css" />
+<style>
+  .layout { align-items: flex-start; }
+  .profileName { font-size: 20px; font-weight: 700; color: #11243f; }
+  .oaPill { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 999px; }
+  .oaPill.gold { background: #fff4d6; color: #9a7400; }
+  .statRow { background: #f7faff; border: 1px solid #e6eef8; border-radius: 12px; }
+  .statBox { background: none; border: none; border-radius: 0; padding: 11px 6px; }
+  .statBox + .statBox { border-left: 1px solid #e6eef8; }
+  .statBox b { font-size: 17px; }
+  .rejReason { background: #fdeaea; border: 1px solid #f6d2d2; color: #a33; border-radius: 10px; padding: 9px 12px; font-size: 12.5px; margin-top: 8px; }
+  .wizNote { font-size: 12px; color: #8a94a3; margin-top: 5px; line-height: 1.6; }
+  .upBtn.ok { color: #1a8a35; border-color: #cdeed4; }
+</style>
+</head>
+<body data-page="academy-studio" data-nav="academy">
+
+<main>
+  <div class="cz-container profile">
+    <div class="layout">
+
+      <aside class="sidebar">
+        <div class="sidebarCard">
+          <div id="stAvatar"></div>
+          <h2 class="profileName">林宥蓁</h2>
+          <div class="sidebarBadgeStrip"><span class="oaPill gold"><i class="ri-quill-pen-line"></i> 認證創作者</span></div>
+          <p class="profileHeadline">職涯教練／前獵才顧問</p>
+          <p class="profileSchool" id="sideMeta"></p>
+          <div class="sidebarButtons">
+            <button class="btn btn-block" id="newCourseBtn"><i class="ri-add-circle-line"></i> 建立新課程</button>
+            <a class="btn btn-white btn-block" href="/creator"><i class="ri-user-3-line"></i> 我的講師主頁</a>
+            <a class="btn btn-white btn-block" href="/academy"><i class="ri-graduation-cap-line"></i> 職涯學院首頁</a>
+          </div>
+          <div class="sidebarDivider"></div>
+          <div class="statRow" id="sideStats"></div>
+        </div>
+      </aside>
+
+      <div class="main">
+        <div class="sectionTabs" id="tabs"></div>
+        <div class="mainCard" id="body" style="border-top:none;border-radius:0 0 var(--border-radius) var(--border-radius)"></div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<script src="/assets/cz/data.js"></script>
+<script src="/assets/cz/app.js"></script>
+<script src="/assets/academy/academy.js"></script>
+<script>
+(function(){
+  const I = window.IXA;
+  let tab = "dash";
+  let step = 1;
+  let draft = null;      // 建立/編輯中的課程（深拷貝，儲存才寫回）
+  let cmtFilter = "all";
+
+  document.getElementById("stAvatar").innerHTML = I.avatarHTML(I.ME, 84);
+
+  const STATUS = { draft: ["draft", "草稿"], pending: ["pending", "審核中"], published: ["live", "已上架"], rejected: ["rejected", "退回修改"], off: ["off", "已下架"] };
+  const stTag = c => { const s = STATUS[c.status] || STATUS.draft; return '<span class="atg ' + s[0] + '">' + s[1] + '</span>'; };
+  const myCmts = () => I.db().comments.filter(m => { const c = I.getCourse(m.courseId); return c && c.creatorId === I.ME && !m.hidden; });
+  const unanswered = m => !m.replies.some(r => r.isCreator);
+
+  function sidebar(){
+    const mine = I.myCourses();
+    const students = mine.reduce((s, c) => s + I.courseStats(c.id).students, 0);
+    const rev = I.creatorRevenue(I.ME);
+    document.getElementById("sideMeta").innerHTML = '<i class="ri-book-2-line"></i> ' + mine.filter(c => c.status === "published").length + ' 堂上架課程 · ' + students.toLocaleString("zh-TW") + ' 位學生';
+    document.getElementById("sideStats").innerHTML =
+      '<div class="statBox"><b>' + mine.length + '</b><span>課程</span></div>' +
+      '<div class="statBox"><b>' + students.toLocaleString("zh-TW") + '</b><span>學生</span></div>' +
+      '<div class="statBox warn"><b style="color:#c35500">' + Math.round(rev.pending / 1000) + 'K</b><span>待撥款</span></div>';
+  }
+
+  function renderTabs(){
+    const pendCmts = myCmts().filter(unanswered).length;
+    const tabs = [
+      ["dash", "ri-dashboard-3-line", "總覽"],
+      ["courses", "ri-book-2-line", "我的課程"],
+      ["wizard", "ri-add-circle-line", draft && draft.id ? "編輯課程" : "建立課程"],
+      ["revenue", "ri-wallet-3-line", "收益"],
+      ["comments", "ri-chat-3-line", "留言管理" + (pendCmts ? ' <span class="navPend" style="background:#d80f0f;color:#fff;font-size:11px;font-weight:700;border-radius:999px;padding:0 6px;margin-left:4px">' + pendCmts + '</span>' : "")],
+    ];
+    document.getElementById("tabs").innerHTML = tabs.map(t =>
+      '<button class="sectionTab ' + (tab === t[0] ? 'active' : '') + '" data-t="' + t[0] + '"><i class="' + t[1] + '"></i> ' + t[2] + '</button>').join("");
+    document.querySelectorAll("#tabs .sectionTab").forEach(b => b.onclick = () => { tab = b.dataset.t; if (tab === "wizard" && !draft) newDraft(); render(); });
+  }
+
+  /* ================= 總覽 ================= */
+  function paneDash(){
+    const mine = I.myCourses();
+    const pub = mine.filter(c => c.status === "published");
+    const students = mine.reduce((s, c) => s + I.courseStats(c.id).students, 0);
+    const gross = mine.reduce((s, c) => s + I.courseStats(c.id).gross, 0);
+    const rev = I.creatorRevenue(I.ME);
+    const orders = I.db().orders.filter(o => { const c = I.getCourse(o.courseId); return c && c.creatorId === I.ME; }).sort((a, b) => b.createdAt - a.createdAt).slice(0, 5);
+    const cmts = myCmts().sort((a, b) => b.createdAt - a.createdAt).slice(0, 3);
+    return '<div class="sectionHeader"><div class="sectionHeaderLeft"><i class="ri-dashboard-3-line"></i> 創作者總覽</div>' +
+      '<span style="font-size:12.5px;color:#8a94a3">平台服務費：售價的 ' + Math.round(I.db().settings.defaultFee * 100) + '%（由平台向學生代收）</span></div>' +
+      '<div class="ax-statRow">' +
+        '<div class="ax-statBox"><div class="l"><i class="ri-book-2-line"></i> 課程</div><div class="v">' + mine.length + '</div><div class="d">' + pub.length + ' 已上架 · ' + mine.filter(c => c.status === "draft").length + ' 草稿 · ' + mine.filter(c => c.status === "pending").length + ' 審核中</div></div>' +
+        '<div class="ax-statBox"><div class="l"><i class="ri-group-line"></i> 總學生數</div><div class="v">' + students.toLocaleString("zh-TW") + '</div><div class="d">累積購課人次</div></div>' +
+        '<div class="ax-statBox"><div class="l"><i class="ri-money-dollar-circle-line"></i> 總銷售額</div><div class="v ax-money">' + I.money(gross) + '</div><div class="d">學生實付累計</div></div>' +
+        '<div class="ax-statBox accent"><div class="l"><i class="ri-hand-coin-line"></i> 待撥款收益</div><div class="v ax-money">' + I.money(rev.pending) + '</div><div class="d">已撥 ' + I.money(rev.paidOut) + '</div></div>' +
+      '</div>' +
+      '<div class="sectionHeader" style="margin-top:6px"><div class="sectionHeaderLeft"><i class="ri-shopping-cart-2-line"></i> 最近訂單</div><button class="btn btn-white btn-small" data-goto="revenue">收益明細 →</button></div>' +
+      (orders.length ? '<div class="tableWrap"><table class="ax-table"><thead><tr><th>時間</th><th>學生</th><th>課程</th><th style="text-align:right">金額</th></tr></thead><tbody>' +
+        orders.map(o => '<tr><td data-label="時間">' + I.timeAgo(o.createdAt) + '</td><td data-label="學生">' + I.esc(o.userName) + '</td><td data-label="課程" class="wrap">' + I.esc((I.getCourse(o.courseId) || {}).title || "") + '</td><td data-label="金額" style="text-align:right"><b>' + I.money(o.amount) + '</b></td></tr>').join("") +
+        '</tbody></table></div>' : '<p class="ax-muted" style="font-size:13px">近 30 天沒有新訂單。</p>') +
+      '<div class="sectionHeader" style="margin-top:18px"><div class="sectionHeaderLeft"><i class="ri-chat-3-line"></i> 最近留言</div><button class="btn btn-white btn-small" data-goto="comments">留言管理 →</button></div>' +
+      (cmts.length ? cmts.map(m => '<div class="ax-cmt">' + I.avatarHTML(m.userId, 34) + '<div class="cbody"><div class="ch"><span class="cn">' + I.esc(m.userName) + '</span>' + (unanswered(m) ? '<span class="atg pending">待回覆</span>' : '<span class="atg paid">已回覆</span>') + '<span class="cd">' + I.timeAgo(m.createdAt) + ' · ' + I.esc((I.getCourse(m.courseId) || {}).title || "") + '</span></div><div class="ct">' + I.esc(m.text) + '</div></div></div>').join("") : '<p class="ax-muted" style="font-size:13px">目前沒有留言。</p>');
+  }
+
+  /* ================= 我的課程 ================= */
+  function paneCourses(){
+    const mine = I.myCourses();
+    return '<div class="sectionHeader"><div class="sectionHeaderLeft"><i class="ri-book-2-line"></i> 我的課程</div>' +
+      '<button class="btn btn-small" id="addC2"><i class="ri-add-line"></i> 建立課程</button></div>' +
+      (mine.length ? mine.map(c => {
+        const st = I.courseStats(c.id);
+        const income = Math.round(st.gross * (1 - I.feeRateFor(c)));
+        return '<div class="ax-row">' +
+          '<div class="thumb" style="' + I.covStyle(c) + '"><i class="' + c.icon + '"></i></div>' +
+          '<div class="rmain"><div class="rt">' + I.esc(c.title) + ' ' + stTag(c) + (c.featured ? '<span class="atg featured"><i class="ri-star-fill"></i> 精選</span>' : '') + '</div>' +
+          '<div class="rs">' + (c.free ? "免費課程" : I.money(c.price) + (c.salePrice ? "（優惠 " + I.money(c.salePrice) + "）" : "")) + ' · ' + st.students.toLocaleString("zh-TW") + ' 人購買 · 收入 ' + I.money(income) + (st.completion ? ' · 完成率 ' + Math.round(st.completion * 100) + '%' : '') + ' · 更新於 ' + I.dfull(c.updatedAt) + '</div>' +
+          (c.status === "rejected" && c.rejectReason ? '<div class="rejReason"><i class="ri-error-warning-line"></i> 退回原因：' + I.esc(c.rejectReason) + '</div>' : '') + '</div>' +
+          '<div class="racts">' +
+            '<button class="btn btn-white btn-small" data-edit="' + c.id + '"><i class="ri-edit-line"></i> 編輯</button>' +
+            '<a class="btn btn-white btn-small" href="/course?id=' + c.id + '"><i class="ri-eye-line"></i> 預覽</a>' +
+            ((c.status === "draft" || c.status === "rejected") ? '<button class="btn btn-small" data-submit="' + c.id + '"><i class="ri-send-plane-line"></i> 送出審核</button>' : '') +
+          '</div></div>';
+      }).join("") : '<p class="ax-muted">還沒有課程，點右上角建立第一堂課。</p>');
+  }
+
+  /* ================= 建立課程精靈 ================= */
+  const COVERS = [["ri-bar-chart-box-line","#0182fd"],["ri-file-user-line","#1d9e75"],["ri-question-answer-line","#c35500"],["ri-lightbulb-flash-line","#7a4ddb"],["ri-palette-line","#db2777"],["ri-bank-line","#1861a8"],["ri-code-s-slash-line","#0f766e"],["ri-table-line","#1a8a35"]];
+  function newDraft(){
+    step = 1;
+    draft = { id: "", title: "", subtitle: "", intro: "", icon: COVERS[0][0], color: COVERS[0][1], trailer: "",
+      careers: [], skills: [], grades: [], stages: [], outcomes: [], level: "入門", hours: 4,
+      free: false, price: 0, salePrice: 0, saleEnd: 0,
+      hasMaterials: true, hasHomework: false, resumeArtifact: false, hasQA: true,
+      fitFor: [""], notFitFor: [""], gains: [""], jobTypes: [""], artifacts: [], pairWith: [], faq: [], sections: [] };
+  }
+  function loadDraft(id){
+    const c = I.getCourse(id);
+    draft = JSON.parse(JSON.stringify(c));
+    ["fitFor","notFitFor","gains","jobTypes"].forEach(k => { if (!draft[k] || !draft[k].length) draft[k] = [""]; });
+    step = 1;
+  }
+  const chipPick = (key, list, labelOf) => '<div class="ax-tagPick">' + list.map(x => {
+    const k = x.key || x, on = draft[key].includes(k);
+    return '<span class="ax-chip ' + (on ? "on" : "") + '" data-pick="' + key + '|' + k + '">' + (on ? '<i class="ri-check-line"></i> ' : '') + (labelOf ? labelOf(x) : x) + '</span>';
+  }).join("") + '</div>';
+  const listEdit = (key, ph) => '<div class="ax-listEdit" data-list="' + key + '">' +
+    draft[key].map((v, i) => '<div class="le"><input class="input" data-li="' + key + '|' + i + '" value="' + I.esc(v) + '" placeholder="' + ph + '"><button class="ax-iconBtn" data-lrm="' + key + '|' + i + '" title="刪除"><i class="ri-delete-bin-line"></i></button></div>').join("") +
+    '<button class="btn btn-ghost btn-small" data-ladd="' + key + '" style="align-self:flex-start"><i class="ri-add-line"></i> 新增一項</button></div>';
+
+  function wizStep1(){
+    return '<label class="f">課程名稱 *</label><input class="input" data-f="title" value="' + I.esc(draft.title) + '" placeholder="例：零基礎商業分析實習準備課">' +
+      '<label class="f">課程副標</label><input class="input" data-f="subtitle" value="' + I.esc(draft.subtitle) + '" placeholder="一句話說明學生會得到什麼">' +
+      '<label class="f">課程介紹 *</label><textarea class="textArea" data-f="intro" rows="4" placeholder="這堂課解決什麼問題、怎麼教、學完會有什麼不同">' + I.esc(draft.intro) + '</textarea>' +
+      '<label class="f">課程封面</label><div class="ax-coverPick">' + COVERS.map(cv => '<div class="ax-coverOpt ' + (draft.icon === cv[0] && draft.color === cv[1] ? 'on' : '') + '" data-cov="' + cv[0] + '|' + cv[1] + '" style="background:linear-gradient(135deg,' + cv[1] + ',' + cv[1] + 'cc)"><i class="' + cv[0] + '"></i></div>').join("") + '</div>' +
+      '<div class="wizNote">正式平台可上傳封面圖；demo 以圖示＋色系代替。</div>' +
+      '<label class="f">課程預告影片 <small>（選填，YouTube／Vimeo 連結）</small></label><input class="input" data-f="trailer" value="' + I.esc(draft.trailer || "") + '" placeholder="https://youtube.com/…">' +
+      '<label class="f">職涯方向標籤 *<small>（對應職缺推薦；可複選）</small></label>' + chipPick("careers", I.CAREERS, x => x.label) +
+      '<label class="f">技能標籤 <small>（逗號分隔）</small></label><input class="input" data-f="skillsCsv" value="' + I.esc((draft.skills || []).join("、")) + '" placeholder="Excel、SQL、履歷">' +
+      '<label class="f">適合年級</label>' + chipPick("grades", I.GRADES) +
+      '<label class="f">適合求職階段</label>' + chipPick("stages", I.STAGES, x => x.label) +
+      '<div class="row2"><div><label class="f">課程難度</label><select class="input" data-f="level">' + ["入門","入門–進階","進階"].map(l => '<option' + (draft.level === l ? ' selected' : '') + '>' + l + '</option>').join("") + '</select></div>' +
+      '<div><label class="f">預估學習時間（小時）</label><input class="input" type="number" min="0.5" step="0.5" data-f="hours" value="' + draft.hours + '"></div></div>';
+  }
+  function wizStep2(){
+    return '<p style="font-size:13px;color:#8a94a3;margin:0 0 4px">這區是 InternX Academy 跟一般課程平台不一樣的地方：告訴學生「這堂課在職涯上有什麼用」。</p>' +
+      '<label class="f">適合誰 *</label>' + listEdit("fitFor", "例：想申請 BA 實習的大二～大四學生") +
+      '<label class="f">不適合誰</label>' + listEdit("notFitFor", "例：已有一年以上實務經驗") +
+      '<label class="f">學完可以獲得什麼 *</label>' + listEdit("gains", "例：完成一份可放進履歷的分析專案") +
+      '<label class="f">可對應哪些職缺</label>' + listEdit("jobTypes", "例：商業分析實習生") +
+      '<label class="f">可產出的履歷成果</label>' +
+      '<div class="row2"><input class="input" data-f="artT" placeholder="成果名稱，例：分析專案報告" value="' + I.esc(draft.artifacts[0] ? draft.artifacts[0].t : "") + '"><input class="input" data-f="artD" placeholder="說明，例：10 頁報告可放作品集" value="' + I.esc(draft.artifacts[0] ? draft.artifacts[0].d : "") + '"></div>' +
+      '<label class="f">建議搭配的服務</label><div class="ax-listEdit" id="pairEdit">' +
+        (draft.pairWith || []).map((p, i) => '<div class="le"><select class="input" style="max-width:110px" data-pw-type="' + i + '">' + [["consult","1:1 諮詢"],["event","職涯活動"],["job","實習職缺"],["course","延伸課程"]].map(o => '<option value="' + o[0] + '"' + (p.type === o[0] ? ' selected' : '') + '>' + o[1] + '</option>').join("") + '</select><input class="input" data-pw-title="' + i + '" value="' + I.esc(p.title) + '" placeholder="顯示名稱"><button class="ax-iconBtn" data-pw-rm="' + i + '"><i class="ri-delete-bin-line"></i></button></div>').join("") +
+        '<button class="btn btn-ghost btn-small" id="pairAdd" style="align-self:flex-start"><i class="ri-add-line"></i> 新增搭配</button></div>' +
+      '<label class="f">課程特性</label><div class="ax-tagPick">' +
+        [["hasMaterials","提供教材下載"],["hasHomework","含課後作業"],["resumeArtifact","可加入履歷作品"],["hasQA","開放留言 Q&A"]].map(o =>
+          '<span class="ax-chip ' + (draft[o[0]] ? "on" : "") + '" data-flag="' + o[0] + '">' + (draft[o[0]] ? '<i class="ri-check-line"></i> ' : '') + o[1] + '</span>').join("") + '</div>';
+  }
+  function wizStep3(){
+    const fee = I.feeRateFor(Object.assign({ id: draft.id || "new", creatorId: I.ME }, draft));
+    return '<label class="f">收費方式</label><div class="ax-tagPick">' +
+      '<span class="ax-chip ' + (!draft.free ? "on" : "") + '" data-freeopt="0">' + (!draft.free ? '<i class="ri-check-line"></i> ' : '') + '付費課程</span>' +
+      '<span class="ax-chip ' + (draft.free ? "on" : "") + '" data-freeopt="1">' + (draft.free ? '<i class="ri-check-line"></i> ' : '') + '免費公開課</span></div>' +
+      (!draft.free ?
+        '<div class="row3"><div><label class="f">原價（NT$）*</label><input class="input" type="number" min="0" data-f="price" value="' + (draft.price || "") + '"></div>' +
+        '<div><label class="f">優惠價 <small>（選填）</small></label><input class="input" type="number" min="0" data-f="salePrice" value="' + (draft.salePrice || "") + '"></div>' +
+        '<div><label class="f">優惠截止日</label><input class="input" type="date" data-f="saleEndDate" value="' + (draft.saleEnd ? new Date(draft.saleEnd).toISOString().slice(0, 10) : "") + '"></div></div>' +
+        '<div class="ax-orderBox" style="margin-top:16px"><div class="kv"><span>平台服務費（代收代付）</span><b>' + Math.round(fee * 100) + '%</b></div>' +
+        '<div class="kv"><span>學生付 ' + I.money(draft.salePrice || draft.price || 0) + ' 時，你實拿</span><b style="color:var(--theme-color-dark)">' + I.money(Math.round((draft.salePrice || draft.price || 0) * (1 - fee))) + '</b></div>' +
+        '<div class="kv" style="font-size:12px;color:#8a94a3"><span>服務費率由平台設定（預設 ' + Math.round(I.db().settings.defaultFee * 100) + '%，可由平台個別調整）；每筆訂單自動建立分潤紀錄，次月結算撥款。</span></div></div>'
+        : '<div class="ax-flowNote" style="margin-top:14px"><i class="ri-information-line"></i> 免費課程不收服務費，常用來當「體驗課」導流到付費課程與 1:1 諮詢。</div>');
+  }
+  function wizStep4(){
+    return '<p style="font-size:13px;color:#8a94a3;margin:0 0 12px"><i class="ri-drag-move-2-line"></i> 拖曳章節／單元排序；影片與教材上傳在 demo 以模擬按鈕代替（正式平台接影音與檔案儲存服務）。</p>' +
+      '<div id="secWrap">' + draft.sections.map((s, si) =>
+        '<div class="ax-secEdit" draggable="true" data-sec="' + si + '">' +
+          '<div class="ax-secEditHead"><i class="ri-draggable ax-drag"></i><span style="font-size:12px;color:#8a94a3;font-weight:700">第 ' + (si + 1) + ' 章</span>' +
+          '<input class="input" data-sect="' + si + '" value="' + I.esc(s.title) + '" placeholder="章節名稱">' +
+          '<button class="ax-iconBtn" data-secrm="' + si + '" title="刪除章節"><i class="ri-delete-bin-line"></i></button></div>' +
+          s.lessons.map((l, li) =>
+            '<div class="ax-lsEdit" draggable="true" data-lsi="' + si + '|' + li + '">' +
+              '<i class="ri-draggable ax-drag"></i>' +
+              '<input class="input lsTitle" data-lst="' + si + '|' + li + '" value="' + I.esc(l.title) + '" placeholder="單元名稱">' +
+              '<input class="input lsMin" type="number" min="1" data-lsm="' + si + '|' + li + '" value="' + l.mins + '" title="分鐘">' +
+              '<label class="ck"><input type="checkbox" data-lsp="' + si + '|' + li + '"' + (l.preview ? ' checked' : '') + '> 試看</label>' +
+              '<button class="btn btn-white btn-small upBtn' + (l.video ? ' ok' : '') + '" data-lsv="' + si + '|' + li + '"><i class="' + (l.video ? 'ri-checkbox-circle-line' : 'ri-video-upload-line') + '"></i> ' + (l.video ? '影片已上傳' : '上傳影片') + '</button>' +
+              '<button class="btn btn-white btn-small" data-lsmat="' + si + '|' + li + '"><i class="ri-attachment-2"></i> 教材(' + (l.materials || []).length + ')</button>' +
+              '<button class="ax-iconBtn" data-lsrm="' + si + '|' + li + '" title="刪除單元"><i class="ri-delete-bin-line"></i></button>' +
+            '</div>').join("") +
+          '<div class="ax-addRow"><button class="btn btn-ghost btn-small" data-lsadd="' + si + '"><i class="ri-add-line"></i> 新增單元</button></div>' +
+        '</div>').join("") + '</div>' +
+      '<button class="btn btn-white" id="secAdd" style="width:100%"><i class="ri-add-line"></i> 新增章節</button>';
+  }
+
+  function paneWizard(){
+    if (!draft) newDraft();
+    const steps = [[1, "基本資料"], [2, "職涯導向"], [3, "價格設定"], [4, "章節與教材"]];
+    return '<div class="sectionHeader"><div class="sectionHeaderLeft"><i class="ri-add-circle-line"></i> ' + (draft.id ? "編輯課程" : "建立課程") + (draft.title ? '：' + I.esc(draft.title) : "") + '</div>' +
+      (draft.id ? stTag(draft) : '<span class="atg draft">尚未儲存</span>') + '</div>' +
+      '<div class="ax-steps">' + steps.map(s => '<span class="ax-step ' + (step === s[0] ? 'cur' : (step > s[0] ? 'doneStep' : '')) + '" data-step="' + s[0] + '"><span class="n">' + (step > s[0] ? '<i class="ri-check-line"></i>' : s[0]) + '</span>' + s[1] + '</span>').join("") + '</div>' +
+      '<div class="ax-form">' + [wizStep1, wizStep2, wizStep3, wizStep4][step - 1]() + '</div>' +
+      '<div style="display:flex;gap:10px;margin-top:22px;flex-wrap:wrap">' +
+        (step > 1 ? '<button class="btn btn-white btn-small" id="wPrev"><i class="ri-arrow-left-line"></i> 上一步</button>' : '') +
+        (step < 4 ? '<button class="btn btn-small" id="wNext">下一步 <i class="ri-arrow-right-line"></i></button>' : '') +
+        '<span style="flex:1"></span>' +
+        '<button class="btn btn-white btn-small" id="wSave"><i class="ri-save-3-line"></i> 儲存草稿</button>' +
+        (draft.id ? '<a class="btn btn-white btn-small" href="/course?id=' + draft.id + '" target="_blank" rel="noopener"><i class="ri-eye-line"></i> 預覽</a>' : '') +
+        (step === 4 ? '<button class="btn btn-small" id="wSubmit" style="background:var(--complementary-color)"><i class="ri-send-plane-line"></i> 送出審核</button>' : '') +
+      '</div>';
+  }
+
+  function collectWizardInputs(){
+    document.querySelectorAll("[data-f]").forEach(el => {
+      const k = el.dataset.f, v = el.value;
+      if (k === "skillsCsv") draft.skills = v.split(/[、,，]/).map(s => s.trim()).filter(Boolean);
+      else if (k === "hours" || k === "price" || k === "salePrice") draft[k] = +v || 0;
+      else if (k === "saleEndDate") draft.saleEnd = v ? new Date(v + "T23:59:59").getTime() : 0;
+      else if (k === "artT" || k === "artD") { /* below */ }
+      else draft[k] = v;
+    });
+    const at = document.querySelector('[data-f="artT"]'), ad = document.querySelector('[data-f="artD"]');
+    if (at) draft.artifacts = at.value.trim() ? [{ t: at.value.trim(), d: (ad.value || "").trim() }] : [];
+    document.querySelectorAll("[data-li]").forEach(el => { const [k, i] = el.dataset.li.split("|"); draft[k][+i] = el.value; });
+    document.querySelectorAll("[data-pw-type]").forEach(el => draft.pairWith[+el.dataset.pwType].type = el.value);
+    document.querySelectorAll("[data-pw-title]").forEach(el => draft.pairWith[+el.dataset.pwTitle].title = el.value);
+    document.querySelectorAll("[data-sect]").forEach(el => draft.sections[+el.dataset.sect].title = el.value);
+    document.querySelectorAll("[data-lst]").forEach(el => { const [s, l] = el.dataset.lst.split("|"); draft.sections[+s].lessons[+l].title = el.value; });
+    document.querySelectorAll("[data-lsm]").forEach(el => { const [s, l] = el.dataset.lsm.split("|"); draft.sections[+s].lessons[+l].mins = Math.max(1, +el.value || 1); });
+    document.querySelectorAll("[data-lsp]").forEach(el => { const [s, l] = el.dataset.lsp.split("|"); draft.sections[+s].lessons[+l].preview = el.checked; });
+  }
+  function cleanLists(){
+    ["fitFor","notFitFor","gains","jobTypes"].forEach(k => draft[k] = draft[k].map(s => s.trim()).filter(Boolean));
+    draft.pairWith = (draft.pairWith || []).filter(p => p.title.trim()).map(p => Object.assign({}, p, {
+      href: p.href && p.href !== "#" ? p.href : ({ consult: "/creator", event: "/activities", job: "https://internx.me/zh-tw/dashboard/forum", course: "/academy" }[p.type] || "#"),
+      ext: p.type === "job",
+    }));
+  }
+  function saveDraft(silent){
+    collectWizardInputs(); cleanLists();
+    ["fitFor","notFitFor","gains","jobTypes"].forEach(k => { if (!draft[k].length) draft[k] = [""]; });
+    const saved = I.saveCourse(JSON.parse(JSON.stringify(Object.assign({}, draft, {
+      fitFor: draft.fitFor.filter(Boolean), notFitFor: draft.notFitFor.filter(Boolean),
+      gains: draft.gains.filter(Boolean), jobTypes: draft.jobTypes.filter(Boolean),
+      price: draft.free ? 0 : draft.price, status: draft.id ? undefined : "draft",
+    }))));
+    if (saved.status === undefined) saved.status = "draft";
+    draft.id = saved.id;
+    if (!silent) CZ.toast("草稿已儲存");
+    return saved;
+  }
+  function validateForSubmit(){
+    const errs = [];
+    if (!draft.title.trim()) errs.push("課程名稱");
+    if (!draft.intro.trim()) errs.push("課程介紹");
+    if (!draft.free && !(draft.price > 0)) errs.push("價格");
+    if (!draft.gains.filter(Boolean).length) errs.push("學完可以獲得什麼");
+    if (!draft.fitFor.filter(Boolean).length) errs.push("適合誰");
+    if (!draft.sections.length || !draft.sections.some(s => s.lessons.length)) errs.push("至少一章一單元");
+    return errs;
+  }
+
+  /* 拖曳排序（HTML5 DnD：章節之間、同章單元之間） */
+  let dragSec = null, dragLs = null;
+  function wireDnD(){
+    document.querySelectorAll("[data-sec]").forEach(el => {
+      el.addEventListener("dragstart", e => { if (e.target.closest("[data-lsi]")) return; dragSec = +el.dataset.sec; el.classList.add("dragging"); });
+      el.addEventListener("dragend", () => { dragSec = null; el.classList.remove("dragging"); });
+      el.addEventListener("dragover", e => e.preventDefault());
+      el.addEventListener("drop", e => {
+        e.preventDefault();
+        if (dragSec === null || dragLs) return;
+        const to = +el.dataset.sec;
+        if (to === dragSec) return;
+        collectWizardInputs();
+        const [m] = draft.sections.splice(dragSec, 1);
+        draft.sections.splice(to, 0, m);
+        render();
+      });
+    });
+    document.querySelectorAll("[data-lsi]").forEach(el => {
+      el.addEventListener("dragstart", e => { e.stopPropagation(); const [s, l] = el.dataset.lsi.split("|"); dragLs = { s: +s, l: +l }; el.classList.add("dragging"); });
+      el.addEventListener("dragend", () => { dragLs = null; el.classList.remove("dragging"); });
+      el.addEventListener("dragover", e => { e.preventDefault(); e.stopPropagation(); });
+      el.addEventListener("drop", e => {
+        e.preventDefault(); e.stopPropagation();
+        if (!dragLs) return;
+        const [s, l] = el.dataset.lsi.split("|").map(Number);
+        if (s !== dragLs.s) { CZ.toast("單元拖曳限同一章內；跨章請先刪除再新增"); dragLs = null; return; }
+        collectWizardInputs();
+        const arr = draft.sections[s].lessons;
+        const [m] = arr.splice(dragLs.l, 1);
+        arr.splice(l, 0, m);
+        render();
+      });
+    });
+  }
+
+  /* ================= 收益 ================= */
+  function paneRevenue(){
+    const mine = I.myCourses();
+    const rev = I.creatorRevenue(I.ME);
+    const monthRecs = rev.records.filter(r => r.paidAt > I.now() - 30 * 86400000);
+    const monthIncome = monthRecs.reduce((s, r) => s + r.creatorIncomeAmount, 0);
+    return '<div class="sectionHeader"><div class="sectionHeaderLeft"><i class="ri-wallet-3-line"></i> 收益</div>' +
+      '<span style="font-size:12.5px;color:#8a94a3">平台代收代付 · 次月 10 日結算撥款</span></div>' +
+      '<div class="ax-statRow">' +
+        '<div class="ax-statBox"><div class="l"><i class="ri-money-dollar-circle-line"></i> 累計收益</div><div class="v ax-money">' + I.money(rev.total) + '</div><div class="d">扣除平台服務費後</div></div>' +
+        '<div class="ax-statBox"><div class="l"><i class="ri-calendar-line"></i> 近 30 天</div><div class="v ax-money">' + I.money(monthIncome) + '</div><div class="d">' + monthRecs.length + ' 筆訂單</div></div>' +
+        '<div class="ax-statBox"><div class="l"><i class="ri-bank-line"></i> 已撥款</div><div class="v ax-money">' + I.money(rev.paidOut) + '</div><div class="d">匯入你的收款帳戶</div></div>' +
+        '<div class="ax-statBox accent"><div class="l"><i class="ri-hand-coin-line"></i> 待撥款</div><div class="v ax-money">' + I.money(rev.pending) + '</div><div class="d">下次結算撥付</div></div>' +
+      '</div>' +
+      '<div class="sectionHeader" style="margin-top:6px"><div class="sectionHeaderLeft"><i class="ri-book-2-line"></i> 各課程收益</div></div>' +
+      '<div class="tableWrap"><table class="ax-table"><thead><tr><th>課程</th><th>人數</th><th>總銷售</th><th>服務費</th><th style="text-align:right">你的收入</th></tr></thead><tbody>' +
+      mine.filter(c => c.status !== "draft").map(c => {
+        const st = I.courseStats(c.id), fee = I.feeRateFor(c);
+        return '<tr><td data-label="課程" class="wrap">' + I.esc(c.title) + '</td><td data-label="人數">' + st.students.toLocaleString("zh-TW") + '</td><td data-label="總銷售">' + I.money(st.gross) + '</td><td data-label="服務費">' + Math.round(fee * 100) + '%</td><td data-label="收入" style="text-align:right"><b style="color:var(--theme-color-dark)">' + I.money(Math.round(st.gross * (1 - fee))) + '</b></td></tr>';
+      }).join("") + '</tbody></table></div>' +
+      '<div class="sectionHeader" style="margin-top:18px"><div class="sectionHeaderLeft"><i class="ri-file-list-3-line"></i> 近 30 天分潤明細</div></div>' +
+      (rev.records.length ? '<div class="tableWrap"><table class="ax-table"><thead><tr><th>時間</th><th>課程</th><th>訂單金額</th><th>服務費</th><th>你的收入</th><th>撥款</th></tr></thead><tbody>' +
+        rev.records.slice().sort((a, b) => b.paidAt - a.paidAt).map(r =>
+          '<tr><td data-label="時間">' + I.timeAgo(r.paidAt) + '</td><td data-label="課程" class="wrap">' + I.esc((I.getCourse(r.courseId) || {}).title || "") + '</td><td data-label="金額">' + I.money(r.grossAmount) + '</td><td data-label="服務費">' + I.money(r.platformFeeAmount) + '</td><td data-label="收入"><b>' + I.money(r.creatorIncomeAmount) + '</b></td><td data-label="撥款">' + (r.payoutStatus === "paid" ? '<span class="atg paid">已撥款</span>' : '<span class="atg unpaid">待撥款</span>') + '</td></tr>').join("") +
+        '</tbody></table></div>' : '<p class="ax-muted" style="font-size:13px">近 30 天沒有分潤紀錄。</p>');
+  }
+
+  /* ================= 留言管理 ================= */
+  function paneComments(){
+    let list = myCmts().sort((a, b) => b.createdAt - a.createdAt);
+    if (cmtFilter === "un") list = list.filter(unanswered);
+    return '<div class="sectionHeader"><div class="sectionHeaderLeft"><i class="ri-chat-3-line"></i> 留言管理</div>' +
+      '<div class="ax-chips"><span class="ax-qf ' + (cmtFilter === "all" ? "on" : "") + '" data-cf="all">全部</span><span class="ax-qf ' + (cmtFilter === "un" ? "on" : "") + '" data-cf="un">待回覆</span></div></div>' +
+      (list.length ? list.map(m => {
+        const c = I.getCourse(m.courseId);
+        const lesson = I.lessonsOf(c).find(l => l.id === m.lessonId);
+        return '<div class="ax-cmt">' + I.avatarHTML(m.userId, 36) +
+          '<div class="cbody"><div class="ch"><span class="cn">' + I.esc(m.userName) + '</span>' +
+          (m.pinned ? '<span class="ax-pinBadge"><i class="ri-pushpin-line"></i> 置頂</span>' : '') +
+          (m.solved ? '<span class="ax-solvedBadge"><i class="ri-check-double-line"></i> 已解答</span>' : '') +
+          (unanswered(m) ? '<span class="atg pending">待回覆</span>' : '') +
+          '<span class="cd">' + I.timeAgo(m.createdAt) + ' · ' + I.esc(c.title) + (lesson ? ' · ' + I.esc(lesson.title) : '') + '</span></div>' +
+          '<div class="ct">' + I.esc(m.text) + '</div>' +
+          m.replies.map(r => '<div class="ax-reply">' + I.avatarHTML(r.userId, 28) + '<div><div class="rn">' + I.esc(r.userName) + (r.isCreator ? ' <span class="ax-pinBadge">講師</span>' : '') + '</div><div class="rt">' + I.esc(r.text) + '</div></div></div>').join("") +
+          '<div class="cacts">' +
+            '<button data-crep="' + m.id + '"><i class="ri-reply-line"></i> 回覆</button>' +
+            '<button data-cpin="' + m.id + '"><i class="ri-pushpin-line"></i> ' + (m.pinned ? '取消置頂' : '置頂') + '</button>' +
+            '<button data-csol="' + m.id + '"><i class="ri-check-double-line"></i> ' + (m.solved ? '取消已解答' : '標記已解答') + '</button>' +
+          '</div>' +
+          '<div class="ax-cmtInput" id="crepBox-' + m.id + '" style="display:none;margin-top:10px"><textarea class="textArea" rows="1" placeholder="以講師身分回覆…"></textarea><button class="btn btn-small" data-csend="' + m.id + '">回覆</button></div>' +
+          '</div></div>';
+      }).join("") : '<p class="ax-muted" style="font-size:13px;padding:10px 0">' + (cmtFilter === "un" ? "太棒了，沒有待回覆的留言。" : "還沒有留言。") + '</p>');
+  }
+
+  /* ================= render / wire ================= */
+  function render(){
+    sidebar(); renderTabs();
+    const panes = { dash: paneDash, courses: paneCourses, wizard: paneWizard, revenue: paneRevenue, comments: paneComments };
+    document.getElementById("body").innerHTML = '<div class="tabPane active" style="display:block">' + panes[tab]() + '</div>';
+    wire();
+  }
+  function wire(){
+    document.querySelectorAll("[data-goto]").forEach(b => b.onclick = () => { tab = b.dataset.goto; render(); });
+    const add2 = document.getElementById("addC2"); add2 && (add2.onclick = () => { newDraft(); tab = "wizard"; render(); });
+    document.querySelectorAll("[data-edit]").forEach(b => b.onclick = () => { loadDraft(b.dataset.edit); tab = "wizard"; render(); });
+    document.querySelectorAll("[data-submit]").forEach(b => b.onclick = () => {
+      I.submitReview(b.dataset.submit);
+      CZ.toast("已送出審核 —— 平台審核通過後自動上架");
+      render();
+    });
+    if (tab === "wizard") {
+      document.querySelectorAll("[data-step]").forEach(s => s.onclick = () => { collectWizardInputs(); step = +s.dataset.step; render(); });
+      const nx = document.getElementById("wNext"); nx && (nx.onclick = () => { collectWizardInputs(); step++; render(); });
+      const pv = document.getElementById("wPrev"); pv && (pv.onclick = () => { collectWizardInputs(); step--; render(); });
+      document.getElementById("wSave").onclick = () => { saveDraft(); render(); };
+      const sb = document.getElementById("wSubmit");
+      sb && (sb.onclick = () => {
+        collectWizardInputs(); cleanLists();
+        const errs = validateForSubmit();
+        if (errs.length) { CZ.toast("還缺：" + errs.join("、")); return; }
+        const saved = saveDraft(true);
+        I.submitReview(saved.id);
+        CZ.toast("已送出審核 —— 可在「我的課程」追蹤狀態");
+        draft = null; tab = "courses"; render();
+      });
+      // chips / flags / covers
+      document.querySelectorAll("[data-pick]").forEach(el => el.onclick = () => {
+        collectWizardInputs();
+        const [k, v] = el.dataset.pick.split("|");
+        const i = draft[k].indexOf(v);
+        i >= 0 ? draft[k].splice(i, 1) : draft[k].push(v);
+        render();
+      });
+      document.querySelectorAll("[data-flag]").forEach(el => el.onclick = () => { collectWizardInputs(); draft[el.dataset.flag] = !draft[el.dataset.flag]; render(); });
+      document.querySelectorAll("[data-cov]").forEach(el => el.onclick = () => { collectWizardInputs(); const [ic, co] = el.dataset.cov.split("|"); draft.icon = ic; draft.color = co; render(); });
+      document.querySelectorAll("[data-freeopt]").forEach(el => el.onclick = () => { collectWizardInputs(); draft.free = el.dataset.freeopt === "1"; render(); });
+      // list editors
+      document.querySelectorAll("[data-ladd]").forEach(el => el.onclick = () => { collectWizardInputs(); draft[el.dataset.ladd].push(""); render(); });
+      document.querySelectorAll("[data-lrm]").forEach(el => el.onclick = () => { collectWizardInputs(); const [k, i] = el.dataset.lrm.split("|"); draft[k].splice(+i, 1); if (!draft[k].length) draft[k] = [""]; render(); });
+      const pa = document.getElementById("pairAdd"); pa && (pa.onclick = () => { collectWizardInputs(); draft.pairWith.push({ type: "consult", title: "", href: "#" }); render(); });
+      document.querySelectorAll("[data-pw-rm]").forEach(el => el.onclick = () => { collectWizardInputs(); draft.pairWith.splice(+el.dataset.pwRm, 1); render(); });
+      // sections
+      const sa = document.getElementById("secAdd"); sa && (sa.onclick = () => { collectWizardInputs(); draft.sections.push({ id: "ns" + Date.now(), title: "", lessons: [] }); render(); });
+      document.querySelectorAll("[data-secrm]").forEach(el => el.onclick = () => { collectWizardInputs(); draft.sections.splice(+el.dataset.secrm, 1); render(); });
+      document.querySelectorAll("[data-lsadd]").forEach(el => el.onclick = () => { collectWizardInputs(); draft.sections[+el.dataset.lsadd].lessons.push({ id: "nl" + Date.now(), title: "", mins: 10, preview: false, materials: [] }); render(); });
+      document.querySelectorAll("[data-lsrm]").forEach(el => el.onclick = () => { collectWizardInputs(); const [s, l] = el.dataset.lsrm.split("|"); draft.sections[+s].lessons.splice(+l, 1); render(); });
+      document.querySelectorAll("[data-lsv]").forEach(el => el.onclick = () => { collectWizardInputs(); const [s, l] = el.dataset.lsv.split("|"); draft.sections[+s].lessons[+l].video = true; CZ.toast("影片上傳完成（demo 模擬；正式平台接影音儲存與轉檔）"); render(); });
+      document.querySelectorAll("[data-lsmat]").forEach(el => el.onclick = () => {
+        collectWizardInputs();
+        const [s, l] = el.dataset.lsmat.split("|");
+        const lesson = draft.sections[+s].lessons[+l];
+        CZ.modal('<h3>單元教材</h3>' +
+          (lesson.materials.length ? lesson.materials.map((m, i) => '<div class="ax-matRow"><div class="mi"><i class="' + (I.MAT_ICON[m.t] || "ri-file-3-line") + '"></i></div><div class="mt">' + I.esc(m.n) + '</div><button class="ax-iconBtn" data-matrm="' + i + '"><i class="ri-delete-bin-line"></i></button></div>').join("") : '<p class="ax-muted" style="font-size:13px">尚無教材</p>') +
+          '<div class="modalField" style="margin-top:14px"><b>新增教材（檔名）</b><input class="input" id="matName" placeholder="例：練習檔.xlsx" style="margin-top:6px"></div>' +
+          '<div style="display:flex;gap:10px;justify-content:flex-end"><button class="btn btn-white btn-small" onclick="CZ.closeModal()">完成</button><button class="btn btn-small" id="matAdd"><i class="ri-upload-2-line"></i> 模擬上傳</button></div>');
+        document.getElementById("matAdd").onclick = () => {
+          const n = document.getElementById("matName").value.trim();
+          if (!n) return;
+          lesson.materials.push({ n, t: (n.split(".").pop() || "").toLowerCase() });
+          CZ.closeModal(); CZ.toast("教材已加入"); render();
+        };
+        document.querySelectorAll("[data-matrm]").forEach(x => x.onclick = () => { lesson.materials.splice(+x.dataset.matrm, 1); CZ.closeModal(); render(); });
+      });
+      wireDnD();
+    }
+    if (tab === "comments") {
+      document.querySelectorAll("[data-cf]").forEach(el => el.onclick = () => { cmtFilter = el.dataset.cf; render(); });
+      document.querySelectorAll("[data-crep]").forEach(el => el.onclick = () => {
+        const box = document.getElementById("crepBox-" + el.dataset.crep);
+        box.style.display = box.style.display === "none" ? "flex" : "none";
+        box.querySelector("textarea").focus();
+      });
+      document.querySelectorAll("[data-csend]").forEach(el => el.onclick = () => {
+        const box = document.getElementById("crepBox-" + el.dataset.csend);
+        const txt = box.querySelector("textarea").value.trim();
+        if (!txt) return;
+        I.addReply(el.dataset.csend, txt, true);
+        CZ.toast("已回覆（學生會收到通知）"); render();
+      });
+      document.querySelectorAll("[data-cpin]").forEach(el => el.onclick = () => { const m = I.db().comments.find(x => x.id === el.dataset.cpin); I.setCmtFlag(m.id, "pinned", !m.pinned); render(); });
+      document.querySelectorAll("[data-csol]").forEach(el => el.onclick = () => { const m = I.db().comments.find(x => x.id === el.dataset.csol); I.setCmtFlag(m.id, "solved", !m.solved); render(); });
+    }
+  }
+  document.getElementById("newCourseBtn").onclick = () => { newDraft(); tab = "wizard"; render(); };
+
+  if (I.qs("tab")) tab = I.qs("tab");
+  if (tab === "wizard") newDraft();
+  render();
+})();
+</script>
+</body>
+</html>

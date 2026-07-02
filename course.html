@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>課程介紹｜職涯學院 · InternX 實習通</title>
+<link rel="icon" href="/assets/cz/favicon.png" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" />
+<link rel="stylesheet" href="/assets/cz/app.css" />
+<link rel="stylesheet" href="/assets/academy/academy.css" />
+<style>
+  .metaRow { display: flex; gap: 14px; flex-wrap: wrap; font-size: 13px; color: #5b6b7e; margin-top: 12px; }
+  .metaRow span { display: inline-flex; align-items: center; gap: 5px; }
+  .metaRow i { color: #9aa7b8; }
+  .statusBanner { border-radius: 12px; padding: 12px 16px; font-size: 13.5px; margin-bottom: 16px; display: flex; gap: 9px; align-items: flex-start; }
+  .statusBanner.pending { background: #fff4d6; border: 1px solid #f0dca8; color: #7a5c00; }
+  .statusBanner.draft { background: #f0f1f4; border: 1px solid #e2e7ef; color: #5b6b7e; }
+  .statusBanner.rejected { background: #fdeaea; border: 1px solid #f6d2d2; color: #a33; }
+</style>
+</head>
+<body data-page="course" data-nav="academy">
+
+<main>
+  <div class="cz-container ax-page" id="page"></div>
+</main>
+
+<script src="/assets/cz/data.js"></script>
+<script src="/assets/cz/app.js"></script>
+<script src="/assets/academy/academy.js"></script>
+<script>
+(function(){
+  const I = window.IXA;
+  const c = I.getCourse(I.qs("id"));
+  if (!c) { location.replace("/academy"); return; }
+  document.title = c.title + "｜職涯學院 · InternX 實習通";
+  const u = I.USERS[c.creatorId] || { name: "講師" };
+  const st = I.courseStats(c.id);
+  const lessons = I.lessonsOf(c);
+  const mats = I.materialsOf(c);
+  const enrolled = () => I.isEnrolled(c.id);
+
+  /* ---------- 區塊 render ---------- */
+  const careersHTML = (c.careers.length ? c.careers.map(k => I.careerOf(k)) : [{label:"全職涯方向", icon:"ri-compass-3-line"}])
+    .map(x => '<span class="ax-miniTag"><i class="'+x.icon+'" style="margin-right:3px"></i>'+x.label+'</span>').join("");
+
+  function statusBanner(){
+    if (c.status === "published") return "";
+    const map = { pending: ["ri-time-line", "此課程正在審核中，尚未公開上架 —— 這是創作者預覽畫面。"], draft: ["ri-draft-line", "此課程為草稿，尚未送審 —— 這是創作者預覽畫面。"], rejected: ["ri-close-circle-line", "此課程被退回修改：" + I.esc(c.rejectReason || "") + "（創作者預覽畫面）"], off: ["ri-eye-off-line", "此課程已下架。"] };
+    const m = map[c.status] || map.draft;
+    return '<div class="statusBanner '+c.status+'"><i class="'+m[0]+'"></i><div>'+m[1]+'</div></div>';
+  }
+
+  function secHTML(s, idx){
+    const mins = s.lessons.reduce((t,l)=>t+l.mins,0);
+    return '<div class="ax-sec'+(idx===0?' open':'')+'">' +
+      '<div class="ax-secHead" data-acc><b>'+I.esc(s.title)+'</b><span class="sm">'+s.lessons.length+' 單元 · '+mins+' 分鐘</span><i class="ri-arrow-down-s-line tw"></i></div>' +
+      '<div class="ax-lessons">' + s.lessons.map(l => {
+        const done = I.prog(c.id).watched[l.id];
+        const canPlay = enrolled() || l.preview;
+        const icon = done ? "ri-checkbox-circle-fill" : (canPlay ? "ri-play-circle-line" : "ri-lock-line");
+        const inner = '<i class="li '+icon+'"></i><span class="lt">'+I.esc(l.title)+'</span>' +
+          (l.preview && !enrolled() ? '<span class="prev">免費試看</span>' : "") +
+          (l.materials.length ? '<i class="ri-attachment-2" style="color:#b5c0d0" title="附教材"></i>' : "") +
+          '<span class="lm">'+l.mins+' 分</span>';
+        return canPlay
+          ? '<a class="ax-lsRow'+(done?' done':'')+'" href="/classroom?id='+c.id+'&lesson='+l.id+'">'+inner+'</a>'
+          : '<div class="ax-lsRow">'+inner+'</div>';
+      }).join("") + '</div></div>';
+  }
+
+  const PAIR_STYLE = {
+    consult: ["ri-user-voice-line", "#ede7fb", "#6a3fc0", "1:1 諮詢"],
+    event:   ["ri-calendar-event-line", "#fff4d6", "#9a7400", "職涯活動"],
+    job:     ["ri-briefcase-line", "#deefff", "#004aad", "實習職缺"],
+    course:  ["ri-graduation-cap-line", "#e4f9e8", "#1a8a35", "延伸課程"],
+  };
+  function pairHTML(p){
+    const s = PAIR_STYLE[p.type] || PAIR_STYLE.course;
+    return '<a class="ax-pair" href="'+p.href+'"'+(p.ext?' target="_blank" rel="noopener"':'')+'>' +
+      '<div class="pi" style="background:'+s[1]+';color:'+s[2]+'"><i class="'+s[0]+'"></i></div>' +
+      '<div><div class="pk">'+s[3]+'</div><div class="pt">'+I.esc(p.title)+'</div></div></a>';
+  }
+  // 相關課程：標籤重疊自動推薦（PRD 推薦模組的簡化版）
+  const related = I.published().filter(x => x.id !== c.id &&
+      (x.careers.some(k => c.careers.includes(k)) || (x.skills||[]).some(k => (c.skills||[]).includes(k))))
+    .slice(0, 2).map(x => ({ type: "course", title: x.title, href: "/course?id=" + x.id }));
+
+  function commentsHTML(){
+    const list = I.commentsOf(c.id).slice(0, 3);
+    if (!list.length) return '<p class="ax-muted" style="font-size:13.5px">還沒有留言 —— 購課後可以在教室對每個單元發問。</p>';
+    return list.map(m => {
+      const lesson = lessons.find(l => l.id === m.lessonId);
+      return '<div class="ax-cmt">' + I.avatarHTML(m.userId, 36) +
+        '<div class="cbody"><div class="ch"><span class="cn">'+I.esc(m.userName)+'</span>' +
+        (m.pinned ? '<span class="ax-pinBadge"><i class="ri-pushpin-line"></i> 講師置頂</span>' : "") +
+        (m.solved ? '<span class="ax-solvedBadge"><i class="ri-check-double-line"></i> 已解答</span>' : "") +
+        '<span class="cd">'+I.timeAgo(m.createdAt)+(lesson ? " · " + I.esc(lesson.title) : "")+'</span></div>' +
+        '<div class="ct">'+I.esc(m.text)+'</div>' +
+        m.replies.map(r => '<div class="ax-reply">'+I.avatarHTML(r.userId, 30)+'<div><div class="rn">'+I.esc(r.userName)+(r.isCreator?' <span class="ax-pinBadge">講師</span>':'')+' <span class="cd">'+I.timeAgo(r.createdAt)+'</span></div><div class="rt">'+I.esc(r.text)+'</div></div></div>').join("") +
+        '</div></div>';
+    }).join("");
+  }
+
+  function buyCardHTML(){
+    const p = I.currentPrice(c);
+    const saleDays = I.onSale(c) ? Math.ceil((c.saleEnd - I.now()) / 86400000) : 0;
+    const pct = I.coursePct(c.id);
+    let cta;
+    if (enrolled()) {
+      cta = '<div class="ax-enrolledBox"><div class="eb1"><i class="ri-checkbox-circle-fill"></i> 你已擁有這堂課</div>' +
+        '<div style="display:flex;align-items:center;gap:9px;margin-top:9px"><div class="pbar" style="flex:1"><i style="width:'+pct+'%"></i></div><span style="font-size:12px;color:#5b6b7e;font-weight:600">'+pct+'%</span></div></div>' +
+        '<div class="ax-buyBtns"><a class="btn btn-block" href="/classroom?id='+c.id+'"><i class="ri-play-circle-line"></i> '+(pct>0?"繼續上課":"開始上課")+'</a>' +
+        '<a class="btn btn-white btn-block" href="/my-courses"><i class="ri-book-marked-line"></i> 我的課程</a></div>';
+    } else {
+      cta = '<div class="ax-buyPrice">' + (p === 0 ? '<span class="now freeP">免費</span>' : '<span class="now">'+I.money(p)+'</span>' + (I.onSale(c) ? '<span class="was">'+I.money(c.price)+'</span>' : "")) + '</div>' +
+        (I.onSale(c) ? '<div class="ax-saleNote"><i class="ri-timer-flash-line"></i> 優惠倒數 '+saleDays+' 天（'+I.dfull(c.saleEnd)+' 截止）</div>' : "") +
+        '<div class="ax-buyBtns">' +
+          '<button class="btn btn-block" id="buyBtn"><i class="'+(p===0?"ri-user-add-line":"ri-shopping-cart-2-line")+'"></i> '+(p===0?"免費報名":"立即購買")+'</button>' +
+          '<button class="btn btn-white btn-block" id="favBtn"><i class="'+(I.isFav(c.id)?"ri-heart-fill":"ri-heart-line")+'" style="color:'+(I.isFav(c.id)?"#e0245e":"inherit")+'"></i> '+(I.isFav(c.id)?"已收藏":"收藏課程")+'</button>' +
+        '</div>';
+    }
+    return '<div class="ax-buyCard"><div class="ax-buyCover" style="'+I.covStyle(c)+'"><i class="'+c.icon+'"></i></div><div class="ax-buyBody">' + cta +
+      '<div class="ax-includes"><ul>' +
+        '<li><i class="ri-time-line"></i>' + c.hours + ' 小時課程內容（' + lessons.length + ' 個單元）</li>' +
+        (mats.length ? '<li><i class="ri-folder-download-line"></i>' + mats.length + ' 份教材，可重複下載</li>' : "") +
+        (c.hasHomework ? '<li><i class="ri-edit-box-line"></i>課後作業＋詳解</li>' : "") +
+        (c.hasQA ? '<li><i class="ri-question-answer-line"></i>單元留言區，講師固定回覆</li>' : "") +
+        (c.resumeArtifact ? '<li><i class="ri-file-user-line"></i>學完產出可放履歷的成果</li>' : "") +
+        '<li><i class="ri-infinity-line"></i>購買後永久觀看，更新免費</li>' +
+      '</ul></div>' +
+      (p > 0 ? '<p style="font-size:11.5px;color:#9aa7b8;margin:12px 0 0;line-height:1.6"><i class="ri-shield-check-line"></i> 款項由實習通平台代收，課程正常提供後撥付創作者。</p>' : "") +
+      '</div></div>';
+  }
+
+  /* ---------- 組頁 ---------- */
+  function render(){
+    document.getElementById("page").innerHTML =
+      '<div class="ax-crumb"><a href="/academy"><i class="ri-graduation-cap-line"></i> 職涯學院</a><i class="ri-arrow-right-s-line"></i><span>'+I.esc(c.title)+'</span></div>' +
+      statusBanner() +
+      '<div class="ax-detailGrid"><div>' +
+
+      '<div class="ax-hero">' +
+        '<div class="ax-miniTags">'+careersHTML+(c.featured?'<span class="atg featured"><i class="ri-star-fill"></i> 平台精選</span>':'')+'</div>' +
+        '<h1>'+I.esc(c.title)+'</h1>' +
+        '<p class="ax-subT">'+I.esc(c.subtitle)+'</p>' +
+        '<div class="metaRow">' +
+          '<span><i class="ri-signal-tower-line"></i>'+c.level+'</span>' +
+          '<span><i class="ri-time-line"></i>'+c.hours+' 小時</span>' +
+          '<span><i class="ri-user-3-line"></i>適合 '+I.gradeRange(c)+'</span>' +
+          '<span><i class="ri-group-line"></i>'+st.students.toLocaleString("zh-TW")+' 人已購</span>' +
+          (st.completion ? '<span><i class="ri-checkbox-circle-line"></i>完成率 '+Math.round(st.completion*100)+'%</span>' : "") +
+        '</div>' +
+        '<div class="ax-creatorLine">'+I.avatarHTML(c.creatorId, 44)+'<div><div class="nm">'+I.esc(u.name)+' <span class="profileBadgePillGold profileBadgePillCompact" style="margin-left:4px"><span class="pillEmoji"><i class="ri-quill-pen-line"></i></span><span class="pillLabel">認證創作者</span></span></div><div class="ttl">'+I.esc(c.creatorTitle)+'</div></div>' +
+        '<a class="btn btn-white btn-small" href="/creator" style="margin-left:auto">講師主頁</a></div>' +
+      '</div>' +
+
+      '<div class="ax-block"><h2><i class="ri-flag-2-line"></i> 學完可以獲得什麼</h2><div class="ax-gain"><ul>' +
+        c.gains.map(g => '<li><i class="ri-checkbox-circle-fill"></i><span>'+I.esc(g)+'</span></li>').join("") +
+      '</ul></div></div>' +
+
+      '<div class="ax-block"><h2><i class="ri-book-open-line"></i> 課程簡介</h2><p>'+I.esc(c.intro)+'</p></div>' +
+
+      '<div class="ax-block"><h2><i class="ri-user-search-line"></i> 這堂課適合誰</h2><div class="ax-fit2">' +
+        '<div class="ax-fitBox yes"><h4><i class="ri-thumb-up-line"></i> 適合你，如果</h4><ul>'+c.fitFor.map(f=>'<li><i class="ri-check-line"></i><span>'+I.esc(f)+'</span></li>').join("")+'</ul></div>' +
+        '<div class="ax-fitBox no"><h4><i class="ri-hand-coin-line"></i> 先不用買，如果</h4><ul>'+(c.notFitFor.length?c.notFitFor.map(f=>'<li><i class="ri-arrow-right-line"></i><span>'+I.esc(f)+'</span></li>').join(""):'<li><i class="ri-arrow-right-line"></i><span>本課程無特別限制</span></li>')+'</ul></div>' +
+      '</div></div>' +
+
+      '<div class="ax-block"><h2><i class="ri-briefcase-4-line"></i> 職涯用途</h2>' +
+        '<div class="ax-tagGroup"><div class="gl"><i class="ri-focus-3-line"></i> 對應職缺類型</div><div class="ax-miniTags">'+c.jobTypes.map(j=>'<span class="ax-miniTag">'+I.esc(j)+'</span>').join("")+'</div></div>' +
+        '<div class="ax-tagGroup"><div class="gl"><i class="ri-tools-line"></i> 對應技能</div><div class="ax-miniTags">'+(c.skills||[]).map(s=>'<span class="ax-miniTag skill">'+I.esc(s)+'</span>').join("")+'</div></div>' +
+        '<div class="ax-tagGroup"><div class="gl"><i class="ri-route-line"></i> 適合的求職階段</div><div class="ax-miniTags">'+c.stages.map(k=>'<span class="ax-miniTag skill">'+I.stageOf(k).label+'</span>').join("")+'</div></div>' +
+        '<div class="ax-tagGroup"><div class="gl"><i class="ri-medal-line"></i> 學習成果</div><div class="ax-miniTags">'+c.outcomes.map(k=>{const o=I.outcomeOf(k);return '<span class="ax-miniTag"><i class="'+o.icon+'" style="margin-right:3px"></i>'+o.label+'</span>';}).join("")+'</div></div>' +
+      '</div>' +
+
+      (c.artifacts.length ? '<div class="ax-block"><h2><i class="ri-file-user-line"></i> 可產出的履歷成果</h2>' +
+        c.artifacts.map(a=>'<div class="ax-artifact"><div class="ai"><i class="ri-award-line"></i></div><div><div class="at">'+I.esc(a.t)+'</div><div class="ad">'+I.esc(a.d)+'</div></div></div>').join("") +
+        '<p style="font-size:12.5px;color:#8a94a3;margin-top:10px"><i class="ri-information-line"></i> 完課後可一鍵加入你的實習通個人頁與職涯地圖。</p></div>' : "") +
+
+      '<div class="ax-block"><h2><i class="ri-list-check-2"></i> 課程章節</h2>' +
+        '<p style="font-size:12.5px;color:#8a94a3;margin:-6px 0 12px">'+c.sections.length+' 章 · '+lessons.length+' 單元 · 共 '+c.hours+' 小時'+(enrolled()?"":" · 標「免費試看」的單元不用購買就能看")+'</p>' +
+        c.sections.map(secHTML).join("") + '</div>' +
+
+      (mats.length ? '<div class="ax-block"><h2><i class="ri-folder-download-line"></i> 教材清單</h2>' +
+        mats.map(m => '<div class="ax-matRow"><div class="mi"><i class="'+(I.MAT_ICON[m.t]||"ri-file-3-line")+'"></i></div><div class="mt">'+I.esc(m.n)+'<div class="ms" style="font-weight:400">'+I.esc(m.lessonTitle)+'</div></div>' +
+          (enrolled() ? '<button class="btn btn-white btn-small" data-dl="'+I.esc(m.n)+'"><i class="ri-download-2-line"></i> 下載</button>' : '<span class="ax-muted" style="font-size:12px"><i class="ri-lock-line"></i> 購課後下載</span>') +
+        '</div>').join("") + '</div>' : "") +
+
+      '<div class="ax-block"><h2><i class="ri-chat-3-line"></i> 學員留言</h2>' + commentsHTML() +
+        (enrolled() ? '<a class="btn btn-white btn-small" href="/classroom?id='+c.id+'" style="margin-top:12px"><i class="ri-chat-new-line"></i> 到教室發問</a>' : "") + '</div>' +
+
+      (c.faq.length ? '<div class="ax-block"><h2><i class="ri-questionnaire-line"></i> 常見問題</h2><div class="ax-faq">' +
+        c.faq.map(f => '<details><summary>'+I.esc(f.q)+'</summary><p>'+I.esc(f.a)+'</p></details>').join("") + '</div></div>' : "") +
+
+      ((c.pairWith.length + related.length) ? '<div class="ax-block"><h2><i class="ri-links-line"></i> 推薦搭配</h2>' +
+        '<p style="font-size:12.5px;color:#8a94a3;margin:-6px 0 12px">課程只是其中一步 —— 搭配這些服務走完整段準備。</p>' +
+        '<div class="ax-pairGrid">' + c.pairWith.map(pairHTML).join("") + related.map(pairHTML).join("") + '</div></div>' : "") +
+
+      '</div><div id="buySlot">' + buyCardHTML() + '</div></div>';
+
+    // 手風琴
+    document.querySelectorAll("[data-acc]").forEach(h => h.addEventListener("click", () => h.parentElement.classList.toggle("open")));
+    // 教材下載
+    document.querySelectorAll("[data-dl]").forEach(b => b.addEventListener("click", () => { I.downloadMaterial(c.id, b.dataset.dl); CZ.toast("教材已下載（demo 為示範檔）"); }));
+    // 收藏
+    const fav = document.getElementById("favBtn");
+    fav && fav.addEventListener("click", () => { I.toggleFav(c.id); document.getElementById("buySlot").innerHTML = buyCardHTML(); wireBuy(); CZ.toast(I.isFav(c.id) ? "已加入收藏" : "已取消收藏"); });
+    wireBuy();
+  }
+
+  /* ---------- 購買流程（PRD §8.1：Order → Payment → Enrollment → RevenueRecord） ---------- */
+  let flow = null; // {order, payment}
+  function stepsHTML(cur, failed){
+    const items = [["1","確認訂單"],["2","付款"],["3","完成"]];
+    return '<div class="ax-payStep">' + items.map((it,i) => {
+      const n = i+1;
+      const cls = n < cur ? "okd" : (n === cur ? "on" : "");
+      return '<span class="ps '+cls+'"><span class="pn">'+(n<cur?'<i class="ri-check-line"></i>':it[0])+'</span>'+it[1]+'</span>' + (n<3?'<span class="pl"></span>':"");
+    }).join("") + '</div>';
+  }
+  function orderKV(amount){
+    return '<div class="ax-orderBox">' +
+      '<div class="kv"><span>課程</span><b>'+I.esc(c.title)+'</b></div>' +
+      '<div class="kv"><span>講師</span><b>'+I.esc(u.name)+'</b></div>' +
+      (I.onSale(c) ? '<div class="kv"><span>原價</span><span style="text-decoration:line-through;color:#a5aebc">'+I.money(c.price)+'</span></div><div class="kv"><span>限時優惠</span><b style="color:#c35500">−'+I.money(c.price - amount)+'</b></div>' : "") +
+      '<div class="kv total"><span>應付金額</span><b>'+I.money(amount)+'</b></div></div>';
+  }
+  function openStep1(){
+    const amount = I.currentPrice(c);
+    CZ.modal(stepsHTML(1) + '<h3>確認訂單</h3>' + orderKV(amount) +
+      '<div class="ax-flowNote"><i class="ri-information-line"></i> 按下後系統會建立 <code>Order（pending）</code> 與 <code>Payment（pending）</code>，再進入付款。</div>' +
+      '<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px">' +
+      '<button class="btn btn-white btn-small" onclick="CZ.closeModal()">取消</button>' +
+      '<button class="btn btn-small" id="mkOrder"><i class="ri-file-list-3-line"></i> 建立訂單並前往付款</button></div>');
+    document.getElementById("mkOrder").onclick = () => {
+      flow = I.createOrder(c.id);
+      if (!flow) { CZ.closeModal(); CZ.toast("你已擁有這堂課"); return; }
+      if (flow.order.amount === 0) { const res = I.mockPaySuccess(flow.order.id); openStep3(res); }
+      else openStep2(false);
+    };
+  }
+  function openStep2(failed){
+    CZ.modal(stepsHTML(2) + '<h3>付款</h3>' + orderKV(flow.order.amount) +
+      '<div class="ax-orderBox" style="background:#f7faff">' +
+        '<div class="kv"><span>訂單編號</span><b>'+flow.order.id+'</b></div>' +
+        '<div class="kv"><span>付款方式</span><b><i class="ri-bank-card-line"></i> '+I.provider().label+'</b></div>' +
+        '<div class="kv"><span>Order 狀態</span><span class="atg unpaid">pending</span></div>' +
+        '<div class="kv"><span>Payment 狀態</span>'+(failed?'<span class="atg refund">failed</span>':'<span class="atg unpaid">pending</span>')+'</div>' +
+      '</div>' +
+      (failed ? '<div class="ax-flowNote" style="background:#fdeaea;color:#a33"><i class="ri-close-circle-line"></i> 模擬付款失敗：訂單保留為 pending，可重新付款（正式金流的失敗 webhook 也走同一條路）。</div>' :
+        '<div class="ax-flowNote"><i class="ri-shield-check-line"></i> V1 使用 FakePaymentProvider；正式金流（ECPay／藍新／Stripe）只需替換 Provider，購買流程不變。</div>') +
+      '<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap">' +
+      '<button class="btn btn-white btn-small" onclick="CZ.closeModal()">稍後再付</button>' +
+      '<button class="btn btn-white btn-small" id="payFail" style="color:#a33"><i class="ri-close-line"></i> 模擬付款失敗</button>' +
+      '<button class="btn btn-small" id="payOk"><i class="ri-secure-payment-line"></i> 模擬付款成功</button></div>');
+    document.getElementById("payOk").onclick = () => { const res = I.mockPaySuccess(flow.order.id); openStep3(res); };
+    document.getElementById("payFail").onclick = () => { I.mockPayFail(flow.order.id); openStep2(true); };
+  }
+  function openStep3(res){
+    CZ.modal(stepsHTML(4) + '<div class="ax-payOk"><div class="big"><i class="ri-check-line"></i></div>' +
+      '<h3 style="margin-bottom:6px">'+(res.order.amount===0?"報名成功！":"付款成功！")+'</h3>' +
+      '<p style="font-size:13.5px;color:#5b6b7e;margin:0 0 14px">課程已加入你的「我的課程」，現在就可以開始上課。</p></div>' +
+      '<div class="ax-orderBox">' +
+        '<div class="kv"><span>訂單 '+res.order.id+'</span><span class="atg paid">paid</span></div>' +
+        '<div class="kv"><span>付款（'+I.provider().label+'）</span><span class="atg paid">paid</span></div>' +
+        '<div class="kv"><span>上課權限 Enrollment</span><span class="atg paid">已開通</span></div>' +
+        (res.order.amount>0 ? '<div class="kv"><span>分潤紀錄 RevenueRecord</span><span class="atg paid">已建立</span></div>' : "") +
+      '</div>' +
+      (res.order.amount>0 ? '<div class="ax-flowNote"><i class="ri-hand-coin-line"></i> 款項由平台代收：平台服務費 '+Math.round(res.record.platformFeeRate*100)+'%（'+I.money(res.record.platformFeeAmount)+'），創作者收入 '+I.money(res.record.creatorIncomeAmount)+'，於次月結算撥付。</div>' : "") +
+      '<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px">' +
+      '<a class="btn btn-white btn-small" href="/my-courses"><i class="ri-book-marked-line"></i> 我的課程</a>' +
+      '<a class="btn btn-small" href="/classroom?id='+c.id+'"><i class="ri-play-circle-line"></i> 進入教室</a></div>');
+    // 重新渲染右側購買卡（已購狀態）＋章節解鎖
+    render();
+  }
+  function wireBuy(){
+    const b = document.getElementById("buyBtn");
+    b && b.addEventListener("click", openStep1);
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>
