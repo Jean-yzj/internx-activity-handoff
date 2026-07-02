@@ -46,6 +46,23 @@
   .groupHead .muted { font-size: 13px; font-weight: 400; color: #8a94a3; }
   .tagKind { font-size: 11px; font-weight: 700; padding: 2px 9px; border-radius: 999px; float: right; }
   .docCard .ic { background: #fff4d6; color: #8a6a10; }
+  /* 開發排程（短 / 中 / 長期） */
+  .rmGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; margin: 14px 0 4px; }
+  .rmCol { background: #fff; border: 1px solid #e7eaf0; border-radius: 14px; padding: 16px 18px 10px; }
+  .rmCol > h3 { margin: 0 0 2px; font-size: 15.5px; display: flex; align-items: center; gap: 7px; }
+  .rmCol .period { font-size: 12px; color: #8a94a3; margin: 0 0 8px; }
+  .rmCol ul { list-style: none; margin: 0; padding: 0; }
+  .rmCol li { padding: 9px 0; border-top: 1px dashed #e7eaf0; font-size: 13.5px; line-height: 1.55; }
+  .rmCol li a { color: inherit; text-decoration: none; font-weight: 600; }
+  .rmCol li a:hover { color: var(--theme-color); }
+  .rmCol .note { display: block; font-size: 12px; color: #7a8494; margin-top: 2px; font-weight: 400; }
+  .chip { display: inline-block; font-size: 11px; font-weight: 700; padding: 1px 8px; border-radius: 999px; margin-left: 5px; vertical-align: 1px; white-space: nowrap; }
+  .chipUrgent, .tag.tShort { background: #fdecec; color: #c0392b; }
+  .chipHard, .tag.tHard { background: #fff4d6; color: #8a6a10; }
+  .chipExt { background: #e8f2fe; color: #1861a8; }
+  .chipLater, .tag.tLater { background: #eef2f7; color: #7a8494; }
+  .tag.tMid { background: #e8f2fe; color: #1861a8; }
+  .rmLegend { font-size: 12.5px; color: #5c6675; margin: 6px 0 0; line-height: 1.9; }
 </style>
 </head>
 <body data-page="handoff">
@@ -67,7 +84,44 @@
       <span class="kindTag kindDoc"><i class="ri-file-text-line"></i> 交接文件</span> ＝ 給工程師的串接規格、說明與架構圖（不是產品畫面）
     </div>
 
-    <div class="groupHead"><h2 style="margin:0"><i class="ri-cursor-line" style="color:var(--theme-color)"></i> Demo 畫面</h2><span class="muted">前端假資料，點進去可實際操作</span></div>
+    <div class="groupHead"><h2 style="margin:0"><i class="ri-road-map-line" style="color:var(--theme-color)"></i> 開發排程：短 / 中 / 長期</h2><span class="muted">給工程端的優先順序；各項連到對應 Demo，完整週次與驗收見 <a href="#doc" onclick="loadDoc('/TIMELINE.md')" style="color:var(--link-color)">工程時程規劃</a></span></div>
+    <div class="rmGrid">
+      <div class="rmCol">
+        <h3><i class="ri-fire-line" style="color:#c0392b"></i> 短期</h3>
+        <p class="period">0–2 個月・立即開工（P1–P2）</p>
+        <ul>
+          <li><a href="/editor">活動編輯器：票券時間×數量、表單拖曳</a><span class="chip chipUrgent">緊急</span><span class="note">先解「早鳥過期還能選、不能限量」（INTEGRATION §3–§4）</span></li>
+          <li><a href="/attendee">報名者畫面：票券狀態鎖定＋表單渲染</a><span class="chip chipUrgent">緊急</span><span class="note">與編輯器同一條動線；後端防超賣 transaction（§5）</span></li>
+          <li><a href="/backstage">認證帳號後臺：報名名單審核</a><span class="chip chipUrgent">緊急</span><span class="note">Registration 狀態機（§12）；與活動發布審核是兩回事</span></li>
+          <li><a href="/blog-editor">創作者後台：創作內容＋block 編輯器</a><span class="chip chipUrgent">緊急</span><span class="note">部落格發佈權放寬給 verified-creator（§10）</span></li>
+          <li>代收代付繳費動線<span class="chip chipUrgent">緊急</span><span class="chip chipExt">外部依賴</span><span class="note">金流特店申請第 0 週就送件（外部審核 2–4 週）；通過→繳費→自動已付款（§6）</span></li>
+          <li>feeItems→tickets 資料遷移<span class="note">一次性 script＋staging 演練＋回滾，票券上線前提（§3.2）</span></li>
+        </ul>
+      </div>
+      <div class="rmCol">
+        <h3><i class="ri-calendar-line" style="color:#1861a8"></i> 中期</h3>
+        <p class="period">2–4 個月（P3–P4）</p>
+        <ul>
+          <li><a href="/backstage#settle">撥款結算 settleAndPayout</a><span class="chip chipHard">高難度</span><span class="note">需按會計法規／發票流程撰寫；結算對帳 gross−抽成−手續費＝net（spec §14.1）；金流 PR 雙人 review</span></li>
+          <li><a href="/club">社團＝組織型主辦：多管理員／換屆</a><span class="note">換屆只換 owner，歷史資料掛 clubId 永久保留（spec §14.2）</span></li>
+          <li><a href="/creator">創作者主頁＋專區目錄</a><span class="note">Profile 3 分頁；檢舉／追蹤／通知扇出是真正新做（CREATOR-HANDOFF）</span></li>
+          <li><a href="/activities">活動個人化：領域／推薦／追蹤主辦</a><span class="note">只影響排序、不隱藏活動；推薦標示原因（spec §16）</span></li>
+          <li>帳號選單依角色＋話題牆串接<span class="note">共用選單＋旗標條件展開（spec §15）；活動上架自動建話題（INTEGRATION §17）</span></li>
+        </ul>
+      </div>
+      <div class="rmCol">
+        <h3><i class="ri-time-line" style="color:#7a8494"></i> 長期</h3>
+        <p class="period">另案排程・可較晚（活動金流穩定後）</p>
+        <ul>
+          <li><a href="/academy">職涯學院 Academy 全套</a><span class="chip chipLater">另案</span><span class="note">課程探索／購買／教室／課程後台／Admin；另案 2 人 8–10 週（ACADEMY-PRD、spec §17）</span></li>
+          <li>推薦 API（職缺／履歷健檢／活動共用）<span class="note">回傳需帶推薦原因（INTEGRATION §20.2）</span></li>
+          <li>短中期只做兩個預留<span class="note">Order／Payment 加 itemType（activity｜course）；Payment Provider interface 先定好（§20.1），Academy 才不重工</span></li>
+        </ul>
+      </div>
+    </div>
+    <p class="rmLegend"><span class="chip chipUrgent">緊急</span>＝先做，擋住其他功能或有外部等待期　·　<span class="chip chipHard">高難度</span>＝需會計法規／金流商配合，預留較長時間　·　<span class="chip chipExt">外部依賴</span>＝送件後等待外部審核　·　<span class="chip chipLater">另案</span>＝獨立排程、可較晚</p>
+
+    <div class="groupHead"><h2 style="margin:0"><i class="ri-cursor-line" style="color:var(--theme-color)"></i> Demo 畫面</h2><span class="muted">前端假資料，點進去可實際操作；卡片上已標「短／中／長期」與緊急度</span></div>
     <div class="demoGrid">
       <a class="demoCard" href="/host">
         <span class="tagKind tagDemo">Demo</span>
@@ -79,112 +133,112 @@
       <a class="demoCard" href="/editor">
         <span class="tagKind tagDemo">Demo</span>
         <div class="ic"><i class="ri-edit-box-line"></i></div>
-        <h3>建立活動・編輯器</h3>
+        <h3>建立活動・編輯器 <span class="tag tShort">短期・緊急</span></h3>
         <p>四步驟：活動內容 / 票券（販售時間×數量）/ 報名表單（拖曳排序、欄位設定）/ 進階。</p>
         <span class="go">開啟 Demo →</span>
       </a>
       <a class="demoCard" href="/backstage">
         <span class="tagKind tagDemo">Demo</span>
         <div class="ic"><i class="ri-store-2-line"></i></div>
-        <h3>認證帳號後臺 <span class="tag">官方帳號</span></h3>
+        <h3>認證帳號後臺 <span class="tag tShort">短期・緊急</span></h3>
         <p>活動管理、報名名單＋審核、撥款結算、創作內容（部落格），長在官方帳號底下。</p>
         <span class="go">開啟 Demo →</span>
       </a>
       <a class="demoCard" href="/backstage#settle">
         <span class="tagKind tagDemo">Demo</span>
         <div class="ic"><i class="ri-wallet-3-line"></i></div>
-        <h3>撥款結算 <span class="tag">代收代付</span></h3>
+        <h3>撥款結算 <span class="tag tHard">中期・高難度</span></h3>
         <p>後臺的金流那半：總收款 / 手續費 / 待撥款 / 已撥款、每場結算明細與撥款記錄（對應金流規格 §10）。</p>
         <span class="go">看撥款結算 →</span>
       </a>
       <a class="demoCard" href="/club">
         <span class="tagKind tagDemo">Demo</span>
         <div class="ic"><i class="ri-group-line"></i></div>
-        <h3>社團主頁 <span class="tag">多管理員 / 換屆</span></h3>
+        <h3>社團主頁 <span class="tag">多管理員 / 換屆</span> <span class="tag tMid">中期</span></h3>
         <p>社團以組織身分擁有帳號：幹部團隊（多管理員角色）、換屆交接（換人不換社團、資料保留）、社團活動。</p>
         <span class="go">開啟 Demo →</span>
       </a>
       <a class="demoCard" href="/club-register">
         <span class="tagKind tagDemo">Demo</span>
         <div class="ic"><i class="ri-team-line"></i></div>
-        <h3>社團註冊流程</h3>
+        <h3>社團註冊流程 <span class="tag tMid">中期</span></h3>
         <p>社團資料 → 身分驗證（指導老師）→ 邀請幹部（多管理員）→ 送審。四步驟，可實際操作。</p>
         <span class="go">開啟 Demo →</span>
       </a>
       <a class="demoCard" href="/activities">
         <span class="tagKind tagDemo">Demo</span>
         <div class="ic"><i class="ri-compass-3-line"></i></div>
-        <h3>活動個人化加層 <span class="tag">概念</span></h3>
+        <h3>活動個人化加層 <span class="tag tMid">中期</span></h3>
         <p>補在<b>既有</b>活動頁上的個人化：領域 chips、「為你推薦」（接既有「綜合」排序、標出原因）、追蹤主辦。不取代既有篩選，見 spec §16。</p>
         <span class="go">開啟 Demo →</span>
       </a>
       <a class="demoCard" href="/attendee">
         <span class="tagKind tagDemo">Demo</span>
         <div class="ic"><i class="ri-smartphone-line"></i></div>
-        <h3>報名者畫面</h3>
+        <h3>報名者畫面 <span class="tag tShort">短期・緊急</span></h3>
         <p>活動介紹 → 報名表單 → 選擇票券。內容由編輯器帶入，票券狀態自動判斷。</p>
         <span class="go">開啟 Demo →</span>
       </a>
       <a class="demoCard" href="/creator">
         <span class="tagKind tagDemo">Demo</span>
         <div class="ic"><i class="ri-user-star-line"></i></div>
-        <h3>創作者主頁</h3>
+        <h3>創作者主頁 <span class="tag tMid">中期</span></h3>
         <p>關於我 / 專長 / 部落格 / 主辦活動 / 活動紀錄。主辦活動連到報名頁。</p>
         <span class="go">開啟 Demo →</span>
       </a>
       <a class="demoCard" href="/creators">
         <span class="tagKind tagDemo">Demo</span>
         <div class="ic"><i class="ri-quill-pen-line"></i></div>
-        <h3>創作者專區・介紹</h3>
+        <h3>創作者專區・介紹 <span class="tag tMid">中期</span></h3>
         <p>價值主張、精選創作者、能做什麼、三步驟成為認證創作者（流程介紹）。</p>
         <span class="go">看介紹 →</span>
       </a>
       <a class="demoCard" href="/blog">
         <span class="tagKind tagDemo">Demo</span>
         <div class="ic"><i class="ri-article-line"></i></div>
-        <h3>部落格</h3>
+        <h3>部落格 <span class="tag tShort">短期</span></h3>
         <p>認證創作者發佈職涯／求職內容；發佈權對應 verified-creator 標章。</p>
         <span class="go">開啟 Demo →</span>
       </a>
       <a class="demoCard" href="/blog-editor">
         <span class="tagKind tagDemo">Demo</span>
         <div class="ic"><i class="ri-layout-2-line"></i></div>
-        <h3>部落格編輯器・block <span class="tag">改版</span></h3>
+        <h3>部落格編輯器・block <span class="tag tShort">短期・緊急</span></h3>
         <p>取代舊的單一 contentEditable「框」：block 化、拖曳排序、＋ / 「/」插入、選字浮動工具列、圖片預覽、即時預覽。</p>
         <span class="go">開啟 Demo →</span>
       </a>
       <a class="demoCard" href="/academy">
         <span class="tagKind tagDemo">Demo</span>
         <div class="ic" style="background:var(--theme-white);color:var(--theme-color)"><i class="ri-graduation-cap-line"></i></div>
-        <h3>職涯學院・課程探索 <span class="tag">新</span></h3>
+        <h3>職涯學院・課程探索 <span class="tag tLater">長期・另案</span></h3>
         <p>職涯導向課程平台：五類標籤篩選、職涯用途課程卡。整站可操作、資料存瀏覽器。</p>
         <span class="go">逛課程 →</span>
       </a>
       <a class="demoCard" href="/course?id=c-ba">
         <span class="tagKind tagDemo">Demo</span>
         <div class="ic" style="background:var(--theme-white);color:var(--theme-color)"><i class="ri-shopping-cart-2-line"></i></div>
-        <h3>課程頁＋Mock 購買 <span class="tag">新</span></h3>
+        <h3>課程頁＋Mock 購買 <span class="tag tLater">長期・另案</span></h3>
         <p>18 區塊職涯導向課程頁；Order → Payment → Enrollment → 分潤紀錄全流程可實際操作。</p>
         <span class="go">走一次購買 →</span>
       </a>
       <a class="demoCard" href="/classroom?id=c-ba">
         <span class="tagKind tagDemo">Demo</span>
         <div class="ic" style="background:var(--theme-white);color:var(--theme-color)"><i class="ri-play-circle-line"></i></div>
-        <h3>教室播放器 <span class="tag">新</span></h3>
+        <h3>教室播放器 <span class="tag tLater">長期・另案</span></h3>
         <p>進度記錄、字幕（CC 可開關）、試看、教材下載、單元留言與公告；完課接個人頁／職涯地圖。</p>
         <span class="go">進教室 →</span>
       </a>
       <a class="demoCard" href="/academy-studio">
         <span class="tagKind tagDemo">Demo</span>
         <div class="ic" style="background:var(--theme-white);color:var(--theme-color)"><i class="ri-video-add-line"></i></div>
-        <h3>創作者課程後台 <span class="tag">新</span></h3>
+        <h3>創作者課程後台 <span class="tag tLater">長期・另案</span></h3>
         <p>Dashboard／我的課程／4 步開課精靈（拖曳章節）／收益分潤／留言管理。</p>
         <span class="go">開後台 →</span>
       </a>
       <a class="demoCard" href="/academy-admin">
         <span class="tagKind tagDemo">Demo</span>
         <div class="ic" style="background:var(--theme-white);color:var(--theme-color)"><i class="ri-shield-star-line"></i></div>
-        <h3>課程管理後台 Admin <span class="tag">新</span></h3>
+        <h3>課程管理後台 Admin <span class="tag tLater">長期・另案</span></h3>
         <p>課程審核（通過/退回/精選）、創作者管理、訂單退款、收益撥款與分潤設定。</p>
         <span class="go">開後台 →</span>
       </a>
@@ -220,6 +274,13 @@
         <p>創作者專區那站的「完整流程圖」：申請認證 → 審核 → 發標章 → 主頁串接。另開分頁。</p>
         <span class="go">到 creator-zone →</span>
       </a>
+      <a class="demoCard docCard" href="#doc" onclick="loadDoc('/TIMELINE.md')">
+        <span class="tagKind tagDoc">文件</span>
+        <div class="ic"><i class="ri-calendar-todo-line"></i></div>
+        <h3>工程時程規劃 <span class="tag">2 人×16 週</span></h3>
+        <p>短中長期排程的完整版：六階段週次、兩人分工、外部依賴 lead time、資料完整性與資安檢查清單。</p>
+        <span class="go">讀時程 →</span>
+      </a>
       <a class="demoCard docCard" href="#doc" onclick="loadDoc('/ACADEMY-PRD.md')">
         <span class="tagKind tagDoc">未來功能</span>
         <div class="ic"><i class="ri-graduation-cap-line"></i></div>
@@ -239,6 +300,7 @@
       <button class="btn btn-small docTab" data-doc="/INTEGRATION.md"><i class="ri-ticket-2-line"></i> 活動報名串接</button>
       <button class="btn btn-white btn-small docTab" data-doc="/CREATOR-HANDOFF.md"><i class="ri-quill-pen-line"></i> 創作者專區串接</button>
       <button class="btn btn-white btn-small docTab" data-doc="/ACADEMY-PRD.md"><i class="ri-graduation-cap-line"></i> 課程平台 PRD（未來）</button>
+      <button class="btn btn-white btn-small docTab" data-doc="/TIMELINE.md"><i class="ri-calendar-todo-line"></i> 時程規劃</button>
       <a class="btn btn-white btn-small" id="dlMd" href="/INTEGRATION.md" download style="margin-left:auto"><i class="ri-download-line"></i> 下載 Markdown</a>
     </div>
     <div id="docBody"><p class="muted">載入串接說明中⋯</p></div>
