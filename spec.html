@@ -24,7 +24,7 @@
         <b>身分/整合</b> 7 帳號認證並行・11 話題牆；
         <b>收尾</b> 12 改動檔案清單・13 驗收標準；
         <b>增補</b> 14 撥款結算＋社團・15 帳號選單・16 活動個人化；
-        <b>職涯學院</b> 17 Academy 課程平台（原型已完成：入口地圖・預留事項・資料流・字幕）。</p>
+        <b>職涯學院</b> 17 Academy 課程平台（原型已完成：入口地圖・預留事項・資料流・字幕・<b>整併風險速查 17.6</b>）。</p>
     </div>
   </div>
 
@@ -521,7 +521,24 @@ GET /recommendations/courses?source_type=<span class="s">job|company|interview_r
 <span class="c">// 匹配：Job.requiredSkills ↔ Course.skillTags；Job.category ↔ Course.careerTags；ResumeReview.weaknessTags ↔ Course.skillTags/outcomeTags</span></pre>
     <div class="callout callout-info"><i class="ri-eye-line"></i><p style="margin:0">推薦一樣要<b>標出原因</b>（「此職缺要求產品企劃、使用者訪談…該課程可補足」）—— 與 §16 活動個人化同一個透明推薦原則。</p></div>
 
-    <h3>17.6 範圍速記</h3>
+    <h3>17.6 整併風險速查（詳版必讀：INTEGRATION.md §21）</h3>
+    <p style="font-size:13px;color:#5b6b7e;margin:0 0 12px"><b>原則：產品邏輯照抄 demo（欄位／狀態機／文案），工程實作全部重做（demo 是 localStorage 假後端）。</b>🔴＝不解決不能上線。</p>
+    <table class="spec">
+      <thead><tr><th>風險</th><th>一句話</th><th>解法方向</th></tr></thead>
+      <tbody>
+        <tr><td>🔴 訂單模型衝突</td><td>活動金流若先上線且沒有 <code>itemType/itemId</code>，Academy 併入要 backfill 或雙軌帳</td><td class="tag-add"><b>現在</b>就把活動金流做成通用 commerce record（唯一不等 Academy 排程的事）</td></tr>
+        <tr><td>🔴 狀態所有權反轉</td><td>demo 全部前端寫；正式版 status／paidAt／enrollment／payout 只能後端寫</td><td class="tag-add">Cloud Functions ＋ Firestore rules ＋ rules simulator 測試</td></tr>
+        <tr><td>🔴 Webhook 髒現實</td><td>FakePay 掩蓋重複回調／亂序／偽造／雙訂單</td><td class="tag-add">驗簽＋冪等鍵＋對帳 job；入帳後才建 Enrollment</td></tr>
+        <tr><td>🔴 權限分支沒被看到</td><td>demo 一人三角色，看不到「非本人課程／被停權／未購買」等錯誤路徑</td><td class="tag-add">後端逐條檢查（藏選單不算）；講師要補收款帳戶核實</td></tr>
+        <tr><td>🔴 媒體管線全模擬</td><td>影片儲存／轉檔／防盜連／上傳狀態機 demo 都是按鈕</td><td class="tag-add">選型（Stream/Mux 類）＋ signed URL 授權＋轉檔狀態機</td></tr>
+        <tr><td>🟡 退款遇已撥款</td><td>直接改狀態會弄壞歷史帳</td><td class="tag-add">調整紀錄（adjustment）從下期撥款扣回</td></tr>
+        <tr><td>🟡 i18n／SEO</td><td>demo 繁中寫死、無 SSR；課程頁是天然 landing page</td><td class="tag-add">UI 字串進翻譯系統；課程頁 SSR＋OG＋Course schema</td></tr>
+        <tr><td>🟡 法務三件事</td><td>發票義務、退款鑑賞期政策、創作者收款個資</td><td class="tag-add">上線前要有書面答案（見 INTEGRATION §21.7）</td></tr>
+      </tbody>
+    </table>
+    <div class="callout callout-info"><i class="ri-flag-line"></i><p style="margin:0">上線策略：契約先行（commerce record＋API contract＋rules 草稿）→ 四條線並行（後端／學生端／創作者端／媒體）→ feature flag 內測（1–2 位真實創作者跑完整流程含一筆真退款）→ 公開。最小測試清單見 <b>INTEGRATION.md §21.8</b>。</p></div>
+
+    <h3>17.7 範圍速記</h3>
     <table class="spec">
       <thead><tr><th>V1 做</th><th>V1 不做（結構預留）</th></tr></thead>
       <tbody>

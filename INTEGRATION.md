@@ -34,6 +34,7 @@
 
 **職涯學院 Academy（原型已完成，整併主平台為後續排程）**
 - §20 InternX Academy 課程平台：原型頁面＋**§20.1 入口地圖（各頁怎麼進）**＋資料層（含字幕）＋預留事項（完整 PRD 見 `ACADEMY-PRD.md`）
+- **§21 整併風險清單（併入前必讀）**：demo→正式對照、狀態所有權、金流 webhook／冪等、權限、i18n/SEO、媒體管線、法務、上線順序與最小測試
 
 ---
 
@@ -893,3 +894,81 @@ mockup 以 GitHub Pages 部署（main 分支 / 根目錄）。這份 repo 與 in
 ### 20.4 排程建議
 
 課程金流與活動金流是**同一套代收代付思路**（學生付款 → 平台代收 → 依分潤撥給創作者），建議等活動金流（§6、spec §14.1 撥款結算）穩定後再排 Academy，屆時直接重用 Provider 抽象與結算後台。
+
+---
+
+## 21. 整併風險清單（Academy 併入 internx.me 前必讀）
+
+> 這節回答一個問題：**「直接把 demo 搬進正式平台，會在哪裡爆掉？」**
+> 原則先講清楚：**demo 要搬的是「行為、欄位、狀態機、文案」，不是程式碼**。demo 是純前端＋localStorage 的展示品，正式平台是 Next.js＋Firestore＋Cloud Functions —— 兩邊架構天生不同，這是刻意的（demo 零依賴、可獨立展示），不是偷懶。
+> 每項標了風險等級：🔴 不解決不能上線｜🟡 上線前要有答案｜🟢 可上線後補。
+
+### 21.1 Demo → 正式平台對照表（先建立正確心智模型）
+
+| Demo（本 repo） | 正式平台該長什麼樣 |
+|---|---|
+| `assets/academy/academy.js` 的 `IXA.*`（瀏覽器內的假後端） | Firestore collections ＋ Cloud Functions（`createOrder`／`confirmPayment`／`approveCourse`…），前端只呼叫 API |
+| `FakePaymentProvider`（一鍵模擬成功） | 同一個 Provider 介面接 ECPay／藍新 **webhook**（見 21.3） |
+| `localStorage` 進度／收藏／留言 | `CourseProgress`／`Enrollments`／`CourseComments` collections，跨裝置同步 |
+| demo 使用者 `u-yz` 同時是學生＋創作者＋Admin | 真實 auth ＋ role 檢查（見 21.4） |
+| `CZ.modal`／`CZ.toast`／自製 tabs | 平台既有 Dialog／Toast／Tab 元件（**保留 demo 已做的 a11y 行為**：dialog 語意、Esc、焦點圈、tablist、44px 觸控） |
+| 課程卡與詳情頁的欄位、五類標籤、購買三步驟、完課→個人頁 | **原樣照搬**（這是 demo 的核心價值，欄位名對齊 PRD §3／§9／§11） |
+
+### 21.2 🔴 資料與狀態所有權：demo 全部反著做
+
+demo 為了可展示，把所有商業狀態放在使用者的瀏覽器裡、由前端直接改。正式平台必須整個反過來：
+
+- **只能由後端寫的欄位**：`course.status`（審核狀態機）、`order.status`／`payment.status`／`paidAt`、`enrollment`（存在與否＝上課權限）、`revenueRecord`／`payoutStatus`、`creator.suspended`、留言的 `pinned/solved/hidden`。前端能寫的只有：自己的草稿課程內容、自己的進度、自己的留言原文、收藏。這條要落成 **Firestore rules ＋ rules simulator 測試**，跟活動的 §16 規則同一原則。
+- **狀態機要有守衛**：demo 的 `approveCourse()` 是一行改字串；正式版每個轉移都要驗證前置狀態（例：只有 `pending` 能被 approve；`rejected` 只能由創作者重新送審）。課程／訂單／Enrollment／撥款／創作者／留言六條狀態機在 review 已列，照抄即可。
+- **Schema 遷移**：demo 用 `SEED_V+1` 整包重建資料，正式版不可能。上線前就要定 migration 慣例（加欄位給預設值、不重命名既有欄位）。
+
+### 21.3 🔴 金流：最貴的坑都在 FakePay 看不到的地方
+
+- **訂單模型先天衝突（最重要的一條）**：如果活動金流先上線、而 Order/Payment/結算沒有 `itemType/itemId`，Academy 併入時就要 backfill 歷史資料或走雙軌帳 —— 兩個都很痛。**現在做活動金流時就把它設計成通用 commerce record**：`itemType`、`itemId`、`sellerType/creatorId/organizationId`、金額快照、費率快照、provider 交易 ID、冪等鍵。這是全文件最值得現在就做的一件事（也見 §20.2、TIMELINE）。
+- **Webhook 的髒現實**：FakePay 一鍵成功掩蓋了正式金流的全部麻煩 —— 重複回調（同一筆付款收到兩次通知）、亂序（退款通知比付款先到）、偽造（要驗簽章）、逾時後使用者重試造成雙訂單。解法是標配：**簽章驗證＋冪等鍵＋以 provider 交易 ID 對帳＋每日對帳 job**。Enrollment 只能在後端確認入帳後建立。
+- **退款遇到已撥款**：demo 的退款直接改狀態；正式版若該筆分潤已撥給創作者，要開**調整紀錄（adjustment）**從下期撥款扣回，不能改歷史帳。
+- **分潤率的生效時點**：demo 在付款當下快照費率（做法正確、保留），但「Admin 調費率後，已上架課程何時生效」「個別費率談判的溯及」是產品決策，上線前要白紙黑字。
+- **發票**（🟡）：PRD V1 不做發票，但台灣正式收款會撞到開立發票義務。決策選項：金流商代開電子發票／自行申請／首波用免用統一發票額度。上線前要有答案，否則第一筆真錢就違規。
+
+### 21.4 🔴 帳號與權限：一人三角色掩蓋了所有分支
+
+demo 的 `u-yz` 同時是學生、創作者、Admin，所以你永遠看不到權限錯誤長什麼樣。併入時會遇到：
+
+- **後端強制檢查**（選單藏起來不算數）：未購買者拿不到付費單元影片 URL；創作者只能編輯自己的、且狀態允許的課程；`verified-creator` 且未停權才能進 Studio；approve/reject/退款/撥款/費率只有 admin role。
+- **講師身分比 verified-creator 多一層**：開課要收錢 → 需要**收款帳戶（銀行帳號）與身分核實**，這是現有 verified-role 申請沒有的欄位。建議：沿用同一審核流，通過後在 Studio 首次開課時補「收款資料」第二步（含個資告知）。
+- **停權的連鎖決策**（🟡）：創作者被停權 → 課程自動下架？已購學生還能看嗎（建議：能看，停售不停課）？待撥款凍結多久？demo 只有一個 flag，這三題要產品拍板。
+- **未登入動線**：demo 沒有登入牆；正式版「未登入點購買」要先走主平台登入再回到課程頁（redirect 保留 `?id=`）。
+
+### 21.5 🟡 前端整併：技術棧與國際化
+
+- **不要移植程式碼**：demo 是 `innerHTML` 字串拼接＋全域 `IXA`＋inline `onclick`；internx.me 是 Next.js/React。正確做法：照 demo 的資訊架構重刻元件，資料層換成 typed API client。**兩邊可並行**：先定 API contract（照 PRD §12 的 endpoint），前端拿 mock contract 開工。
+- **i18n**：demo 全繁中寫死；正式站有 `[lang]` 路由。UI 字串要進翻譯系統；**課程內容欄位（適合誰／學完獲得…）是否多語**是產品決策 —— 建議 V1 單語（課程本來就是中文授課），但欄位結構別寫死單字串（留 `{zh: …}` 擴充空間）。
+- **SEO／分享**（🟡）：課程頁是天然的行銷 landing page，需要 SSR/SSG＋og:image＋結構化資料（Course schema），demo 完全沒有。上線時程要算進去。
+- **設計系統**：demo 的 a11y 修正（dialog 語意、tablist、44px 觸控、label 關聯）是行為需求不是樣式偏好，換平台元件時要逐項對照保留（清單見 git log `37ddc50`）。
+
+### 21.6 🔴 媒體管線：demo 完全模擬的一塊
+
+影片是 Academy 與活動模組**最大的基礎設施差異**（活動沒有影音）：
+
+- **選型要先做**：影片儲存＋轉檔＋CDN＋防盜連（Cloudflare Stream／Mux／Bunny 類服務 vs 自建）。成本模型跟課程時數成正比，開第一堂課前就要定。
+- **授權**：試看單元公開；付費單元用**短效 signed URL**，由後端驗 Enrollment 後簽發。教材下載同理。
+- **上傳流水線**：檔案驗證（型別／大小）、掃毒、轉檔狀態機（queued→processing→ready→failed），Studio 的「模擬上傳」按鈕就是這條線的佔位。
+- **字幕**：demo 的 cue 模型（`lesson.subtitles[{t,text}]`）可直接沿用；正式版加 SRT/VTT 解析與 `subtitleTracks[]`（多語預留）。
+
+### 21.7 🟡 營運與法務（工程以外，但上線就會遇到）
+
+- **退款政策文案**：線上課程的消保法鑑賞期爭議（已觀看比例、教材已下載怎麼算）需要一版明確政策＋法務過目；demo 的 Admin 退款只是按鈕。
+- **審核 SLA 與溝通**：課程審核誰做、承諾幾個工作天、退回原因怎麼通知（接主平台 Notification＋Email，demo 只有 toast）。
+- **撥款作業**：demo 的「標記撥款」在正式版是真的銀行轉帳＋對帳＋憑證留存；月結日、最低撥款門檻、手續費由誰負擔要先講好。
+- **個資**：創作者收款資料（銀行帳號）與學生購課紀錄的保存、存取權限、隱私政策更新。
+
+### 21.8 上線策略與最小測試（照這個順序做就不會互相卡）
+
+1. **契約先行**：通用 commerce record（21.3）＋ PRD §12 API contract ＋ Firestore rules 草稿 —— 這步做完，後端／學生端 UI／創作者端 UI／媒體管線四條線可並行。
+2. **後端模型**：collections＋六條狀態機＋Cloud Functions。
+3. **學生端** → 4. **創作者/Admin 端**（桌機優先）→ 5. **媒體管線** → 6. **跨模組推薦**。
+7. **內測再公開**：feature flag，先開 1–2 位真實創作者＋小群學生跑完整流程（含一筆真退款），再開放。
+
+**最小測試清單**（沒有這些不要碰真錢）：webhook 重複／亂序／偽造回調、同訂單 Enrollment 只建一次、退款冪等＋已撥款調整、rules simulator（學生寫不進 status/enrollment/payout）、E2E 主流程（瀏覽→購買→上課→完課；創作者開課→送審→退回→重送→通過；Admin 退款→學生失去權限）。
+
+> 一句話總結：**產品邏輯照抄 demo，工程實作全部重做，金流 schema 現在就要通用化。** 其中 21.3 第一條（`itemType/itemId`）是唯一「不在 Academy 排程內、但現在就要動手」的事。
