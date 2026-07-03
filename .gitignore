@@ -2,3 +2,6 @@
 node_modules/
 *.log
 .gstack/
+
+# Prevent secret leaks
+.env*
