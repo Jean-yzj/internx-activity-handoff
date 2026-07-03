@@ -31,7 +31,7 @@
 (function(){
   const I = window.IXA;
   const c = I.getCourse(I.qs("id"));
-  if (!c) { location.replace("/academy"); return; }
+  if (!c) { location.replace("/academy?notice=" + (I.qs("id") ? "course-missing" : "pick-course")); return; }
   document.title = c.title + "｜職涯學院 · InternX 實習通";
   const u = I.USERS[c.creatorId] || { name: "講師" };
   const st = I.courseStats(c.id);

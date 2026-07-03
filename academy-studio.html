@@ -25,6 +25,7 @@
 <body data-page="academy-studio" data-nav="academy">
 
 <main>
+  <h1 class="sr-only">課程後台（創作者）｜職涯學院</h1>
   <div class="cz-container profile">
     <div class="layout">
 
@@ -161,7 +162,7 @@
   }
   const chipPick = (key, list, labelOf) => '<div class="ax-tagPick">' + list.map(x => {
     const k = x.key || x, on = draft[key].includes(k);
-    return '<span class="ax-chip ' + (on ? "on" : "") + '" data-pick="' + key + '|' + k + '">' + (on ? '<i class="ri-check-line"></i> ' : '') + (labelOf ? labelOf(x) : x) + '</span>';
+    return '<button type="button" class="ax-chip ' + (on ? "on" : "") + '" data-pick="' + key + '|' + k + '" aria-pressed="' + (on ? "true" : "false") + '">' + (on ? '<i class="ri-check-line"></i> ' : '') + (labelOf ? labelOf(x) : x) + '</button>';
   }).join("") + '</div>';
   const listEdit = (key, ph) => '<div class="ax-listEdit" data-list="' + key + '">' +
     draft[key].map((v, i) => '<div class="le"><input class="input" data-li="' + key + '|' + i + '" value="' + I.esc(v) + '" placeholder="' + ph + '"><button class="ax-iconBtn" data-lrm="' + key + '|' + i + '" title="刪除"><i class="ri-delete-bin-line"></i></button></div>').join("") +
@@ -194,13 +195,13 @@
         '<button class="btn btn-ghost btn-small" id="pairAdd" style="align-self:flex-start"><i class="ri-add-line"></i> 新增搭配</button></div>' +
       '<label class="f">課程特性</label><div class="ax-tagPick">' +
         [["hasMaterials","提供教材下載"],["hasHomework","含課後作業"],["resumeArtifact","可加入履歷作品"],["hasQA","開放留言 Q&A"]].map(o =>
-          '<span class="ax-chip ' + (draft[o[0]] ? "on" : "") + '" data-flag="' + o[0] + '">' + (draft[o[0]] ? '<i class="ri-check-line"></i> ' : '') + o[1] + '</span>').join("") + '</div>';
+          '<button type="button" class="ax-chip ' + (draft[o[0]] ? "on" : "") + '" data-flag="' + o[0] + '" aria-pressed="' + (draft[o[0]] ? "true" : "false") + '">' + (draft[o[0]] ? '<i class="ri-check-line"></i> ' : '') + o[1] + '</button>').join("") + '</div>';
   }
   function wizStep3(){
     const fee = I.feeRateFor(Object.assign({ id: draft.id || "new", creatorId: I.ME }, draft));
     return '<label class="f">收費方式</label><div class="ax-tagPick">' +
-      '<span class="ax-chip ' + (!draft.free ? "on" : "") + '" data-freeopt="0">' + (!draft.free ? '<i class="ri-check-line"></i> ' : '') + '付費課程</span>' +
-      '<span class="ax-chip ' + (draft.free ? "on" : "") + '" data-freeopt="1">' + (draft.free ? '<i class="ri-check-line"></i> ' : '') + '免費公開課</span></div>' +
+      '<button type="button" class="ax-chip ' + (!draft.free ? "on" : "") + '" data-freeopt="0" aria-pressed="' + (!draft.free ? "true" : "false") + '">' + (!draft.free ? '<i class="ri-check-line"></i> ' : '') + '付費課程</button>' +
+      '<button type="button" class="ax-chip ' + (draft.free ? "on" : "") + '" data-freeopt="1" aria-pressed="' + (draft.free ? "true" : "false") + '">' + (draft.free ? '<i class="ri-check-line"></i> ' : '') + '免費公開課</button></div>' +
       (!draft.free ?
         '<div class="row3"><div><label class="f">原價（NT$）*</label><input class="input" type="number" min="0" data-f="price" value="' + (draft.price || "") + '"></div>' +
         '<div><label class="f">優惠價 <small>（選填）</small></label><input class="input" type="number" min="0" data-f="salePrice" value="' + (draft.salePrice || "") + '"></div>' +
@@ -368,7 +369,7 @@
     let list = myCmts().sort((a, b) => b.createdAt - a.createdAt);
     if (cmtFilter === "un") list = list.filter(unanswered);
     return '<div class="sectionHeader"><div class="sectionHeaderLeft"><i class="ri-chat-3-line"></i> 留言管理</div>' +
-      '<div class="ax-chips"><span class="ax-qf ' + (cmtFilter === "all" ? "on" : "") + '" data-cf="all">全部</span><span class="ax-qf ' + (cmtFilter === "un" ? "on" : "") + '" data-cf="un">待回覆</span></div></div>' +
+      '<div class="ax-chips"><button type="button" class="ax-qf ' + (cmtFilter === "all" ? "on" : "") + '" data-cf="all" aria-pressed="' + (cmtFilter === "all") + '">全部</button><button type="button" class="ax-qf ' + (cmtFilter === "un" ? "on" : "") + '" data-cf="un" aria-pressed="' + (cmtFilter === "un") + '">待回覆</button></div></div>' +
       (list.length ? list.map(m => {
         const c = I.getCourse(m.courseId);
         const lesson = I.lessonsOf(c).find(l => l.id === m.lessonId);

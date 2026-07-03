@@ -90,8 +90,12 @@
 
   /* ---------- 手機選單 ---------- */
   function buildMobileMenu() {
+    // 高亮邏輯與 TopBar 一致：目前路徑（含前綴）或 body[data-nav] 對應的 tab
+    const cur = location.pathname.replace(/\.html$/, "").replace(/\/+$/, "");
+    const nav = document.body.dataset.nav || "";
     const items = D.navTabs.map(t => {
-      const sel = t.key === "creator" ? "selected" : "";
+      const a = t.href.split("?")[0].replace(/\/+$/, "");
+      const sel = (a === cur || (a.length > 1 && cur.startsWith(a)) || (t.key && t.key === nav)) ? "selected" : "";
       const tgt = t.external ? `target="_blank" rel="noopener"` : "";
       return `<a class="${sel}" href="${t.href}" ${tgt}><i class="ri-${t.icon}"></i>${t.text}</a>`;
     }).join("");

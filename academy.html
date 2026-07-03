@@ -39,32 +39,35 @@
 
     <div class="myStrip" id="continueStrip" style="display:none"></div>
 
-    <div class="ax-label"><i class="ri-focus-3-line"></i> 你想走的職涯方向（可複選）</div>
-    <div class="ax-chips" id="careerChips"></div>
-
-    <div class="ax-label"><i class="ri-route-line"></i> 你現在的求職階段</div>
-    <div class="ax-chips" id="stageChips"></div>
-
-    <div class="ax-label"><i class="ri-equalizer-line"></i> 快篩</div>
-    <div class="ax-chips" id="qfRow">
-      <span class="ax-qf" data-qf="free"><i class="ri-price-tag-3-line"></i> 免費</span>
-      <span class="ax-qf" data-qf="under1k"><i class="ri-money-dollar-circle-line"></i> 千元有找</span>
-      <span class="ax-qf" data-qf="artifact"><i class="ri-file-user-line"></i> 可產出履歷作品</span>
-      <span class="ax-qf" data-qf="materials"><i class="ri-folder-download-line"></i> 有教材</span>
-      <span class="ax-qf" data-qf="homework"><i class="ri-edit-box-line"></i> 有作業</span>
-    </div>
-
-    <div class="ax-searchRow">
+    <div class="ax-searchRow" style="margin-top:18px">
       <input class="input" id="q" placeholder="搜尋課程、技能或講師，例如「SQL」「面試」「張哲瑋」" />
-      <select class="input ax-sort" id="gradeSel">
+      <button type="button" class="btn btn-white btn-small ax-fToggle" id="fToggle" aria-expanded="false" aria-controls="filterPanel"><i class="ri-equalizer-line"></i> 篩選 <span class="fBadge" id="fCnt" hidden></span></button>
+      <select class="input ax-sort" id="gradeSel" aria-label="適合年級">
         <option value="">全部年級</option>
       </select>
-      <select class="input ax-sort" id="sortSel">
+      <select class="input ax-sort" id="sortSel" aria-label="排序方式">
         <option value="rec">推薦排序</option>
         <option value="new">最新上架</option>
         <option value="students">最多人購買</option>
         <option value="priceAsc">價格低 → 高</option>
       </select>
+    </div>
+
+    <div id="filterPanel" class="ax-filterPanel">
+      <div class="ax-label"><i class="ri-focus-3-line"></i> 你想走的職涯方向（可複選）</div>
+      <div class="ax-chips" id="careerChips"></div>
+
+      <div class="ax-label"><i class="ri-route-line"></i> 你現在的求職階段</div>
+      <div class="ax-chips" id="stageChips"></div>
+
+      <div class="ax-label"><i class="ri-equalizer-line"></i> 快篩</div>
+      <div class="ax-chips" id="qfRow">
+        <button type="button" class="ax-qf" data-qf="free" aria-pressed="false"><i class="ri-price-tag-3-line"></i> 免費</button>
+        <button type="button" class="ax-qf" data-qf="under1k" aria-pressed="false"><i class="ri-money-dollar-circle-line"></i> 千元有找</button>
+        <button type="button" class="ax-qf" data-qf="artifact" aria-pressed="false"><i class="ri-file-user-line"></i> 可產出履歷作品</button>
+        <button type="button" class="ax-qf" data-qf="materials" aria-pressed="false"><i class="ri-folder-download-line"></i> 有教材</button>
+        <button type="button" class="ax-qf" data-qf="homework" aria-pressed="false"><i class="ri-edit-box-line"></i> 有作業</button>
+      </div>
     </div>
 
     <div class="feedHead" style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:22px 0 4px">
@@ -93,6 +96,9 @@
   const sel = { careers: new Set(), stages: new Set(), qf: {}, grade: "", q: "", sort: "rec" };
   // 從網址帶入職涯方向（職缺頁 / 活動頁推薦點過來）
   (I.qs("career") || "").split(",").filter(Boolean).forEach(k => sel.careers.add(k));
+  // 裸路由 / 無效課程導回時的友善提示（/course、/classroom 沒帶 id 或 id 無效）
+  const notice = I.qs("notice");
+  if (notice) setTimeout(() => CZ.toast(notice === "course-missing" ? "找不到這堂課程（可能已下架），先從下面挑一堂吧" : "請先從下面選一堂課程"), 350);
 
   // hero 統計
   (function(){
@@ -121,15 +127,15 @@
       '<a class="btn btn-small" href="/classroom?id='+c.id+'" style="margin-left:auto"><i class="ri-arrow-right-line"></i> 進入教室</a>';
   })();
 
-  // 篩選 chips
+  // 篩選 chips（<button aria-pressed>，鍵盤 Enter/Space 原生可操作）
   function renderChips(){
     document.getElementById("careerChips").innerHTML = I.CAREERS.map(c =>
-      '<span class="ax-chip '+(sel.careers.has(c.key)?'on':'')+'" data-k="'+c.key+'">'+(sel.careers.has(c.key)?'<i class="ri-check-line"></i>':'<i class="'+c.icon+'"></i>')+' '+c.label+'</span>').join("");
+      '<button type="button" class="ax-chip '+(sel.careers.has(c.key)?'on':'')+'" data-k="'+c.key+'" aria-pressed="'+(sel.careers.has(c.key)?'true':'false')+'">'+(sel.careers.has(c.key)?'<i class="ri-check-line"></i>':'<i class="'+c.icon+'"></i>')+' '+c.label+'</button>').join("");
     document.querySelectorAll("#careerChips .ax-chip").forEach(el => el.onclick = () => {
       const k = el.dataset.k; sel.careers.has(k) ? sel.careers.delete(k) : sel.careers.add(k); renderChips(); renderGrid();
     });
     document.getElementById("stageChips").innerHTML = I.STAGES.map(s =>
-      '<span class="ax-chip '+(sel.stages.has(s.key)?'on':'')+'" data-k="'+s.key+'">'+(sel.stages.has(s.key)?'<i class="ri-check-line"></i> ':'')+s.label+'</span>').join("");
+      '<button type="button" class="ax-chip '+(sel.stages.has(s.key)?'on':'')+'" data-k="'+s.key+'" aria-pressed="'+(sel.stages.has(s.key)?'true':'false')+'">'+(sel.stages.has(s.key)?'<i class="ri-check-line"></i> ':'')+s.label+'</button>').join("");
     document.querySelectorAll("#stageChips .ax-chip").forEach(el => el.onclick = () => {
       const k = el.dataset.k; sel.stages.has(k) ? sel.stages.delete(k) : sel.stages.add(k); renderChips(); renderGrid();
     });
@@ -170,10 +176,25 @@
     document.getElementById("cnt").textContent =
       (sel.careers.size ? "已選 " + sel.careers.size + " 個方向 · " : "") + list.length + " 堂課";
     I.wireFavs(document.getElementById("grid"));
+    updateFilterBadge();
   }
+  // 手機版篩選收合：按鈕上的已選數 badge
+  function updateFilterBadge(){
+    const n = sel.careers.size + sel.stages.size + Object.values(sel.qf).filter(Boolean).length + (sel.grade ? 1 : 0);
+    const b = document.getElementById("fCnt");
+    b.hidden = !n; b.textContent = n;
+  }
+  document.getElementById("fToggle").onclick = () => {
+    const p = document.getElementById("filterPanel");
+    const open = p.classList.toggle("open");
+    document.getElementById("fToggle").setAttribute("aria-expanded", open ? "true" : "false");
+  };
 
   document.querySelectorAll("#qfRow .ax-qf").forEach(b => b.onclick = () => {
-    sel.qf[b.dataset.qf] = !sel.qf[b.dataset.qf]; b.classList.toggle("on", !!sel.qf[b.dataset.qf]); renderGrid();
+    sel.qf[b.dataset.qf] = !sel.qf[b.dataset.qf];
+    b.classList.toggle("on", !!sel.qf[b.dataset.qf]);
+    b.setAttribute("aria-pressed", sel.qf[b.dataset.qf] ? "true" : "false");
+    renderGrid();
   });
   document.getElementById("q").addEventListener("input", e => { sel.q = e.target.value.trim(); renderGrid(); });
   document.getElementById("gradeSel").addEventListener("change", e => { sel.grade = e.target.value; renderGrid(); });

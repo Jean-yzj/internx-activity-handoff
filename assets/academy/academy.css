@@ -29,16 +29,27 @@
 .pbar > i { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--theme-light), var(--theme-color)); transition: width .3s; }
 .pbar.done > i { background: linear-gradient(90deg, #35c65a, #1a8a35); }
 
-/* ---------- 篩選列（探索頁） ---------- */
+/* ---------- 篩選列（探索頁）；chips 為 <button type="button">（鍵盤可操作、帶 aria-pressed） ---------- */
 .ax-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-.ax-chip { font-size: 13.5px; padding: 7px 13px; border-radius: 999px; border: 1px solid #d8dee8; background: #fff; color: #11243f; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; user-select: none; transition: all .12s; }
+.ax-chip { font-family: inherit; appearance: none; -webkit-appearance: none; font-size: 13.5px; padding: 7px 13px; border-radius: 999px; border: 1px solid #d8dee8; background: #fff; color: #11243f; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; user-select: none; transition: all .12s; }
 .ax-chip:hover { border-color: var(--theme-light); }
 .ax-chip.on { background: var(--theme-white); color: var(--theme-color-black); border-color: var(--theme-color); font-weight: 600; }
-.ax-qf { font-size: 13px; padding: 6px 12px; border-radius: 999px; border: 1px solid #d8dee8; background: #fff; color: #5b6b7e; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; user-select: none; }
+.ax-qf { font-family: inherit; appearance: none; -webkit-appearance: none; font-size: 13px; padding: 6px 12px; border-radius: 999px; border: 1px solid #d8dee8; background: #fff; color: #5b6b7e; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; user-select: none; }
 .ax-qf.on { background: #11243f; color: #fff; border-color: #11243f; }
+.ax-chip:focus-visible, .ax-qf:focus-visible, .ax-fav:focus-visible { outline: 2px solid var(--theme-color); outline-offset: 2px; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 .ax-searchRow { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 16px; }
 .ax-searchRow .input { flex: 1; min-width: 200px; }
 .ax-sort { width: auto; }
+/* 篩選收合（手機）：桌機面板恆展開、按鈕隱藏 */
+.ax-fToggle { display: none; }
+.ax-fToggle .fBadge { background: var(--theme-color); color: #fff; font-size: 11px; font-weight: 700; border-radius: 999px; padding: 1px 7px; margin-left: 2px; }
+@media (max-width: 640px) {
+  .ax-fToggle { display: inline-flex; }
+  .ax-searchRow .input { min-width: 140px; }
+  .ax-filterPanel { display: none; border: 1px solid #e7eaf0; border-radius: 14px; background: #fff; padding: 2px 14px 14px; margin-top: 12px; }
+  .ax-filterPanel.open { display: block; }
+}
 
 /* ---------- 課程卡 ---------- */
 .ax-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 14px; }
@@ -46,7 +57,7 @@
 .ax-card:hover { box-shadow: 0 10px 26px rgba(16,32,56,.1); border-color: var(--theme-color); transform: translateY(-2px); }
 .ax-cover { height: 120px; display: grid; place-items: center; color: #fff; font-size: 40px; position: relative; }
 .ax-cover .ax-covTags { position: absolute; top: 10px; left: 10px; display: flex; gap: 6px; }
-.ax-fav { position: absolute; top: 8px; right: 8px; width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,.92); border: none; color: #8a94a3; font-size: 16px; cursor: pointer; display: grid; place-items: center; }
+.ax-fav { position: absolute; top: 6px; right: 6px; width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,.92); border: none; color: #8a94a3; font-size: 19px; cursor: pointer; display: grid; place-items: center; }
 .ax-fav.on { color: #e0245e; }
 .ax-cardBody { padding: 14px 15px 15px; display: flex; flex-direction: column; gap: 7px; flex: 1; }
 .ax-cardT { font-weight: 700; font-size: 15.5px; color: #11243f; line-height: 1.45; }

@@ -27,6 +27,7 @@
 <body data-page="academy-admin" data-nav="academy">
 
 <main>
+  <h1 class="sr-only">課程管理後台（Admin）｜職涯學院</h1>
   <div class="cz-container profile">
     <div class="layout">
 
@@ -180,7 +181,7 @@
     return '<div class="sectionHeader"><div class="sectionHeaderLeft"><i class="ri-shopping-cart-2-line"></i> 訂單管理</div>' +
       '<button class="btn btn-white btn-small" id="expOrders"><i class="ri-file-excel-2-line"></i> 匯出 Excel</button></div>' +
       '<p style="font-size:12.5px;color:#8a94a3;margin:0 0 12px">示範資料保留近 30 天明細，較早訂單已彙總至各課程統計。Order／Payment／Enrollment／RevenueRecord 與主平台金流結構共用。</p>' +
-      '<div class="ax-chips" style="margin-bottom:14px">' + chips.map(f => '<span class="ax-qf ' + (orderFilter === f[0] ? "on" : "") + '" data-of="' + f[0] + '">' + f[1] + '</span>').join("") + '</div>' +
+      '<div class="ax-chips" style="margin-bottom:14px">' + chips.map(f => '<button type="button" class="ax-qf ' + (orderFilter === f[0] ? "on" : "") + '" data-of="' + f[0] + '" aria-pressed="' + (orderFilter === f[0]) + '">' + f[1] + '</button>').join("") + '</div>' +
       '<div class="tableWrap"><table class="ax-table"><thead><tr><th>訂單編號</th><th>學生</th><th>課程</th><th>金額</th><th>狀態</th><th>付款時間</th><th style="text-align:right">操作</th></tr></thead><tbody>' +
       list.map(o => {
         const c = I.getCourse(o.courseId);

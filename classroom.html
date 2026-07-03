@@ -31,7 +31,7 @@
 (function(){
   const I = window.IXA;
   const c = I.getCourse(I.qs("id"));
-  if (!c) { location.replace("/academy"); return; }
+  if (!c) { location.replace("/academy?notice=" + (I.qs("id") ? "course-missing" : "pick-course")); return; }
   document.title = c.title + "｜教室 · InternX 實習通";
   const enrolled = I.isEnrolled(c.id);
   const lessons = I.lessonsOf(c);

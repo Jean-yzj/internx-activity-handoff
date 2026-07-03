@@ -895,7 +895,7 @@
     return '<a class="ax-card" href="/course?id=' + c.id + '">' +
       '<div class="ax-cover" style="' + covStyle(c) + '"><i class="' + c.icon + '"></i>' +
         '<div class="ax-covTags">' + (c.featured ? '<span class="atg featured"><i class="ri-star-fill"></i> 精選</span>' : "") + (c.free ? '<span class="atg free">免費</span>' : (onSale(c) ? '<span class="atg free">限時優惠</span>' : "")) + "</div>" +
-        '<button class="ax-fav ' + (isFav(c.id) ? "on" : "") + '" data-fav="' + c.id + '" title="收藏課程"><i class="' + (isFav(c.id) ? "ri-heart-fill" : "ri-heart-line") + '"></i></button>' +
+        '<button type="button" class="ax-fav ' + (isFav(c.id) ? "on" : "") + '" data-fav="' + c.id + '" aria-pressed="' + (isFav(c.id) ? "true" : "false") + '" aria-label="收藏課程：' + esc(c.title) + '" title="收藏課程"><i class="' + (isFav(c.id) ? "ri-heart-fill" : "ri-heart-line") + '" aria-hidden="true"></i></button>' +
       "</div>" +
       '<div class="ax-cardBody">' +
         '<div class="ax-cardT">' + esc(c.title) + "</div>" +
@@ -913,7 +913,8 @@
       e.preventDefault(); e.stopPropagation();
       const on = toggleFav(b.dataset.fav);
       b.classList.toggle("on", on);
-      b.innerHTML = '<i class="' + (on ? "ri-heart-fill" : "ri-heart-line") + '"></i>';
+      b.setAttribute("aria-pressed", on ? "true" : "false");
+      b.innerHTML = '<i class="' + (on ? "ri-heart-fill" : "ri-heart-line") + '" aria-hidden="true"></i>';
       if (window.CZ) CZ.toast(on ? "已加入收藏，可在「我的課程」查看" : "已取消收藏");
     }));
   }
