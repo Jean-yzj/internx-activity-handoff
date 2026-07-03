@@ -170,16 +170,16 @@
         '<div class="ax-player" id="player">' +
           '<div class="pv-art" style="' + I.covStyle(c) + ';opacity:.92"><i class="' + c.icon + '"></i></div>' +
           '<div class="pv-title">' + I.esc(cur.title) + '</div>' +
-          '<button class="ax-playBig" id="bigPlay" title="播放"><i class="ri-play-fill"></i></button>' +
+          '<button class="ax-playBig" id="bigPlay" title="播放" aria-label="播放"><i class="ri-play-fill" aria-hidden="true"></i></button>' +
           '<div class="ax-ccBox" id="ccBox" style="display:' + (I.ccOn() ? 'flex' : 'none') + '"><span id="ccText"></span></div>' +
           '<div class="ax-pvCtrl">' +
-            '<input type="range" class="ax-seek" id="seek" min="0" max="' + dur(cur) + '" value="' + t + '" step="1" />' +
+            '<input type="range" class="ax-seek" id="seek" min="0" max="' + dur(cur) + '" value="' + t + '" step="1" aria-label="播放進度" />' +
             '<div class="ax-pvBtns">' +
-              '<button id="ctlPlay" title="播放/暫停"><i class="ri-play-fill"></i></button>' +
+              '<button id="ctlPlay" title="播放/暫停" aria-label="播放"><i class="ri-play-fill" aria-hidden="true"></i></button>' +
               '<span id="tlabel">' + fmtT(t) + ' / ' + fmtT(dur(cur)) + '</span>' +
               '<span class="spacer"></span>' +
-              '<button id="ccBtn" class="' + (I.ccOn() ? '' : 'ccOff') + '" title="字幕開關"><i class="ri-closed-captioning-' + (I.ccOn() ? 'fill' : 'line') + '"></i></button>' +
-              '<button class="ax-speed" id="spd">' + speed + 'x</button>' +
+              '<button id="ccBtn" class="' + (I.ccOn() ? '' : 'ccOff') + '" title="字幕開關" aria-label="字幕開關" aria-pressed="' + (I.ccOn() ? 'true' : 'false') + '"><i class="ri-closed-captioning-' + (I.ccOn() ? 'fill' : 'line') + '" aria-hidden="true"></i></button>' +
+              '<button class="ax-speed" id="spd" aria-label="播放速度">' + speed + 'x</button>' +
             '</div>' +
           '</div>' +
         '</div>' +
@@ -203,6 +203,7 @@
     wire();
     updateCtrl();
     updateBar();
+    I.a11yTabs(document.querySelector(".roomTabs"), "active");
   }
 
   function updateBar(){
@@ -223,7 +224,10 @@
     const big = document.getElementById("bigPlay");
     const ctl = document.getElementById("ctlPlay");
     if (big) big.style.display = playing ? "none" : "grid";
-    if (ctl) ctl.innerHTML = playing ? '<i class="ri-pause-fill"></i>' : '<i class="ri-play-fill"></i>';
+    if (ctl) {
+      ctl.innerHTML = playing ? '<i class="ri-pause-fill" aria-hidden="true"></i>' : '<i class="ri-play-fill" aria-hidden="true"></i>';
+      ctl.setAttribute("aria-label", playing ? "暫停" : "播放");
+    }
   }
   function updateAll(){ render(); }
 
@@ -236,7 +240,8 @@
       I.setCC(!I.ccOn());
       const b = document.getElementById("ccBtn");
       b.classList.toggle("ccOff", !I.ccOn());
-      b.innerHTML = '<i class="ri-closed-captioning-' + (I.ccOn() ? 'fill' : 'line') + '"></i>';
+      b.setAttribute("aria-pressed", I.ccOn() ? "true" : "false");
+      b.innerHTML = '<i class="ri-closed-captioning-' + (I.ccOn() ? 'fill' : 'line') + '" aria-hidden="true"></i>';
       updateCC();
       CZ.toast(I.ccOn() ? "字幕已開啟" : "字幕已關閉");
     };

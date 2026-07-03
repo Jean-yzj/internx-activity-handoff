@@ -318,10 +318,10 @@ let agenda = [
 function renderAgenda(){
   document.getElementById('agendaList').innerHTML = agenda.map((a,i)=>`
     <div class="agenda-item">
-      <input class="input ag-time" placeholder="14:00" value="${esc(a.time)}" oninput="agenda[${i}].time=this.value">
-      <input class="input ag-title" placeholder="標題（例：報到）" value="${esc(a.title)}" oninput="agenda[${i}].title=this.value">
-      <button class="ag-del" title="刪除時段" onclick="removeAgenda(${i})"><i class="ri-delete-bin-line"></i></button>
-      <input class="input ag-desc" placeholder="說明（選填）" value="${esc(a.desc||'')}" oninput="agenda[${i}].desc=this.value">
+      <input class="input ag-time" placeholder="14:00" aria-label="第 ${i+1} 個時段的時間" value="${esc(a.time)}" oninput="agenda[${i}].time=this.value">
+      <input class="input ag-title" placeholder="標題（例：報到）" aria-label="第 ${i+1} 個時段的標題" value="${esc(a.title)}" oninput="agenda[${i}].title=this.value">
+      <button class="ag-del" title="刪除時段" aria-label="刪除第 ${i+1} 個時段" onclick="removeAgenda(${i})"><i class="ri-delete-bin-line" aria-hidden="true"></i></button>
+      <input class="input ag-desc" placeholder="說明（選填）" aria-label="第 ${i+1} 個時段的說明" value="${esc(a.desc||'')}" oninput="agenda[${i}].desc=this.value">
     </div>`).join('') || `<p class="muted" style="font-size:13px;margin:4px 0">尚未新增時段；報名頁不會顯示「當天流程」。</p>`;
 }
 function addAgenda(){ agenda.push({time:'',title:'',desc:''}); renderAgenda(); }
@@ -510,6 +510,27 @@ function saveActivity(){
 function previewRegistration(){ saveActivity(); toast('已帶入目前內容，開啟報名頁預覽'); window.open('attendee.html','_blank'); }
 
 renderFields();
+
+/* a11y：label ↔ 控制項自動關聯（label 沒 for 時補上後方第一個控制項；票券等動態區塊重渲染後自動再補） */
+(function(){
+  function fixLabels(){
+    document.querySelectorAll("label").forEach((lb, i) => {
+      if (lb.htmlFor || lb.querySelector("input,select,textarea")) return; // 已關聯或包裹式
+      let el = lb.nextElementSibling, ctl = null;
+      while (el && !ctl) {
+        ctl = (el.matches && el.matches("input,select,textarea")) ? el : (el.querySelector ? el.querySelector("input,select,textarea") : null);
+        el = el.nextElementSibling;
+      }
+      if (!ctl) return;
+      if (!ctl.id) ctl.id = "fld-" + i;
+      lb.setAttribute("for", ctl.id);
+    });
+  }
+  fixLabels();
+  let t;
+  new MutationObserver(() => { clearTimeout(t); t = setTimeout(fixLabels, 150); })
+    .observe(document.body, { childList: true, subtree: true });
+})();
 </script>
 </body>
 </html>

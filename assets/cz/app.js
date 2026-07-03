@@ -189,20 +189,40 @@
       </footer>`);
   }
 
-  /* ---------- Modal ---------- */
+  /* ---------- Modal（dialog 語意 / Esc 關閉 / 焦點圈與還原） ---------- */
+  let _modalReturnFocus = null;
+  const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
   window.CZ.modal = function (innerHtml) {
     let overlay = document.getElementById("czModal");
     if (!overlay) {
       overlay = h(`<div class="modalOverlay" id="czModal"></div>`);
       document.body.appendChild(overlay);
       overlay.addEventListener("click", (e) => { if (e.target === overlay) CZ.closeModal(); });
+      overlay.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") { e.stopPropagation(); CZ.closeModal(); return; }
+        if (e.key !== "Tab") return;
+        // 焦點圈：Tab 在 modal 內循環
+        const items = overlay.querySelectorAll(FOCUSABLE);
+        if (!items.length) return;
+        const first = items[0], last = items[items.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      });
     }
-    overlay.innerHTML = `<div class="modal">${innerHtml}</div>`;
-    requestAnimationFrame(() => overlay.classList.add("show"));
+    _modalReturnFocus = document.activeElement;
+    overlay.innerHTML = `<div class="modal" role="dialog" aria-modal="true" tabindex="-1">${innerHtml}</div>`;
+    requestAnimationFrame(() => {
+      overlay.classList.add("show");
+      const dlg = overlay.firstElementChild;
+      const first = dlg.querySelector(FOCUSABLE);
+      (first || dlg).focus();
+    });
   };
   window.CZ.closeModal = function () {
     const o = document.getElementById("czModal");
     if (o) o.classList.remove("show");
+    if (_modalReturnFocus && document.contains(_modalReturnFocus)) { try { _modalReturnFocus.focus(); } catch (e) {} }
+    _modalReturnFocus = null;
   };
 
   /* 認證標章說明彈窗（VerifiedRolePitchModal） */
@@ -277,17 +297,36 @@
     t._timer = setTimeout(() => t.classList.remove("show"), 2600);
   };
 
-  /* ---------- 分頁切換 ---------- */
+  /* ---------- 分頁切換（tablist 語意＋方向鍵） ---------- */
   function wireTabs(root) {
     (root || document).querySelectorAll("[data-tabs]").forEach(group => {
-      group.querySelectorAll("[data-tab]").forEach(btn => {
+      group.setAttribute("role", "tablist");
+      const btns = group.querySelectorAll("[data-tab]");
+      btns.forEach(btn => {
+        btn.setAttribute("role", "tab");
+        btn.setAttribute("aria-selected", btn.classList.contains("active") ? "true" : "false");
         btn.addEventListener("click", () => {
           const key = btn.dataset.tab;
-          group.querySelectorAll("[data-tab]").forEach(b => b.classList.toggle("active", b === btn));
+          group.querySelectorAll("[data-tab]").forEach(b => {
+            b.classList.toggle("active", b === btn);
+            b.setAttribute("aria-selected", b === btn ? "true" : "false");
+          });
           document.querySelectorAll(`[data-pane="${group.dataset.tabs}"]`).forEach(p =>
             p.classList.toggle("active", p.dataset.paneKey === key));
         });
       });
+      if (!group._czTabKeys) {
+        group._czTabKeys = true;
+        group.addEventListener("keydown", e => {
+          if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+          const t = [...group.querySelectorAll("[data-tab]")];
+          const i = t.indexOf(document.activeElement);
+          if (i < 0) return;
+          e.preventDefault();
+          const n = t[(i + (e.key === "ArrowRight" ? 1 : t.length - 1)) % t.length];
+          n.focus(); n.click();
+        });
+      }
     });
   }
   window.CZ.wireTabs = wireTabs;

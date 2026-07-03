@@ -96,6 +96,7 @@
     document.getElementById("tabs").innerHTML = tabs.map(t =>
       '<button class="sectionTab ' + (tab === t[0] ? 'active' : '') + '" data-t="' + t[0] + '"><i class="' + t[1] + '"></i> ' + t[2] + '</button>').join("");
     document.querySelectorAll("#tabs .sectionTab").forEach(b => b.onclick = () => { tab = b.dataset.t; if (tab === "wizard" && !draft) newDraft(); render(); });
+    I.a11yTabs(document.getElementById("tabs"), "active");
   }
 
   /* ================= 總覽 ================= */
@@ -287,6 +288,7 @@
     }))));
     if (saved.status === undefined) saved.status = "draft";
     draft.id = saved.id;
+    if (window._clearWizDirty) window._clearWizDirty();
     if (!silent) CZ.toast("草稿已儲存");
     return saved;
   }
@@ -510,6 +512,17 @@
     }
   }
   document.getElementById("newCourseBtn").onclick = () => { newDraft(); tab = "wizard"; render(); };
+
+  /* 未存檔離開警告（review P2）：精靈內有改動且未儲存 → 關頁/跳頁前提醒 */
+  let wizDirty = false;
+  document.getElementById("body").addEventListener("input", () => { if (tab === "wizard") wizDirty = true; });
+  document.getElementById("body").addEventListener("click", e => {
+    if (tab === "wizard" && e.target.closest("[data-pick],[data-flag],[data-freeopt],[data-cov],[data-ladd],[data-lrm],[data-lsadd],[data-lsrm],[data-lsv],[data-lscc],#secAdd,#pairAdd")) wizDirty = true;
+  });
+  window.addEventListener("beforeunload", e => {
+    if (tab === "wizard" && wizDirty) { e.preventDefault(); e.returnValue = ""; }
+  });
+  window._clearWizDirty = () => { wizDirty = false; };
 
   if (I.qs("tab")) tab = I.qs("tab");
   if (tab === "wizard") newDraft();

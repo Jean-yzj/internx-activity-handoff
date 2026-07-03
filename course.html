@@ -133,6 +133,19 @@
       '</div></div>';
   }
 
+  /* 手機 sticky 列：未購＝價格＋購買；已購＝進度＋繼續上課（review P2） */
+  function stickyBarHTML(){
+    if (c.status !== "published") return "";
+    if (enrolled()) {
+      const pct = I.coursePct(c.id);
+      return '<div class="ax-stickyBar"><div class="sp"><div class="spT">已完成 ' + pct + '%</div><div class="pbar"><i style="width:' + pct + '%"></i></div></div>' +
+        '<a class="btn btn-small" href="/classroom?id=' + c.id + '"><i class="ri-play-circle-line"></i> ' + (pct > 0 ? '繼續上課' : '開始上課') + '</a></div>';
+    }
+    const p = I.currentPrice(c);
+    return '<div class="ax-stickyBar"><div class="sp"><div class="spT">課程價格</div><div class="spV">' + (p === 0 ? '<span style="color:#1a8a35">免費</span>' : I.money(p) + (I.onSale(c) ? '<span class="was">' + I.money(c.price) + '</span>' : '')) + '</div></div>' +
+      '<button type="button" class="btn btn-small" id="stickyBuy"><i class="' + (p === 0 ? 'ri-user-add-line' : 'ri-shopping-cart-2-line') + '"></i> ' + (p === 0 ? '免費報名' : '立即購買') + '</button></div>';
+  }
+
   /* ---------- 組頁 ---------- */
   function render(){
     document.getElementById("page").innerHTML =
@@ -196,7 +209,7 @@
         '<p style="font-size:12.5px;color:#8a94a3;margin:-6px 0 12px">課程只是其中一步 —— 搭配這些服務走完整段準備。</p>' +
         '<div class="ax-pairGrid">' + c.pairWith.map(pairHTML).join("") + related.map(pairHTML).join("") + '</div></div>' : "") +
 
-      '</div><div id="buySlot">' + buyCardHTML() + '</div></div>';
+      '</div><div id="buySlot">' + buyCardHTML() + '</div></div>' + stickyBarHTML();
 
     // 手風琴
     document.querySelectorAll("[data-acc]").forEach(h => h.addEventListener("click", () => h.parentElement.classList.toggle("open")));
@@ -276,6 +289,8 @@
   function wireBuy(){
     const b = document.getElementById("buyBtn");
     b && b.addEventListener("click", openStep1);
+    const sb = document.getElementById("stickyBuy");
+    sb && sb.addEventListener("click", openStep1);
   }
 
   render();

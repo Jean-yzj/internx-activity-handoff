@@ -89,6 +89,7 @@
     document.getElementById("tabs").innerHTML = tabs.map(t =>
       '<button class="sectionTab ' + (tab === t[0] ? "active" : "") + '" data-t="' + t[0] + '"><i class="' + t[1] + '"></i> ' + t[2] + '</button>').join("");
     document.querySelectorAll("#tabs .sectionTab").forEach(b => b.onclick = () => { tab = b.dataset.t; render(); });
+    I.a11yTabs(document.getElementById("tabs"), "active");
   }
 
   /* ================= 課程審核 ================= */

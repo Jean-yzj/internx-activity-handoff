@@ -26,7 +26,10 @@
         <p id="coverTag"></p>
       </header>
 
-      <img class="ix-activity-image" src="assets/img/internx-logo-with-background.png" alt="實習通活動預設圖片" />
+      <!-- 主辦方未上傳封面時的精簡佔位（原為 1.3MB 3:2 大圖，review 指出首屏被空白圖吃掉） -->
+      <div class="ix-activity-cover" role="img" aria-label="活動封面示意">
+        <i class="ri-calendar-event-line"></i><span>InternX 職涯活動</span>
+      </div>
 
       <section class="ix-content-section">
         <h2>活動介紹</h2>
@@ -254,31 +257,35 @@ if(fromEditor) document.getElementById('editorBanner').style.display='flex';
 
 /* ---- ② form fields (how each field displays to the attendee) ---- */
 function renderForm(fields){
-  return (fields||[]).map(f=>{
+  // 每個欄位配 id：文字類控制項用 label[for]，群組類（單選/複選/檔案）用 role=group + aria-labelledby
+  return (fields||[]).map((f,i)=>{
+    const fid='af-'+i, lid='af-l-'+i;
     const req = f.required ? ' <span class="req">★</span>' : '';
     let help = f.helperText ? `<div class="hint">${esc(f.helperText)}</div>` : '';
-    let ctrl='';
+    let ctrl='', grouped=false;
     switch(f.type){
-      case 'textarea': ctrl=`<textarea class="textarea" rows="3" placeholder="${esc(f.placeholder)}"></textarea>`; break;
-      case 'select': ctrl=`<select class="select"><option>請選擇</option>${(f.options||[]).map(o=>`<option>${esc(o)}</option>`).join('')}${f.allowOther?'<option>其他…</option>':''}</select>`; break;
+      case 'textarea': ctrl=`<textarea id="${fid}" class="textarea" rows="3" placeholder="${esc(f.placeholder)}"></textarea>`; break;
+      case 'select': ctrl=`<select id="${fid}" class="select"><option>請選擇</option>${(f.options||[]).map(o=>`<option>${esc(o)}</option>`).join('')}${f.allowOther?'<option>其他…</option>':''}</select>`; break;
       case 'radio': case 'checkbox':
-        ctrl=`<div class="opt-list">${(f.options||[]).map(o=>`<label class="opt-pick"><span class="mk ${f.type==='checkbox'?'sq':''}"></span>${esc(o)}</label>`).join('')}${f.allowOther?`<label class="opt-pick"><span class="mk ${f.type==='checkbox'?'sq':''}"></span>其他…</label>`:''}</div>`; break;
-      case 'date': ctrl=`<input class="input" type="date">`; break;
-      case 'number': ctrl=`<input class="input" type="number" placeholder="${esc(f.placeholder)}"${f.min!=null?` min="${f.min}"`:''}${f.max!=null?` max="${f.max}"`:''}>`; break;
+        grouped=true;
+        ctrl=`<div class="opt-list" role="group" aria-labelledby="${lid}">${(f.options||[]).map(o=>`<label class="opt-pick"><span class="mk ${f.type==='checkbox'?'sq':''}"></span>${esc(o)}</label>`).join('')}${f.allowOther?`<label class="opt-pick"><span class="mk ${f.type==='checkbox'?'sq':''}"></span>其他…</label>`:''}</div>`; break;
+      case 'date': ctrl=`<input id="${fid}" class="input" type="date">`; break;
+      case 'number': ctrl=`<input id="${fid}" class="input" type="number" placeholder="${esc(f.placeholder)}"${f.min!=null?` min="${f.min}"`:''}${f.max!=null?` max="${f.max}"`:''}>`; break;
       case 'email':
-        ctrl=`<input class="input" type="email" placeholder="${esc(f.placeholder)}">`;
+        ctrl=`<input id="${fid}" class="input" type="email" placeholder="${esc(f.placeholder)}">`;
         if(f.allowedDomains && f.allowedDomains.filter(Boolean).length) help=`<div class="hint">僅接受 ${f.allowedDomains.filter(Boolean).map(esc).join('、')} 網域</div>`;
         break;
       case 'file': {
+        grouped=true;
         const p=[]; if(f.accept && f.accept!=='*/*') p.push('接受 '+f.accept);
         if(f.maxFileSizeMB) p.push('單檔 ≤ '+f.maxFileSizeMB+'MB'); p.push('最多 '+(f.maxFiles||1)+' 個');
-        ctrl=`<div class="filebox"><i class="ri-upload-cloud-2-line"></i><div>點擊或拖曳上傳<br><small>${esc(p.join(' · '))}</small></div></div>`; break;
+        ctrl=`<div class="filebox" role="group" aria-labelledby="${lid}"><i class="ri-upload-cloud-2-line"></i><div>點擊或拖曳上傳<br><small>${esc(p.join(' · '))}</small></div></div>`; break;
       }
       case 'agreement':
         return `<div class="field"><label class="opt-pick" style="font-weight:400;align-items:flex-start"><span class="mk sq" style="margin-top:2px"></span><span>${esc(f.agreementText||f.label)}${req}</span></label>${help}</div>`;
-      default: ctrl=`<input class="input" placeholder="${esc(f.placeholder)}">`;
+      default: ctrl=`<input id="${fid}" class="input" placeholder="${esc(f.placeholder)}">`;
     }
-    return `<div class="field"><label>${esc(f.label)}${req}</label>${ctrl}${help}</div>`;
+    return `<div class="field"><label id="${lid}"${grouped?'':` for="${fid}"`}>${esc(f.label)}${req}</label>${ctrl}${help}</div>`;
   }).join('');
 }
 document.getElementById('formBox').innerHTML = renderForm(A.fields);

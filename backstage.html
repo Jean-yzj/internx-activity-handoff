@@ -162,13 +162,13 @@
 
       <!-- RIGHT: 上方水平分頁 + 內容卡（與創作者主頁一致） -->
       <div class="main">
-        <div class="sectionTabs" id="bkTabs">
-          <button class="sectionTab active" data-go="manage"><i class="ri-calendar-todo-line"></i> 活動管理</button>
-          <button class="sectionTab" data-go="regs"><i class="ri-list-check-2"></i> 報名名單 <span id="navPend" class="navPend">3</span></button>
-          <button class="sectionTab" data-go="settle"><i class="ri-wallet-3-line"></i> 撥款結算</button>
-          <button class="sectionTab" data-go="content"><i class="ri-quill-pen-line"></i> 創作內容</button>
-          <button class="sectionTab" data-go="showcase"><i class="ri-medal-line"></i> 成果展示</button>
-          <button class="sectionTab" data-go="reviews"><i class="ri-chat-3-line"></i> 回應評價</button>
+        <div class="sectionTabs" id="bkTabs" role="tablist">
+          <button class="sectionTab active" role="tab" aria-selected="true" data-go="manage"><i class="ri-calendar-todo-line"></i> 活動管理</button>
+          <button class="sectionTab" role="tab" aria-selected="false" data-go="regs"><i class="ri-list-check-2"></i> 報名名單 <span id="navPend" class="navPend">3</span></button>
+          <button class="sectionTab" role="tab" aria-selected="false" data-go="settle"><i class="ri-wallet-3-line"></i> 撥款結算</button>
+          <button class="sectionTab" role="tab" aria-selected="false" data-go="content"><i class="ri-quill-pen-line"></i> 創作內容</button>
+          <button class="sectionTab" role="tab" aria-selected="false" data-go="showcase"><i class="ri-medal-line"></i> 成果展示</button>
+          <button class="sectionTab" role="tab" aria-selected="false" data-go="reviews"><i class="ri-chat-3-line"></i> 回應評價</button>
         </div>
         <div class="mainCard">
 
@@ -324,7 +324,10 @@
   document.getElementById("bkAvatar").innerHTML = CZ.avatar("X", "#0182fd", 96, "sidebarAvatar");
   function showSection(k){
     document.querySelectorAll(".tabPane").forEach(p => p.classList.toggle("active", p.dataset.paneKey === k));
-    document.querySelectorAll(".sectionTab").forEach(n => n.classList.toggle("active", n.dataset.go === k));
+    document.querySelectorAll(".sectionTab").forEach(n => {
+      n.classList.toggle("active", n.dataset.go === k);
+      n.setAttribute("aria-selected", n.dataset.go === k ? "true" : "false");
+    });
   }
   function goTab(k){ showSection(k); }
   document.querySelectorAll(".sectionTab").forEach(b => b.addEventListener("click", () => showSection(b.dataset.go)));

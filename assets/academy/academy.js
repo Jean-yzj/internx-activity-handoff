@@ -920,6 +920,28 @@
   }
   const MAT_ICON = { xlsx: "ri-file-excel-2-line", pptx: "ri-slideshow-2-line", docx: "ri-file-word-2-line", pdf: "ri-file-pdf-2-line", zip: "ri-file-zip-line", fig: "ri-pen-nib-line", notion: "ri-booklet-line" };
 
+  /* 分頁語意化：role=tablist/tab + aria-selected + 左右鍵切換（各頁 render 後呼叫） */
+  function a11yTabs(container, activeClass) {
+    if (!container) return;
+    container.setAttribute("role", "tablist");
+    container.querySelectorAll("button").forEach(b => {
+      b.setAttribute("role", "tab");
+      b.setAttribute("aria-selected", b.classList.contains(activeClass || "active") ? "true" : "false");
+    });
+    if (!container._axTabKeys) {
+      container._axTabKeys = true;
+      container.addEventListener("keydown", e => {
+        if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+        const t = [...container.querySelectorAll("button")];
+        const i = t.indexOf(document.activeElement);
+        if (i < 0) return;
+        e.preventDefault();
+        const n = t[(i + (e.key === "ArrowRight" ? 1 : t.length - 1)) % t.length];
+        n.focus(); n.click();
+      });
+    }
+  }
+
   /* ================= 字幕（cue 模型；正式版＝講師上傳 SRT/VTT，見 spec §17） ================= */
   // lesson.subtitles = [{ t: 秒, text }]；沒有自訂字幕的單元回傳示範字幕（demo 佔位）
   function cuesFor(lesson) {
@@ -967,6 +989,6 @@
     approveCourse, rejectCourse, takedownCourse, setFeatured, decideCreatorApp, setSuspended,
     platformSummary, markPayout, exportCSV,
     covStyle, avatarHTML, priceHTML, courseCardHTML, wireFavs, MAT_ICON,
-    cuesFor, cueAt, ccOn, setCC, parseCueLines, cueLinesOf,
+    cuesFor, cueAt, ccOn, setCC, parseCueLines, cueLinesOf, a11yTabs,
   };
 })();

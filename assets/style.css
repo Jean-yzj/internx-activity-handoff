@@ -483,18 +483,23 @@ body:not([data-cz]) .topbar {
   line-height: 1.65;
   max-width: 760px;
 }
-.ix-activity-image {
+/* 活動封面：無上傳圖時用精簡品牌佔位（取代原 3:2 大圖；正式版由主辦方上傳實圖＋WebP 壓縮） */
+.ix-activity-cover {
   width: 100%;
   max-width: 650px;
-  aspect-ratio: 3 / 2;
-  object-fit: cover;
-  object-position: center;
+  height: 128px;
   border-radius: var(--border-radius);
-  display: block;
   margin-bottom: 34px;
-  border: 1px solid var(--border);
-  background: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: #fff;
+  font-weight: 600;
+  letter-spacing: .02em;
+  background: linear-gradient(135deg, var(--theme-color), var(--theme-color-dark));
 }
+.ix-activity-cover i { font-size: 26px; opacity: .92; }
 .ix-content-section {
   margin-bottom: 40px;
 }

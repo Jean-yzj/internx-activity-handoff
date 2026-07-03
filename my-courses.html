@@ -90,6 +90,7 @@
     const tabs = [["all", "全部課程", "ri-book-2-line"], ["doing", "進行中", "ri-play-circle-line"], ["done", "已完成", "ri-checkbox-circle-line"], ["fav", "收藏", "ri-heart-line"], ["dl", "下載紀錄", "ri-download-2-line"]];
     document.getElementById("tabs").innerHTML = tabs.map(t => '<button class="mcTab ' + (tab === t[0] ? 'active' : '') + '" data-t="' + t[0] + '"><i class="' + t[2] + '"></i> ' + t[1] + '</button>').join("");
     document.querySelectorAll(".mcTab").forEach(b => b.onclick = () => { tab = b.dataset.t; render(); });
+    I.a11yTabs(document.getElementById("tabs"), "active");
 
     const body = document.getElementById("body");
     const list = my();
