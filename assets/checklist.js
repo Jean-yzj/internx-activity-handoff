@@ -13,13 +13,14 @@
   var LS_KEY = "handoff_key";
   var LS_OPEN = "handoff_open";
 
-  var DEF = { status: "todo", by: "", at: null };
+  var DEF = { status: "todo", by: "", at: null, assignee: "" };
 
   var items = null;      // checklist-items.json
   var state = null;      // { storage, items:{}, notes:[], writeProtected }
   var filter = "all";
   // /handoff 的排程看板點過來時帶 ?stage=short|mid|long，直接聚焦那一期
   var stage = (location.search.match(/[?&]stage=(short|mid|long)/) || [])[1] || "all";
+  var person = "all";    // all｜未指派用 "_none"｜其餘為負責人名字
   var openSet = new Set(JSON.parse(localStorage.getItem(LS_OPEN) || "[]"));
   var root = document.getElementById("ck");
 
@@ -72,6 +73,26 @@
   }
 
   function st(id) { return (state.items && state.items[id]) || DEF; }
+
+  function who4(id) { return (st(id).assignee || "").trim(); }
+
+  // 目前出現過的所有負責人（用來做篩選列與快速指派按鈕）
+  function people() {
+    var seen = {};
+    everyItem().forEach(function (x) {
+      var a = who4(x.item.id);
+      if (a) seen[a] = (seen[a] || 0) + 1;
+    });
+    var me = who();
+    if (me && !seen[me]) seen[me] = 0;   // 自己就算還沒認領也要出現，才點得到
+    return Object.keys(seen).sort(function (a, b) { return seen[b] - seen[a] || a.localeCompare(b); });
+  }
+
+  function matchPerson(id) {
+    if (person === "all") return true;
+    if (person === "_none") return !who4(id);
+    return who4(id) === person;
+  }
 
   function notesFor(id) {
     return (state.notes || []).filter(function (n) { return n.itemId === id; });
@@ -132,10 +153,22 @@
 
   /* ---------------- actions ---------------- */
 
+  function assign(itemId, name) {
+    if (!guard()) return;
+    var prev = st(itemId);
+    state.items[itemId] = {
+      status: prev.status || "todo", by: who(), at: new Date().toISOString(), assignee: name,
+    };
+    render();
+    post("/api/assignee", { itemId: itemId, assignee: name, by: who() })
+      .then(function () { toast(name ? "已指派給 " + name : "已取消指派"); })
+      .catch(function (e) { state.items[itemId] = prev; render(); onWriteError(e); });
+  }
+
   function setStatus(itemId, status) {
     if (!guard()) return;
     var prev = st(itemId);
-    state.items[itemId] = { status: status, by: who(), at: new Date().toISOString() };
+    state.items[itemId] = { status: status, by: who(), at: new Date().toISOString(), assignee: prev.assignee || "" };
     render();
     post("/api/status", { itemId: itemId, status: status, by: who() }).catch(function (e) {
       state.items[itemId] = prev;
@@ -150,7 +183,9 @@
       .then(function (r) {
         state.notes.push(r.note);
         if (kind === "blocker" && itemId !== "_general" && st(itemId).status !== "blocked") {
-          state.items[itemId] = { status: "blocked", by: who(), at: new Date().toISOString() };
+          state.items[itemId] = {
+            status: "blocked", by: who(), at: new Date().toISOString(), assignee: who4(itemId),
+          };
           post("/api/status", { itemId: itemId, status: "blocked", by: who() }).catch(function () {});
         }
         render();
@@ -171,7 +206,8 @@
 
   function counts() {
     var c = { todo: 0, doing: 0, done: 0, blocked: 0, total: 0 };
-    allItems().forEach(function (x) { c[st(x.item.id).status]++; c.total++; });
+    allItems().filter(function (x) { return matchPerson(x.item.id); })
+      .forEach(function (x) { c[st(x.item.id).status]++; c.total++; });
     return c;
   }
 
@@ -255,7 +291,9 @@
       var ns = notesFor(x.item.id).filter(function (n) { return !n.resolved; });
       var last = ns[ns.length - 1];
       return '<div class="ckAlertRow">' +
-        '<div class="t">' + esc(x.item.title) + '</div>' +
+        '<div class="t">' + esc(x.item.title) +
+          (who4(x.item.id) ? '<span class="ckOwner" style="margin-left:8px">' + esc(who4(x.item.id)) + '</span>' : '') +
+        '</div>' +
         (last ? '<div class="q">' + esc(last.body) + '</div><div class="m">' + esc(last.author || "") + '・' + esc(fmt(last.at)) + '</div>'
               : '<div class="m">標成卡住，還沒寫下問題</div>') +
         '<div style="margin-top:8px"><button class="btn btn-white btn-small ckJump" data-id="' + esc(x.item.id) + '">看這項 →</button></div>' +
@@ -282,7 +320,8 @@
     var ns = notesFor(it.id);
     var openBlockers = ns.filter(function (n) { return n.kind === "blocker" && !n.resolved; }).length;
     var isOpen = openSet.has(it.id);
-    var show = filter === "all" || s.status === filter;
+    var show = (filter === "all" || s.status === filter) && matchPerson(it.id);
+    var owner = who4(it.id);
 
     return '<div class="ckItem' + (isOpen ? ' open' : '') + (show ? '' : ' hide') + '" data-s="' + s.status + '" data-id="' + esc(it.id) + '">' +
       '<div class="ckRow" data-toggle="' + esc(it.id) + '">' +
@@ -290,6 +329,8 @@
         '<div class="ckMain">' +
           '<div class="ckTitle">' + esc(it.title) + '</div>' +
           '<div class="ckMeta">' +
+            // 只在有人認領時標名字；沒人認領就留白，未指派的總數看上面的分工列
+            (owner ? '<span class="ckOwner">' + esc(owner) + '</span>' : '') +
             '<span class="ckRef">' + esc(it.ref) + '</span>' +
             (it.note ? '<span class="ckBadge staging"><i class="ri-information-line"></i> 有提醒</span>' : '') +
             (openBlockers ? '<span class="ckBadge blocker">' + openBlockers + ' 個問題待回</span>' : '') +
@@ -303,11 +344,14 @@
         '<p class="ckDetail">' + esc(it.detail) + '</p>' +
         (it.note ? '<div class="ckWarn" style="margin-bottom:12px"><i class="ri-information-line"></i> ' + esc(it.note) + '</div>' : '') +
         '<div class="ckAccept"><b>怎樣算做完：</b>' + esc(it.accept) + '</div>' +
-        '<div class="ckStates">' +
-          ORDER.map(function (v) {
-            return '<button class="ckState' + (s.status === v ? ' on' : '') + '" data-v="' + v + '" data-set="' + esc(it.id) + '">' + LABEL[v] + '</button>';
-          }).join('') +
+        '<div class="ckField2"><span class="ckField2Label">狀態</span>' +
+          '<div class="ckStates">' +
+            ORDER.map(function (v) {
+              return '<button class="ckState' + (s.status === v ? ' on' : '') + '" data-v="' + v + '" data-set="' + esc(it.id) + '">' + LABEL[v] + '</button>';
+            }).join('') +
+          '</div>' +
         '</div>' +
+        renderAssign(it, owner) +
         '<div class="ckNotes">' +
           ns.map(renderNote).join('') +
           '<div class="ckAdd">' +
@@ -322,6 +366,25 @@
     '</div>';
   }
 
+  // 指派區：先給「我來」與已出現過的人名一鍵指派，真的要打新名字才用輸入框
+  function renderAssign(it, owner) {
+    var me = who();
+    var others = people().filter(function (p) { return p !== me; });
+    var btns = "";
+    if (me) {
+      btns += '<button class="ckPerson' + (owner === me ? " on" : "") + '" data-assign="' + esc(it.id) + '" data-name="' + esc(me) + '">' +
+        (owner === me ? '<i class="ri-check-line"></i> 我' : '我來') + '</button>';
+    }
+    btns += others.map(function (p) {
+      return '<button class="ckPerson' + (owner === p ? " on" : "") + '" data-assign="' + esc(it.id) + '" data-name="' + esc(p) + '">' + esc(p) + '</button>';
+    }).join("");
+    btns += '<button class="ckPerson ghost" data-assign-other="' + esc(it.id) + '"><i class="ri-user-add-line"></i> 其他人</button>';
+    if (owner) {
+      btns += '<button class="ckPerson ghost" data-assign="' + esc(it.id) + '" data-name=""><i class="ri-close-line"></i> 取消指派</button>';
+    }
+    return '<div class="ckField2"><span class="ckField2Label">負責人</span><div class="ckStates">' + btns + '</div></div>';
+  }
+
   function renderNote(n) {
     return '<div class="ckNote ' + (n.kind === "blocker" ? "blocker" : "") + (n.resolved ? " resolved" : "") + '">' +
       '<div class="nh">' +
@@ -333,6 +396,34 @@
           (n.resolved ? "標回未解決" : "標為已解決") + '</button>' +
       '</div>' +
       '<div class="nb">' + esc(n.body) + '</div>' +
+    '</div>';
+  }
+
+  // 分工總覽：誰認領了幾項、還剩幾項沒人認。點名字就只看那個人的。
+  function renderPeopleBar() {
+    var pool = allItems();          // 跟著目前分期走
+    var tally = {}, none = 0;
+    pool.forEach(function (x) {
+      var a = who4(x.item.id);
+      if (!a) { none++; return; }
+      tally[a] = tally[a] || { total: 0, done: 0 };
+      tally[a].total++;
+      if (st(x.item.id).status === "done") tally[a].done++;
+    });
+    var names = Object.keys(tally).sort(function (a, b) { return tally[b].total - tally[a].total || a.localeCompare(b); });
+
+    var chips = '<button class="ckPersonChip' + (person === "all" ? " on" : "") + '" data-person="all">全部 ' + pool.length + '</button>';
+    chips += names.map(function (n) {
+      return '<button class="ckPersonChip' + (person === n ? " on" : "") + '" data-person="' + esc(n) + '">' +
+        esc(n) + ' <em>' + tally[n].done + '／' + tally[n].total + '</em></button>';
+    }).join("");
+    if (none) {
+      chips += '<button class="ckPersonChip none' + (person === "_none" ? " on" : "") + '" data-person="_none">未指派 ' + none + '</button>';
+    }
+
+    return '<div class="ckPeopleBar">' +
+      '<span class="ckPeopleLabel"><i class="ri-team-line"></i> 分工</span>' +
+      '<div class="ckPeopleChips">' + chips + '</div>' +
     '</div>';
   }
 
@@ -355,7 +446,9 @@
 
   function renderGroup(g) {
     var done = g.items.filter(function (it) { return st(it.id).status === "done"; }).length;
-    var visible = g.items.filter(function (it) { return filter === "all" || st(it.id).status === filter; }).length;
+    var visible = g.items.filter(function (it) {
+      return (filter === "all" || st(it.id).status === filter) && matchPerson(it.id);
+    }).length;
     return '<div class="ckGroup" id="' + esc(g.id) + '"' + (visible ? '' : ' style="display:none"') + '>' +
       '<div class="ckGroupHead">' +
         '<h3>' + esc(g.title) + '</h3>' +
@@ -399,6 +492,7 @@
       renderPanel(c) +
       renderBlockers() +
       renderStageTabs() +
+      renderPeopleBar() +
       '<div class="ckToolbar"><span class="ckHint"><i class="ri-book-2-line"></i> 分期與週次沿用 <a href="/handoff#roadmap">開發排程</a>；每項的規格出處寫在標籤上，完整內容看 <a href="/handoff#doc">交接文件</a>。</span></div>' +
       groups().map(renderGroup).join('') +
       renderGeneral();
@@ -424,6 +518,30 @@
         e.stopPropagation();
         setStatus(el.dataset.set, el.dataset.v);
       });
+    });
+
+    root.querySelectorAll("[data-assign]").forEach(function (el) {
+      el.addEventListener("click", function (e) {
+        e.stopPropagation();
+        var id = el.dataset.assign;
+        var name = el.dataset.name;
+        // 再點一次自己身上的指派 = 取消，省一個按鈕
+        assign(id, who4(id) === name && name ? "" : name);
+      });
+    });
+
+    root.querySelectorAll("[data-assign-other]").forEach(function (el) {
+      el.addEventListener("click", function (e) {
+        e.stopPropagation();
+        var id = el.dataset.assignOther;
+        var name = window.prompt("指派給誰？（打名字，留空=取消指派）", who4(id) || "");
+        if (name === null) return;
+        assign(id, name.trim().slice(0, 40));
+      });
+    });
+
+    root.querySelectorAll(".ckPersonChip").forEach(function (el) {
+      el.addEventListener("click", function () { person = el.dataset.person; render(); });
     });
 
     root.querySelectorAll("[data-send]").forEach(function (el) {
@@ -468,7 +586,8 @@
         openSet.add(id);
         localStorage.setItem(LS_OPEN, JSON.stringify(Array.from(openSet)));
         filter = "all";
-        stage = "all";   // 卡住的項目可能不在目前篩選的分期，先解除篩選才跳得到
+        stage = "all";   // 卡住的項目可能不在目前篩選的分期或負責人，先全部解除才跳得到
+        person = "all";
         render();
         var t = root.querySelector('.ckItem[data-id="' + CSS.escape(id) + '"]');
         if (t) t.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -481,6 +600,8 @@
         localStorage.setItem(LS_WHO, whoEl.value.trim());
         whoEl.style.borderColor = "";
       });
+      // 填完名字才會有「我來」可以按，所以離開欄位時重畫一次
+      whoEl.addEventListener("blur", function () { render(); });
     }
 
     var unlock = document.getElementById("btnUnlock");
@@ -516,14 +637,30 @@
     var c = { done: 0, doing: 0, blocked: 0, total: all.length };
     all.forEach(function (x) { var s = st(x.item.id).status; if (c[s] != null) c[s]++; });
     var lines = ["實習通 串接進度（" + fmt(new Date().toISOString()) + "）",
-      "完成 " + c.done + "／" + c.total + "　進行中 " + c.doing + "　卡住 " + c.blocked, ""];
+      "完成 " + c.done + "／" + c.total + "　進行中 " + c.doing + "　卡住 " + c.blocked];
+    var tally = {}, none = 0;
+    all.forEach(function (x) {
+      var a = who4(x.item.id);
+      if (!a) { none++; return; }
+      tally[a] = tally[a] || { total: 0, done: 0 };
+      tally[a].total++;
+      if (st(x.item.id).status === "done") tally[a].done++;
+    });
+    var names = Object.keys(tally).sort(function (a, b) { return tally[b].total - tally[a].total; });
+    if (names.length) {
+      lines.push("分工：" + names.map(function (n) { return n + " " + tally[n].done + "／" + tally[n].total; }).join("　") +
+        (none ? "　未指派 " + none : ""));
+    }
+    lines.push("");
     items.groups.forEach(function (g) {
       var done = g.items.filter(function (it) { return st(it.id).status === "done"; }).length;
       lines.push("【" + g.title + "】" + done + "／" + g.items.length);
       g.items.forEach(function (it) {
         var s = st(it.id);
-        if (s.status === "todo") return;
-        lines.push("  " + (s.status === "done" ? "[x]" : s.status === "blocked" ? "[!]" : "[~]") + " " + it.title);
+        var owner = who4(it.id);
+        if (s.status === "todo" && !owner) return;   // 沒動過也沒人認領才省略
+        lines.push("  " + (s.status === "done" ? "[x]" : s.status === "blocked" ? "[!]" : s.status === "doing" ? "[~]" : "[ ]") +
+          " " + it.title + (owner ? "（" + owner + "）" : ""));
       });
     });
     var blocked = everyItem().filter(function (x) { return st(x.item.id).status === "blocked"; });

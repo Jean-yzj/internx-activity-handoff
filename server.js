@@ -71,6 +71,17 @@ async function api(req, res, urlPath) {
     return json(res, 200, { ok: true, item });
   }
 
+  if (req.method === 'POST' && urlPath === '/api/assignee') {
+    const body = await readBody(req);
+    if (!authed(req, body)) return json(res, 403, { error: 'bad_key' });
+    const itemId = str(body.itemId, 80);
+    const assignee = str(body.assignee, 40);   // 空字串 = 取消指派
+    const by = str(body.by, 40) || '匿名';
+    if (!itemId) return json(res, 400, { error: 'bad_input' });
+    const item = await store.setAssignee(itemId, assignee, by);
+    return json(res, 200, { ok: true, item });
+  }
+
   if (req.method === 'POST' && urlPath === '/api/note') {
     const body = await readBody(req);
     if (!authed(req, body)) return json(res, 403, { error: 'bad_key' });
