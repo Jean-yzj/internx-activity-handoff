@@ -63,6 +63,8 @@
   .chipLater, .tag.tLater { background: #eef2f7; color: #7a8494; }
   .tag.tMid { background: #e8f2fe; color: #1861a8; }
   .rmLegend { font-size: 12.5px; color: #5c6675; margin: 6px 0 0; line-height: 1.9; }
+  .rmGoal { font-size: 13px; color: #4a5568; line-height: 1.8; background: #f7faff; border: 1px solid #dde8f6; border-left: 3px solid var(--theme-color); border-radius: 0 12px 12px 0; padding: 11px 15px; margin: 10px 0 0; }
+  .rmGoal b { color: #11243f; }
   /* 排程欄位裡的即時進度條（資料來自 /checklist 的看板） */
   .rmProg { display: block; text-decoration: none; color: inherit; margin: 0 0 10px; padding: 10px 12px; border-radius: 11px; background: #f7f9fc; border: 1px solid #eaeef4; transition: border-color .15s, background .15s; }
   .rmProg:hover { border-color: var(--theme-color); background: #f2f8ff; }
@@ -119,28 +121,30 @@
     </div>
 
     <div class="groupHead" id="roadmap"><h2 style="margin:0"><i class="ri-road-map-line" style="color:var(--theme-color)"></i> 開發排程：短 / 中 / 長期</h2><span class="muted">給工程端的優先順序；各項連到對應 Demo，完整週次與驗收見 <a href="#doc" onclick="loadDoc('/TIMELINE.md')" style="color:var(--link-color)">工程時程規劃</a></span></div>
+    <p class="rmGoal"><i class="ri-flag-line"></i> <b>2026-07-25 調整優先序：</b>活動相關的東西（含社團等組織型主辦）＋創作者主頁＋部落格全部拉到短期，目標是<b>這個暑假讓社團把招募資料放上來</b>。收費活動用的代收代付與撥款結算移到中期 —— 免費招募活動先跑起來，金流不擋上架。</p>
     <div class="rmGrid">
       <div class="rmCol" data-stage="short">
         <h3><i class="ri-fire-line" style="color:#c0392b"></i> 短期</h3>
-        <p class="period">0–2 個月・立即開工（P1–P2）</p>
+        <p class="period">暑假衝刺・目標：社團把招募資料放上來</p>
         <ul>
-          <li><a href="/editor">活動編輯器：票券時間×數量、表單拖曳</a><span class="chip chipUrgent">緊急</span><span class="note">先解「早鳥過期還能選、不能限量」（INTEGRATION §3–§4）</span></li>
+          <li><a href="/editor">活動編輯器：票券時間×數量、表單拖曳</a><span class="chip chipUrgent">緊急</span><span class="note">先解「早鳥過期還能選、不能限量」；免費活動一樣需要名額上限（INTEGRATION §3–§4）</span></li>
           <li><a href="/attendee">報名者畫面：票券狀態鎖定＋表單渲染</a><span class="chip chipUrgent">緊急</span><span class="note">與編輯器同一條動線；後端防超賣 transaction（§5）</span></li>
-          <li><a href="/backstage">認證帳號後臺：報名名單審核</a><span class="chip chipUrgent">緊急</span><span class="note">Registration 狀態機（§12）；與活動發布審核是兩回事</span></li>
-          <li><a href="/blog-editor">創作者後台：創作內容＋block 編輯器</a><span class="chip chipUrgent">緊急</span><span class="note">部落格發佈權放寬給 verified-creator（§10）</span></li>
-          <li>代收代付繳費動線<span class="chip chipUrgent">緊急</span><span class="chip chipExt">外部依賴</span><span class="note">金流特店申請第 0 週就送件（外部審核 2–4 週）；通過→繳費→自動已付款（§6）</span></li>
+          <li><a href="/backstage">認證帳號後臺：報名名單審核</a><span class="chip chipUrgent">緊急</span><span class="note">Registration 狀態機（§12）；免費活動到「已通過」就結束</span></li>
+          <li><a href="/club">社團＝組織型主辦：多管理員／換屆</a><span class="chip chipUrgent">緊急</span><span class="note">暑假的主要用戶；換屆只換 owner，歷史資料掛 clubId 永久保留（spec §14.2）</span></li>
+          <li><a href="/creator">創作者主頁＋專區目錄</a><span class="chip chipUrgent">緊急</span><span class="note">社團與講者要有能對外展示的頁面，招募才有說服力（CREATOR-HANDOFF）</span></li>
+          <li><a href="/blog-editor">部落格：發佈權＋block 編輯器</a><span class="chip chipUrgent">緊急</span><span class="note">發佈權放寬給 verified-creator（§10）；byline 標章、檢舉與追蹤一併做完</span></li>
           <li>feeItems→tickets 資料遷移<span class="note">一次性 script＋staging 演練＋回滾，票券上線前提（§3.2）</span></li>
         </ul>
       </div>
       <div class="rmCol" data-stage="mid">
         <h3><i class="ri-calendar-line" style="color:#1861a8"></i> 中期</h3>
-        <p class="period">2–4 個月（P3–P4）</p>
+        <p class="period">暑假後・收費活動與擴充</p>
         <ul>
+          <li>代收代付繳費動線<span class="chip chipExt">外部依賴</span><span class="note">金流特店申請外部審核 2–4 週：確定要開放收費活動的那一週就要送件（§6）</span></li>
           <li><a href="/backstage#settle">撥款結算 settleAndPayout</a><span class="chip chipHard">高難度</span><span class="note">需按會計法規／發票流程撰寫；結算對帳 gross−抽成−手續費＝net（spec §14.1）；金流 PR 雙人 review</span></li>
-          <li><a href="/club">社團＝組織型主辦：多管理員／換屆</a><span class="note">換屆只換 owner，歷史資料掛 clubId 永久保留（spec §14.2）</span></li>
-          <li><a href="/creator">創作者主頁＋專區目錄</a><span class="note">Profile 3 分頁；檢舉／追蹤／通知扇出是真正新做（CREATOR-HANDOFF）</span></li>
           <li><a href="/activities">活動個人化：領域／推薦／追蹤主辦</a><span class="note">只影響排序、不隱藏活動；推薦標示原因（spec §16）</span></li>
           <li>帳號選單依角色＋話題牆串接<span class="note">共用選單＋旗標條件展開（spec §15）；活動上架自動建話題（INTEGRATION §17）</span></li>
+          <li>整合回歸＋資安＋灰度上線<span class="note">三視角回歸、資安清單逐項、feature flag 逐批開（TIMELINE Phase 5）</span></li>
         </ul>
       </div>
       <div class="rmCol" data-stage="long">
@@ -188,14 +192,14 @@
       <a class="demoCard" href="/club">
         <span class="tagKind tagDemo">Demo</span>
         <div class="ic"><i class="ri-group-line"></i></div>
-        <h3>社團主頁 <span class="tag">多管理員 / 換屆</span> <span class="tag tMid">中期</span></h3>
+        <h3>社團主頁 <span class="tag">多管理員 / 換屆</span> <span class="tag tShort">短期・緊急</span></h3>
         <p>社團以組織身分擁有帳號：幹部團隊（多管理員角色）、換屆交接（換人不換社團、資料保留）、社團活動。</p>
         <span class="go">開啟 Demo →</span>
       </a>
       <a class="demoCard" href="/club-register">
         <span class="tagKind tagDemo">Demo</span>
         <div class="ic"><i class="ri-team-line"></i></div>
-        <h3>社團註冊流程 <span class="tag tMid">中期</span></h3>
+        <h3>社團註冊流程 <span class="tag tShort">短期・緊急</span></h3>
         <p>社團資料 → 身分驗證（指導老師）→ 邀請幹部（多管理員）→ 送審。四步驟，可實際操作。</p>
         <span class="go">開啟 Demo →</span>
       </a>
@@ -216,14 +220,14 @@
       <a class="demoCard" href="/creator">
         <span class="tagKind tagDemo">Demo</span>
         <div class="ic"><i class="ri-user-star-line"></i></div>
-        <h3>創作者主頁 <span class="tag tMid">中期</span></h3>
+        <h3>創作者主頁 <span class="tag tShort">短期・緊急</span></h3>
         <p>關於我 / 專長 / 部落格 / 主辦活動 / 活動紀錄。主辦活動連到報名頁。</p>
         <span class="go">開啟 Demo →</span>
       </a>
       <a class="demoCard" href="/creators">
         <span class="tagKind tagDemo">Demo</span>
         <div class="ic"><i class="ri-quill-pen-line"></i></div>
-        <h3>創作者專區・介紹 <span class="tag tMid">中期</span></h3>
+        <h3>創作者專區・介紹 <span class="tag tShort">短期</span></h3>
         <p>價值主張、精選創作者、能做什麼、三步驟成為認證創作者（流程介紹）。</p>
         <span class="go">看介紹 →</span>
       </a>

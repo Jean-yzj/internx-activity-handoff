@@ -1,37 +1,13 @@
 {
-  "version": "2026-07-25c",
+  "version": "2026-07-25d",
   "groups": [
     {
-      "id": "phase0-prereq",
-      "title": "Phase 0：前置作業",
+      "id": "summer-prereq",
+      "title": "開工前置",
       "stage": "short",
-      "weeks": "開工前 1–2 週",
-      "summary": "開工前必須啟動的外部申請、基礎設施準備與開關機制，與 Phase 1 並行跑",
+      "weeks": "開工前 1 週",
+      "summary": "暑假衝刺前先備好安全網與開關；金流相關的前置已移到金流那組",
       "items": [
-        {
-          "id": "payment-provider-apply",
-          "title": "金流商選型並送出特店申請",
-          "detail": "評估綠界／藍新／TapPay 的代收代付／平台拆帳產品，送出特店申請表。外部審核需 2–4 週，應在第 0 週啟動，否則 Phase 2 正式上線將被卡住。",
-          "accept": "特店申請已送出，預計審核完成日期已記錄在專案 issue",
-          "ref": "TIMELINE.md Phase 0、INTEGRATION.md §6",
-          "note": ""
-        },
-        {
-          "id": "invoice-policy",
-          "title": "確認發票開立方案（電子發票或加值中心）",
-          "detail": "代收代付下由誰開發票（平台自行申請、金流商加值中心、或首波用免用額度）。需諮詢會計或法務，1–3 週，與特店申請並行進行。",
-          "accept": "發票方案有書面確認，負責單位與生效時程已記錄",
-          "ref": "TIMELINE.md Phase 0、INTEGRATION.md §6",
-          "note": ""
-        },
-        {
-          "id": "bank-account-encryption",
-          "title": "決定銀行帳戶欄位的加密儲存方式",
-          "detail": "在 Firestore 加 encryptedBankAccount 欄位（或加密後的 Firestore Doc），前端僅顯示末四碼遮罩，完整帳號只後端讀取。需確認加解密 key 管理方案（Cloud Secret Manager 或 KMS）。",
-          "accept": "加密方案寫進 PR 描述，staging 可寫入並遮罩顯示末四碼",
-          "ref": "TIMELINE.md Phase 0、spec §14.1",
-          "note": ""
-        },
         {
           "id": "staging-backup-drill",
           "title": "Firestore 匯出 / 還原演練跑通",
@@ -52,10 +28,10 @@
     },
     {
       "id": "ticket-model",
-      "title": "Phase 1A：票券資料模型",
+      "title": "票券資料模型與防超賣",
       "stage": "short",
-      "weeks": "週 1–3",
-      "summary": "新增 Ticket 型別、ticketStatus() 函式，並遷移現有 feeItems 資料（週 1–3）",
+      "weeks": "週 1–2",
+      "summary": "免費活動同樣需要名額上限與報名期間，所以票券模型是社團上架的前提",
       "items": [
         {
           "id": "ticket-ts-type",
@@ -79,7 +55,7 @@
           "detail": "對既有活動，把每筆 feeItems[i]{name, price} 轉成 Ticket，quantity=null、saleStart=活動建立時間、saleEnd=活動開始時間、sold=0。以 Node.js 腳本跑一次，不影響線上讀取。需含 staging 演練與回滾方案。",
           "accept": "migration 腳本在 staging 跑通，結果 tickets 陣列長度 >= 原 feeItems 長度，且可用回滾腳本復原",
           "ref": "INTEGRATION.md §3.2、TIMELINE.md Phase 1",
-          "note": ""
+          "note": "免費活動的 feeItems 多半是空的，遷移仍要跑過一次確認不炸"
         },
         {
           "id": "firestore-ticket-structure",
@@ -95,7 +71,7 @@
           "detail": "用 Firestore runTransaction：先讀 ticketRef，呼叫 ticketStatus() 驗證 live，檢查 sold + qty <= quantity，通過才 tx.update sold += qty、tx.set registration{status:'pending'}。失敗回 TICKET_NOT_ON_SALE 或 SOLD_OUT。",
           "accept": "同時送出 2 筆搶同一張剩餘票，只有 1 筆成功，另一筆收到 SOLD_OUT 錯誤",
           "ref": "INTEGRATION.md §5、TIMELINE.md Phase 1",
-          "note": "staging 已有票券販售引擎實作，需 QA／合併"
+          "note": "staging 已有票券販售引擎實作，需 QA／合併；免費活動也要防超賣（名額上限），這項不能因為不收費就跳過"
         },
         {
           "id": "firestore-rules-registration",
@@ -109,10 +85,10 @@
     },
     {
       "id": "editor-frontend",
-      "title": "Phase 1B：活動編輯器前端",
+      "title": "活動編輯器與報名頁",
       "stage": "short",
       "weeks": "週 1–3",
-      "summary": "票券設定卡片 UI、表單拖曳排序（@dnd-kit）、驗證規則與報名頁版型（週 1–3）",
+      "summary": "社團自己就能把招募活動建起來、報名者看得懂也填得完",
       "items": [
         {
           "id": "ticket-card-ui",
@@ -173,11 +149,11 @@
       ]
     },
     {
-      "id": "registration-backend",
-      "title": "Phase 2：報名審核 + 平台代收代付",
+      "id": "registration-core",
+      "title": "報名審核與後台名單",
       "stage": "short",
-      "weeks": "週 4–7",
-      "summary": "Registration 狀態機、Cloud Functions、通知事件、後台 UI（週 4–7）",
+      "weeks": "週 3–5",
+      "summary": "收報名、審核、通知的完整動線；免費活動到「已通過」就結束",
       "items": [
         {
           "id": "registration-status-model",
@@ -196,30 +172,6 @@
           "note": ""
         },
         {
-          "id": "payment-session-cf",
-          "title": "Cloud Function：createPaymentSession（報名者繳費入口）",
-          "detail": "接受 registrationId，驗 status === 'approved'，金額取自 registration.amount（快照值），回傳 paymentUrl 導向既有 Payments.tsx 金流頁面。非 approved 狀態回 NOT_APPROVED。",
-          "accept": "pending 狀態的 registration 呼叫 createPaymentSession 回 NOT_APPROVED 錯誤",
-          "ref": "INTEGRATION.md §14、TIMELINE.md Phase 2",
-          "note": ""
-        },
-        {
-          "id": "payment-webhook-cf",
-          "title": "Cloud Function：onPaymentSucceeded（付款 webhook，冪等＋驗簽）",
-          "detail": "平台金流回調：approved → paid，寫 paidAt / paymentId，觸發站內通知主辦方「已付款」並寄收據給報名者。需驗簽章＋冪等（同 paymentId 重複回調只生效一次）。另補 refundRegistration：paid → refunded，釋放 sold，建退款記錄。",
-          "accept": "staging 模擬 webhook 後，registration.status 轉 paid，主辦後台自動顯示「已付款」；重複觸發同 paymentId 不重複建立記錄",
-          "ref": "INTEGRATION.md §6、§14、TIMELINE.md Phase 2",
-          "note": "staging 已有平台代收代付實作，需 QA 驗 webhook 冪等後合併"
-        },
-        {
-          "id": "itemtype-itemid-reserve",
-          "title": "Order / Payment 模型加 itemType / itemId 欄位",
-          "detail": "在 Order 與 Payment 資料模型加 itemType: 'activity' | 'course' 與 itemId 欄位，讓金流 Schema 成為通用 commerce record。這是 INTEGRATION §21.3 明文要求「現在就動手」的唯一跨模組預留，避免 Academy 上線時 backfill 歷史資料。",
-          "accept": "新建 Order 文件含 itemType='activity' 與 itemId=activityId，TypeScript 型別通過",
-          "ref": "INTEGRATION.md §20.2、§21.3、TIMELINE.md Phase 2 備註",
-          "note": ""
-        },
-        {
           "id": "notify-new-registration",
           "title": "通知主辦方：有新報名待審",
           "detail": "在 submitRegistration CF 建立 registration 後，向 activity.admining 成員發站內通知（可選 Email）：「X 報名了〈活動〉」含前往審核連結。呼叫既有 addSideNotification() 或 Notification 集合寫入。",
@@ -233,7 +185,7 @@
           "detail": "approveRegistration CF 轉 approved 後，發 Email + 站內通知給報名者：「已通過，點此於實習通繳費（金額 / 期限）」，含 createPaymentSession 產生的連結。",
           "accept": "主辦方按「通過」後，報名者收到站內通知且通知含繳費連結",
           "ref": "INTEGRATION.md §15、TIMELINE.md Phase 2",
-          "note": ""
+          "note": "暑假這輪只需通知「審核通過」；繳費連結等金流上線後再補"
         },
         {
           "id": "notify-rejected",
@@ -241,14 +193,6 @@
           "detail": "rejectRegistration CF 轉 rejected 後，發 Email + 站內通知含 rejectReason 說明。前端拒絕彈窗的 reason 欄位最長 500 字。",
           "accept": "主辦方填原因按「拒絕」後，報名者站內通知顯示拒絕說明文字",
           "ref": "INTEGRATION.md §15、TIMELINE.md Phase 2",
-          "note": ""
-        },
-        {
-          "id": "notify-paid",
-          "title": "通知主辦方付款完成 + 寄報名者收據",
-          "detail": "onPaymentSucceeded webhook CF 轉 paid 後：站內通知主辦方「X 已完成繳費」（後台自動轉已付款）；Email 寄報名者收據（含活動名稱、票種、金額、paidAt）。",
-          "accept": "webhook 觸發後主辦後台狀態自動翻為「已付款」，不需手動標記",
-          "ref": "INTEGRATION.md §15、§6、TIMELINE.md Phase 2",
           "note": ""
         },
         {
@@ -270,28 +214,12 @@
       ]
     },
     {
-      "id": "payout-club",
-      "title": "Phase 3：撥款結算 + 社團",
-      "stage": "mid",
-      "weeks": "週 8–10",
-      "summary": "Payout 模型、settleAndPayout、Club／ClubMember 資料結構、換屆移轉、後台 UI（週 8–10）",
+      "id": "club-organizer",
+      "title": "社團／組織型主辦",
+      "stage": "short",
+      "weeks": "週 4–6",
+      "summary": "社團是暑假的主要用戶：多管理員共管、換屆不掉資料、社團主頁與註冊流程",
       "items": [
-        {
-          "id": "payout-model",
-          "title": "新增 data/payout.ts 與 settleAndPayout() 函式",
-          "detail": "建立 Payout interface（payoutId / activityId / gross / platformFee / paymentFee / net / status / orderIds / settledAt / paidAt）。settleAndPayout() 在活動結束 T+N 天執行：計算 gross - 平台抽成 - 金流手續費 = net，每筆 payout 可回溯 orderIds，結算金額可對帳。",
-          "accept": "結算對帳測試：gross − 平台抽成 − 金流手續費 = net，含退款情境計算正確",
-          "ref": "spec §14.1、TIMELINE.md Phase 3",
-          "note": ""
-        },
-        {
-          "id": "payout-backstage-page",
-          "title": "後台「撥款結算」頁（收款摘要 + 銀行帳戶設定）",
-          "detail": "新增 pages/[lang]/professional/payouts.tsx：顯示總收款 / 手續費 / 待撥款 / 已撥款 / 已退款摘要，列出歷史 payout 紀錄（含 orderIds 展開）。銀行帳戶設定區顯示遮罩後末四碼，修改需重新驗證身分。",
-          "accept": "主辦方可查看該活動的結算摘要，金額與 payout 文件一致；銀行帳號顯示遮罩",
-          "ref": "spec §14.1、TIMELINE.md Phase 3",
-          "note": ""
-        },
         {
           "id": "club-model",
           "title": "新增 data/club.ts：Club / ClubMember 模型與五種角色權限",
@@ -327,11 +255,11 @@
       ]
     },
     {
-      "id": "creator-personalization",
-      "title": "Phase 4：創作者 + 個人化 + 話題牆 + 選單",
-      "stage": "mid",
-      "weeks": "週 11–14",
-      "summary": "創作者主頁分頁、部落格發佈權、檢舉機制、追蹤通知、活動個人化、話題牆串接（週 11–14）",
+      "id": "creator-blog",
+      "title": "創作者主頁與部落格",
+      "stage": "short",
+      "weeks": "週 5–7",
+      "summary": "社團與講者要有能對外展示的頁面與內容，招募才有說服力",
       "items": [
         {
           "id": "onboarding-identity-step",
@@ -420,7 +348,97 @@
           "accept": "client SDK 直接改 profiles.badges 被 permission-denied；verified-creator 可建 blogPosts",
           "ref": "CREATOR-HANDOFF.md §15、TIMELINE.md Phase 4",
           "note": ""
+        }
+      ]
+    },
+    {
+      "id": "payment-payout",
+      "title": "金流：代收代付與撥款結算",
+      "stage": "mid",
+      "weeks": "暑假後・約 3–4 週",
+      "summary": "收費活動才需要。特店申請有 2–4 週外部審核，決定要收費就要提前送件",
+      "items": [
+        {
+          "id": "payment-provider-apply",
+          "title": "金流商選型並送出特店申請",
+          "detail": "評估綠界／藍新／TapPay 的代收代付／平台拆帳產品，送出特店申請表。外部審核需 2–4 週，應在第 0 週啟動，否則 Phase 2 正式上線將被卡住。",
+          "accept": "特店申請已送出，預計審核完成日期已記錄在專案 issue",
+          "ref": "TIMELINE.md Phase 0、INTEGRATION.md §6",
+          "note": "外部審核 2–4 週。確定要開放收費活動的當週就要送件，不要等功能做完"
         },
+        {
+          "id": "invoice-policy",
+          "title": "確認發票開立方案（電子發票或加值中心）",
+          "detail": "代收代付下由誰開發票（平台自行申請、金流商加值中心、或首波用免用額度）。需諮詢會計或法務，1–3 週，與特店申請並行進行。",
+          "accept": "發票方案有書面確認，負責單位與生效時程已記錄",
+          "ref": "TIMELINE.md Phase 0、INTEGRATION.md §6",
+          "note": ""
+        },
+        {
+          "id": "bank-account-encryption",
+          "title": "決定銀行帳戶欄位的加密儲存方式",
+          "detail": "在 Firestore 加 encryptedBankAccount 欄位（或加密後的 Firestore Doc），前端僅顯示末四碼遮罩，完整帳號只後端讀取。需確認加解密 key 管理方案（Cloud Secret Manager 或 KMS）。",
+          "accept": "加密方案寫進 PR 描述，staging 可寫入並遮罩顯示末四碼",
+          "ref": "TIMELINE.md Phase 0、spec §14.1",
+          "note": ""
+        },
+        {
+          "id": "payment-session-cf",
+          "title": "Cloud Function：createPaymentSession（報名者繳費入口）",
+          "detail": "接受 registrationId，驗 status === 'approved'，金額取自 registration.amount（快照值），回傳 paymentUrl 導向既有 Payments.tsx 金流頁面。非 approved 狀態回 NOT_APPROVED。",
+          "accept": "pending 狀態的 registration 呼叫 createPaymentSession 回 NOT_APPROVED 錯誤",
+          "ref": "INTEGRATION.md §14、TIMELINE.md Phase 2",
+          "note": ""
+        },
+        {
+          "id": "payment-webhook-cf",
+          "title": "Cloud Function：onPaymentSucceeded（付款 webhook，冪等＋驗簽）",
+          "detail": "平台金流回調：approved → paid，寫 paidAt / paymentId，觸發站內通知主辦方「已付款」並寄收據給報名者。需驗簽章＋冪等（同 paymentId 重複回調只生效一次）。另補 refundRegistration：paid → refunded，釋放 sold，建退款記錄。",
+          "accept": "staging 模擬 webhook 後，registration.status 轉 paid，主辦後台自動顯示「已付款」；重複觸發同 paymentId 不重複建立記錄",
+          "ref": "INTEGRATION.md §6、§14、TIMELINE.md Phase 2",
+          "note": "staging 已有平台代收代付實作，需 QA 驗 webhook 冪等後合併"
+        },
+        {
+          "id": "itemtype-itemid-reserve",
+          "title": "Order / Payment 模型加 itemType / itemId 欄位",
+          "detail": "在 Order 與 Payment 資料模型加 itemType: 'activity' | 'course' 與 itemId 欄位，讓金流 Schema 成為通用 commerce record。這是 INTEGRATION §21.3 明文要求「現在就動手」的唯一跨模組預留，避免 Academy 上線時 backfill 歷史資料。",
+          "accept": "新建 Order 文件含 itemType='activity' 與 itemId=activityId，TypeScript 型別通過",
+          "ref": "INTEGRATION.md §20.2、§21.3、TIMELINE.md Phase 2 備註",
+          "note": ""
+        },
+        {
+          "id": "notify-paid",
+          "title": "通知主辦方付款完成 + 寄報名者收據",
+          "detail": "onPaymentSucceeded webhook CF 轉 paid 後：站內通知主辦方「X 已完成繳費」（後台自動轉已付款）；Email 寄報名者收據（含活動名稱、票種、金額、paidAt）。",
+          "accept": "webhook 觸發後主辦後台狀態自動翻為「已付款」，不需手動標記",
+          "ref": "INTEGRATION.md §15、§6、TIMELINE.md Phase 2",
+          "note": ""
+        },
+        {
+          "id": "payout-model",
+          "title": "新增 data/payout.ts 與 settleAndPayout() 函式",
+          "detail": "建立 Payout interface（payoutId / activityId / gross / platformFee / paymentFee / net / status / orderIds / settledAt / paidAt）。settleAndPayout() 在活動結束 T+N 天執行：計算 gross - 平台抽成 - 金流手續費 = net，每筆 payout 可回溯 orderIds，結算金額可對帳。",
+          "accept": "結算對帳測試：gross − 平台抽成 − 金流手續費 = net，含退款情境計算正確",
+          "ref": "spec §14.1、TIMELINE.md Phase 3",
+          "note": ""
+        },
+        {
+          "id": "payout-backstage-page",
+          "title": "後台「撥款結算」頁（收款摘要 + 銀行帳戶設定）",
+          "detail": "新增 pages/[lang]/professional/payouts.tsx：顯示總收款 / 手續費 / 待撥款 / 已撥款 / 已退款摘要，列出歷史 payout 紀錄（含 orderIds 展開）。銀行帳戶設定區顯示遮罩後末四碼，修改需重新驗證身分。",
+          "accept": "主辦方可查看該活動的結算摘要，金額與 payout 文件一致；銀行帳號顯示遮罩",
+          "ref": "spec §14.1、TIMELINE.md Phase 3",
+          "note": ""
+        }
+      ]
+    },
+    {
+      "id": "personalization-needswall",
+      "title": "個人化・話題牆・討論區",
+      "stage": "mid",
+      "weeks": "暑假後・約 2–3 週",
+      "summary": "活動量夠多之後才有意義的擴充，不擋社團上架",
+      "items": [
         {
           "id": "activity-personalization",
           "title": "活動個人化：industryTags + 領域篩選 + 推薦排序",
@@ -465,10 +483,10 @@
     },
     {
       "id": "integration-launch",
-      "title": "Phase 5：整合回歸 + 資安 + 上線",
+      "title": "整合回歸＋資安＋上線",
       "stage": "mid",
-      "weeks": "週 15–16",
-      "summary": "全站三視角回歸、資安清單逐項、灰度上線、正式 feeItems 遷移（週 15–16）",
+      "weeks": "上線前 2 週",
+      "summary": "三視角回歸、資安清單、灰度開關、正式環境資料遷移",
       "items": [
         {
           "id": "three-role-regression",
@@ -514,10 +532,10 @@
     },
     {
       "id": "academy-future",
-      "title": "Phase 6：Academy 職涯課程平台（另案，低優先）",
+      "title": "Academy 職涯課程平台（另案）",
       "stage": "long",
       "weeks": "另案 8–10 週",
-      "summary": "等活動金流（Phase 2–3）穩定後另案排程，2 人 × 8–10 週；§21 整併風險清單為上線前必讀",
+      "summary": "等活動與金流穩定後另案排程；§21 整併風險清單為上線前提",
       "items": [
         {
           "id": "academy-data-layer",

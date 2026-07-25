@@ -8,7 +8,7 @@
   var ORDER = ["todo", "doing", "done", "blocked"];
   // 與 /handoff 的「開發排程：短 / 中 / 長期」同一套分期；group.stage 由 checklist-items.json 帶
   var STAGE = { short: "短期", mid: "中期", long: "長期" };
-  var STAGE_SUB = { short: "0–2 個月・立即開工", mid: "2–4 個月", long: "另案排程" };
+  var STAGE_SUB = { short: "暑假衝刺・社團招募上線", mid: "暑假後・收費活動與擴充", long: "另案排程" };
   var LS_WHO = "handoff_who";
   var LS_KEY = "handoff_key";
   var LS_OPEN = "handoff_open";
