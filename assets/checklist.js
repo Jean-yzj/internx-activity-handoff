@@ -6,6 +6,9 @@
 
   var LABEL = { todo: "未開始", doing: "進行中", done: "已完成", blocked: "卡住" };
   var ORDER = ["todo", "doing", "done", "blocked"];
+  // 與 /handoff 的「開發排程：短 / 中 / 長期」同一套分期；group.stage 由 checklist-items.json 帶
+  var STAGE = { short: "短期", mid: "中期", long: "長期" };
+  var STAGE_SUB = { short: "0–2 個月・立即開工", mid: "2–4 個月", long: "另案排程" };
   var LS_WHO = "handoff_who";
   var LS_KEY = "handoff_key";
   var LS_OPEN = "handoff_open";
@@ -15,6 +18,8 @@
   var items = null;      // checklist-items.json
   var state = null;      // { storage, items:{}, notes:[], writeProtected }
   var filter = "all";
+  // /handoff 的排程看板點過來時帶 ?stage=short|mid|long，直接聚焦那一期
+  var stage = (location.search.match(/[?&]stage=(short|mid|long)/) || [])[1] || "all";
   var openSet = new Set(JSON.parse(localStorage.getItem(LS_OPEN) || "[]"));
   var root = document.getElementById("ck");
 
@@ -49,7 +54,18 @@
 
   function toast(msg) { if (window.CZ && CZ.toast) CZ.toast(msg); else alert(msg); }
 
+  function groups() {
+    return items.groups.filter(function (g) { return stage === "all" || g.stage === stage; });
+  }
+
   function allItems() {
+    var out = [];
+    groups().forEach(function (g) { g.items.forEach(function (it) { out.push({ group: g, item: it }); }); });
+    return out;
+  }
+
+  // 不受分期篩選影響的全量，用來算分期分頁上的數字
+  function everyItem() {
     var out = [];
     items.groups.forEach(function (g) { g.items.forEach(function (it) { out.push({ group: g, item: it }); }); });
     return out;
@@ -163,7 +179,7 @@
     var t = 0;
     // 只看清單裡還存在的項目 —— 清單改版後留在資料庫的舊 id 不該左右「最後更新」時間
     var live = {};
-    allItems().forEach(function (x) { live[x.item.id] = true; });
+    everyItem().forEach(function (x) { live[x.item.id] = true; });
     Object.keys(state.items || {}).forEach(function (k2) {
       if (!live[k2]) return;
       var v = new Date(state.items[k2].at).getTime();
@@ -225,7 +241,8 @@
 
   function renderBlockers() {
     // 出現在這裡的條件：狀態標成「卡住」，或是有還沒解決的問題留言 —— 兩者都需要 Jean 回。
-    var blocked = allItems().filter(function (x) {
+    // 不受分期篩選影響：卡住的東西不管在哪一期都要浮上來。
+    var blocked = everyItem().filter(function (x) {
       if (st(x.item.id).status === "blocked") return true;
       return notesFor(x.item.id).some(function (n) { return n.kind === "blocker" && !n.resolved; });
     });
@@ -319,12 +336,30 @@
     '</div>';
   }
 
+  // 分期分頁 —— 和 /handoff「開發排程：短 / 中 / 長期」是同一套分期，數字則是即時的
+  function renderStageTabs() {
+    var tabs = ["all", "short", "mid", "long"].map(function (s) {
+      var pool = items.groups.filter(function (g) { return s === "all" || g.stage === s; });
+      var total = 0, done = 0;
+      pool.forEach(function (g) {
+        g.items.forEach(function (it) { total++; if (st(it.id).status === "done") done++; });
+      });
+      return '<button class="ckStageTab' + (stage === s ? " on" : "") + '" data-stage="' + s + '">' +
+        '<b>' + (s === "all" ? "全部階段" : STAGE[s]) + '</b>' +
+        '<span>' + (s === "all" ? "計畫全貌" : STAGE_SUB[s]) + '</span>' +
+        '<em>' + done + '／' + total + '</em>' +
+      '</button>';
+    }).join("");
+    return '<div class="ckStageBar">' + tabs + '</div>';
+  }
+
   function renderGroup(g) {
     var done = g.items.filter(function (it) { return st(it.id).status === "done"; }).length;
     var visible = g.items.filter(function (it) { return filter === "all" || st(it.id).status === filter; }).length;
-    return '<div class="ckGroup"' + (visible ? '' : ' style="display:none"') + '>' +
+    return '<div class="ckGroup" id="' + esc(g.id) + '"' + (visible ? '' : ' style="display:none"') + '>' +
       '<div class="ckGroupHead">' +
         '<h3>' + esc(g.title) + '</h3>' +
+        (g.stage ? '<span class="ckStagePill s-' + esc(g.stage) + '">' + esc(STAGE[g.stage] || "") + '・' + esc(g.weeks || "") + '</span>' : '') +
         '<span class="sum">' + esc(g.summary) + '</span>' +
         '<span class="frac">' + done + '／' + g.items.length + '</span>' +
       '</div>' +
@@ -363,8 +398,9 @@
       warn +
       renderPanel(c) +
       renderBlockers() +
-      '<div class="ckToolbar"><span class="ckHint"><i class="ri-book-2-line"></i> 每項的規格出處寫在標籤上，詳細內容看 <a href="/handoff#doc">交接文件</a>。</span></div>' +
-      items.groups.map(renderGroup).join('') +
+      renderStageTabs() +
+      '<div class="ckToolbar"><span class="ckHint"><i class="ri-book-2-line"></i> 分期與週次沿用 <a href="/handoff#roadmap">開發排程</a>；每項的規格出處寫在標籤上，完整內容看 <a href="/handoff#doc">交接文件</a>。</span></div>' +
+      groups().map(renderGroup).join('') +
       renderGeneral();
 
     wire();
@@ -416,12 +452,23 @@
       el.addEventListener("click", function () { filter = el.dataset.f; render(); });
     });
 
+    root.querySelectorAll(".ckStageTab").forEach(function (el) {
+      el.addEventListener("click", function () {
+        stage = el.dataset.stage;
+        // 網址跟著走，這樣分享連結就能直接指到某一期
+        var url = location.pathname + (stage === "all" ? "" : "?stage=" + stage);
+        history.replaceState(null, "", url);
+        render();
+      });
+    });
+
     root.querySelectorAll(".ckJump").forEach(function (el) {
       el.addEventListener("click", function () {
         var id = el.dataset.id;
         openSet.add(id);
         localStorage.setItem(LS_OPEN, JSON.stringify(Array.from(openSet)));
         filter = "all";
+        stage = "all";   // 卡住的項目可能不在目前篩選的分期，先解除篩選才跳得到
         render();
         var t = root.querySelector('.ckItem[data-id="' + CSS.escape(id) + '"]');
         if (t) t.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -464,7 +511,10 @@
   }
 
   function copySummary() {
-    var c = counts();
+    // 摘要一律涵蓋全部階段，不受目前篩選影響
+    var all = everyItem();
+    var c = { done: 0, doing: 0, blocked: 0, total: all.length };
+    all.forEach(function (x) { var s = st(x.item.id).status; if (c[s] != null) c[s]++; });
     var lines = ["實習通 串接進度（" + fmt(new Date().toISOString()) + "）",
       "完成 " + c.done + "／" + c.total + "　進行中 " + c.doing + "　卡住 " + c.blocked, ""];
     items.groups.forEach(function (g) {
@@ -476,7 +526,7 @@
         lines.push("  " + (s.status === "done" ? "[x]" : s.status === "blocked" ? "[!]" : "[~]") + " " + it.title);
       });
     });
-    var blocked = allItems().filter(function (x) { return st(x.item.id).status === "blocked"; });
+    var blocked = everyItem().filter(function (x) { return st(x.item.id).status === "blocked"; });
     if (blocked.length) {
       lines.push("", "卡住的項目：");
       blocked.forEach(function (x) {
@@ -500,6 +550,12 @@
   ]).then(function (r) {
     items = r[0];
     render();
+    // /checklist#payout-club 這種連結直接跳到該階段
+    var anchor = location.hash.slice(1);
+    if (anchor) {
+      var target = document.getElementById(anchor);
+      if (target) target.scrollIntoView({ block: "start" });
+    }
   }).catch(function (e) {
     root.innerHTML = '<div class="ckWarn"><i class="ri-alert-line"></i> 載入失敗：' + esc(e.message) + '</div>';
   });

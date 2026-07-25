@@ -63,6 +63,20 @@
   .chipLater, .tag.tLater { background: #eef2f7; color: #7a8494; }
   .tag.tMid { background: #e8f2fe; color: #1861a8; }
   .rmLegend { font-size: 12.5px; color: #5c6675; margin: 6px 0 0; line-height: 1.9; }
+  /* 排程欄位裡的即時進度條（資料來自 /checklist 的看板） */
+  .rmProg { display: block; text-decoration: none; color: inherit; margin: 0 0 10px; padding: 10px 12px; border-radius: 11px; background: #f7f9fc; border: 1px solid #eaeef4; transition: border-color .15s, background .15s; }
+  .rmProg:hover { border-color: var(--theme-color); background: #f2f8ff; }
+  .rmBar { height: 7px; border-radius: 99px; background: #e4e9f0; overflow: hidden; display: flex; }
+  .rmBar i { display: block; height: 100%; }
+  .rmBar i.done { background: #1a9e5c; }
+  .rmBar i.doing { background: var(--theme-color); }
+  .rmBar i.blocked { background: #d8392b; }
+  .rmProgTxt { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 7px; font-size: 12.5px; color: #5c6675; }
+  .rmProgTxt b { color: #11243f; font-size: 13px; }
+  .rmProgTxt .s { font-weight: 600; }
+  .rmProgTxt .s.doing { color: var(--theme-color); }
+  .rmProgTxt .s.blocked { color: #c0392b; }
+  .rmProgTxt .go { margin-left: auto; font-weight: 700; color: var(--theme-color); }
   /* 串接進度看板入口 — 唯一「會寫入」的頁面，所以獨立成一條，不混在 Demo/文件卡片裡 */
   .progressBand { display: flex; align-items: center; gap: 16px; margin: 4px 0 14px; padding: 18px 20px; text-decoration: none; color: inherit;
     background: linear-gradient(100deg, #0182fd, #1861a8); border-radius: 16px; box-shadow: 0 10px 26px rgba(1,74,173,.18); transition: transform .06s, box-shadow .15s; }
@@ -104,9 +118,9 @@
       <span class="kindTag kindDoc"><i class="ri-file-text-line"></i> 交接文件</span> ＝ 給工程師的串接規格、說明與架構圖（不是產品畫面）
     </div>
 
-    <div class="groupHead"><h2 style="margin:0"><i class="ri-road-map-line" style="color:var(--theme-color)"></i> 開發排程：短 / 中 / 長期</h2><span class="muted">給工程端的優先順序；各項連到對應 Demo，完整週次與驗收見 <a href="#doc" onclick="loadDoc('/TIMELINE.md')" style="color:var(--link-color)">工程時程規劃</a></span></div>
+    <div class="groupHead" id="roadmap"><h2 style="margin:0"><i class="ri-road-map-line" style="color:var(--theme-color)"></i> 開發排程：短 / 中 / 長期</h2><span class="muted">給工程端的優先順序；各項連到對應 Demo，完整週次與驗收見 <a href="#doc" onclick="loadDoc('/TIMELINE.md')" style="color:var(--link-color)">工程時程規劃</a></span></div>
     <div class="rmGrid">
-      <div class="rmCol">
+      <div class="rmCol" data-stage="short">
         <h3><i class="ri-fire-line" style="color:#c0392b"></i> 短期</h3>
         <p class="period">0–2 個月・立即開工（P1–P2）</p>
         <ul>
@@ -118,7 +132,7 @@
           <li>feeItems→tickets 資料遷移<span class="note">一次性 script＋staging 演練＋回滾，票券上線前提（§3.2）</span></li>
         </ul>
       </div>
-      <div class="rmCol">
+      <div class="rmCol" data-stage="mid">
         <h3><i class="ri-calendar-line" style="color:#1861a8"></i> 中期</h3>
         <p class="period">2–4 個月（P3–P4）</p>
         <ul>
@@ -129,7 +143,7 @@
           <li>帳號選單依角色＋話題牆串接<span class="note">共用選單＋旗標條件展開（spec §15）；活動上架自動建話題（INTEGRATION §17）</span></li>
         </ul>
       </div>
-      <div class="rmCol">
+      <div class="rmCol" data-stage="long">
         <h3><i class="ri-time-line" style="color:#7a8494"></i> 長期</h3>
         <p class="period">另案排程・可較晚（活動金流穩定後）</p>
         <ul>
@@ -386,7 +400,53 @@
     }).catch(()=>{ document.getElementById("docBody").innerHTML = '<p class="muted">無法載入，請見 <a href="https://github.com/Jean-yzj/internx-activity-handoff">GitHub</a>。</p>'; });
   }
   document.querySelectorAll(".docTab").forEach(b=>b.addEventListener("click",()=>loadDoc(b.dataset.doc)));
-  loadDoc("/INTEGRATION.md");
+  /* 從 /checklist 連過來時可以直接開時程規劃那一份：/handoff?doc=timeline#doc */
+  var DOC_PARAM = { timeline: "/TIMELINE.md", creator: "/CREATOR-HANDOFF.md" };
+  loadDoc(DOC_PARAM[(location.search.match(/[?&]doc=(\w+)/) || [])[1]] || "/INTEGRATION.md");
+</script>
+
+<script>
+/* 排程看板的即時進度 —— 計畫（這三欄）與現況（/checklist）用同一份項目清單，
+   分期由 checklist-items.json 每組的 stage 欄位決定，這裡只負責把數字貼上去。 */
+(function () {
+  var cols = document.querySelectorAll(".rmCol[data-stage]");
+  if (!cols.length) return;
+
+  Promise.all([
+    fetch("/assets/checklist-items.json?v=" + Date.now()).then(function (r) { return r.json(); }),
+    fetch("/api/state?v=" + Date.now()).then(function (r) { return r.json(); }).catch(function () { return { items: {} }; }),
+  ]).then(function (r) {
+    var data = r[0], state = r[1] || { items: {} };
+    var st = function (id) { return (state.items && state.items[id] && state.items[id].status) || "todo"; };
+
+    cols.forEach(function (col) {
+      var stage = col.dataset.stage;
+      var c = { todo: 0, doing: 0, done: 0, blocked: 0, total: 0 };
+      data.groups.filter(function (g) { return g.stage === stage; })
+        .forEach(function (g) { g.items.forEach(function (it) { c[st(it.id)]++; c.total++; }); });
+      if (!c.total) return;
+
+      var pct = function (n) { return (n / c.total * 100).toFixed(2) + "%"; };
+      var a = document.createElement("a");
+      a.className = "rmProg";
+      a.href = "/checklist?stage=" + stage;
+      a.innerHTML =
+        '<div class="rmBar">' +
+          '<i class="done" style="width:' + pct(c.done) + '"></i>' +
+          '<i class="doing" style="width:' + pct(c.doing) + '"></i>' +
+          '<i class="blocked" style="width:' + pct(c.blocked) + '"></i>' +
+        '</div>' +
+        '<div class="rmProgTxt"><b>' + c.done + '／' + c.total + ' 項已完成</b>' +
+          (c.doing ? '<span class="s doing">進行中 ' + c.doing + '</span>' : '') +
+          (c.blocked ? '<span class="s blocked">卡住 ' + c.blocked + '</span>' : '') +
+          '<span class="go">開啟看板 →</span></div>';
+      col.insertBefore(a, col.querySelector("ul"));
+    });
+
+    var head = document.querySelector("#roadmap .muted");
+    if (head) head.insertAdjacentHTML("beforeend", '　·　下面每欄的數字是 <a href="/checklist" style="color:var(--link-color)">串接進度看板</a> 的即時狀態');
+  }).catch(function () { /* 進度拿不到就維持原本的純計畫呈現 */ });
+})();
 </script>
 </body>
 </html>

@@ -47,6 +47,21 @@
   .ckAlertRow .q { font-size: 13.5px; color: #4a5568; line-height: 1.65; margin-top: 5px; white-space: pre-wrap; }
   .ckAlertRow .m { font-size: 12px; color: #98a1ad; margin-top: 6px; }
 
+  /* ---- 分期分頁（對齊 /handoff 的短 / 中 / 長期）---- */
+  .ckStageBar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 0 0 14px; }
+  .ckStageTab { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left;
+    font: inherit; background: #fff; border: 1px solid #e7eaf0; border-radius: 13px; padding: 11px 14px; cursor: pointer; transition: .12s; }
+  .ckStageTab:hover { border-color: #b9c4d1; }
+  .ckStageTab b { font-size: 14.5px; color: #11243f; }
+  .ckStageTab span { font-size: 11.5px; color: #8a94a3; }
+  .ckStageTab em { font-style: normal; font-size: 13px; font-weight: 700; color: var(--theme-color-black); margin-top: 3px; }
+  .ckStageTab.on { border-color: var(--theme-color); background: var(--theme-white); box-shadow: 0 0 0 3px rgba(1,130,253,.10); }
+
+  .ckStagePill { font-size: 11.5px; font-weight: 700; padding: 2px 9px; border-radius: 999px; white-space: nowrap; }
+  .ckStagePill.s-short { background: #fdecec; color: #c0392b; }
+  .ckStagePill.s-mid { background: #e8f2fe; color: #1861a8; }
+  .ckStagePill.s-long { background: #eef2f7; color: #7a8494; }
+
   /* ---- 分組 ---- */
   .ckGroup { background: #fff; border: 1px solid #e7eaf0; border-radius: 16px; margin-bottom: 14px; overflow: hidden; }
   .ckGroupHead { padding: 15px 18px; border-bottom: 1px solid #eef1f6; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
@@ -107,6 +122,7 @@
   .ckWarn { background: #fff4d6; border: 1px solid #f0dfae; color: #7a5c08; border-radius: 12px; padding: 11px 15px; font-size: 13px; line-height: 1.65; margin-bottom: 14px; }
 
   @media (max-width: 640px) {
+    .ckStageBar { grid-template-columns: repeat(2, 1fr); }
     .ckBody { padding-left: 18px; }
     .ckRow { padding: 12px 14px; }
     .ckAddBtns { flex-direction: row; width: 100%; }
@@ -121,9 +137,14 @@
     <div class="cz-container">
       <span class="cz-eyebrow"><i class="ri-checkbox-multiple-line"></i> 串接進度</span>
       <h1 style="font-size:calc(var(--font-size)/3.4);margin:10px 0 8px">串接進度看板</h1>
-      <p style="margin:0;color:#5c6675;max-width:760px">
+      <p style="margin:0 0 10px;color:#5c6675;max-width:760px">
         交接文件裡的每一項工作都列在下面。串好了就點成「已完成」；卡住了點「卡住」並寫下問題，
         我這邊打開同一頁就看得到。<b>進度存在伺服器</b>，換裝置、換瀏覽器都不會不見。
+      </p>
+      <p style="margin:0;color:#7a8494;font-size:13.5px;max-width:760px">
+        分期（短／中／長期、週次）沿用 <a href="/handoff#roadmap" style="color:var(--link-color)">開發排程</a> 與
+        <a href="/handoff?doc=timeline#doc" style="color:var(--link-color)">工程時程規劃</a>：
+        那邊是<b>計畫</b>（該做什麼、排在第幾週），這裡是<b>現況</b>（實際做到哪、卡在哪）。同一份項目，兩種看法。
       </p>
     </div>
   </section>
