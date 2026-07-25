@@ -54,7 +54,10 @@ demo into one site, one nav, one model. Visual system mirrors the real InternX a
 站上唯一「有後端」的頁面，其餘全是靜態示意。技術成員在這裡把每項工作點成
 未開始／進行中／已完成／卡住，卡住時留言寫下問題；進度存伺服器，雙方打開同一頁就看到同一份狀態。
 
-- 項目清單：`assets/checklist-items.json`（版控在 repo，依 `TIMELINE.md` 的 Phase 排序）
+- 項目清單：`assets/checklist-items.json`（版控在 repo，依 `TIMELINE.md` 的 Phase 排序）。每組帶 `stage`（short/mid/long）與 `weeks`，**這是它跟 `/handoff` 開發排程看板的接點**：
+  - `/handoff` 的短／中／長期三欄會抓 `/api/state` 算出即時進度條，點下去進 `/checklist?stage=…`
+  - `/checklist` 有同一套分期分頁，每組標「短期・週 1–3」這種標籤，回連 `/handoff#roadmap`
+  - 換句話說：排程看板＝計畫（該做什麼、第幾週），進度看板＝現況（做到哪、卡在哪），同一份項目兩種看法。改分期只要改 JSON 的 `stage`，兩邊一起變
 - 狀態與留言：PostgreSQL 表 `handoff_item_status` / `handoff_notes`（Zeabur 專案 InternX 的 `postgresql-unbed`）
 - API：`GET /api/state`、`POST /api/status|note|note/resolve|check-key`（`lib/store.js` 是儲存層）
 - 環境變數（設在 Zeabur 服務上）：
