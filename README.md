@@ -41,6 +41,7 @@ demo into one site, one nav, one model. Visual system mirrors the real InternX a
 | `academy-admin.html` `/academy-admin` | 課程管理後台：審核、創作者、訂單退款、收益撥款、分潤設定 |
 | `integration.html` `/integration` | 整合動線：接進實習通的位置與點擊路徑 |
 | `spec.html` `/spec` | 工程規格：資料模型、驗證、改動清單、驗收 |
+| `checklist.html` `/checklist` | **串接進度看板**：交接文件的每項工作逐項打勾＋問題回報（唯一會寫入資料庫的頁面）|
 | `INTEGRATION.md` | 工程交接文件：活動票券＋審核＋金流＋部落格＋verified-role |
 | `ACADEMY-PRD.md` | InternX Academy 職涯課程平台 PRD（**原型已完成**，整併主平台為後續排程）；工程對照見 spec §17 / INTEGRATION §20 |
 
@@ -48,12 +49,27 @@ demo into one site, one nav, one model. Visual system mirrors the real InternX a
 
 活動頁用 `assets/style.css`；創作者頁用 `assets/cz/`（兩套 CSS 並存，token 相同），共用同一條導覽。
 
+## 串接進度看板 `/checklist`
+
+站上唯一「有後端」的頁面，其餘全是靜態示意。技術成員在這裡把每項工作點成
+未開始／進行中／已完成／卡住，卡住時留言寫下問題；進度存伺服器，雙方打開同一頁就看到同一份狀態。
+
+- 項目清單：`assets/checklist-items.json`（版控在 repo，依 `TIMELINE.md` 的 Phase 排序）
+- 狀態與留言：PostgreSQL 表 `handoff_item_status` / `handoff_notes`（Zeabur 專案 InternX 的 `postgresql-unbed`）
+- API：`GET /api/state`、`POST /api/status|note|note/resolve|check-key`（`lib/store.js` 是儲存層）
+- 環境變數（設在 Zeabur 服務上）：
+  - `DATABASE_URL` — 沒設或連不上時會自動退回本機 JSON 暫存檔，頁面上會出現黃色警告，不會靜默失敗
+  - `HANDOFF_KEY` — 寫入用的共用通行碼；沒設＝任何人都能寫。讀取永遠開放
+- 清單改版時沿用既有 item `id`，已記錄的狀態才不會變成孤兒；資料庫裡對不到清單的舊 id 會被忽略
+
 ## 本機預覽
 
-雙擊 `index.html` 即可，或啟動零依賴伺服器：
+雙擊 `index.html` 即可，或啟動伺服器（唯一依賴是 `pg`，只有 `/checklist` 用得到）：
 
 ```bash
-node server.js        # http://localhost:4178
+npm install
+node server.js                          # http://localhost:4178（無 DATABASE_URL → 用本機暫存檔）
+HANDOFF_KEY=testkey node server.js      # 順便測通行碼流程
 ```
 
 ## 設計 token（取自實習通 globals.css）
