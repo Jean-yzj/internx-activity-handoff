@@ -161,7 +161,11 @@
 
   function lastUpdated() {
     var t = 0;
+    // 只看清單裡還存在的項目 —— 清單改版後留在資料庫的舊 id 不該左右「最後更新」時間
+    var live = {};
+    allItems().forEach(function (x) { live[x.item.id] = true; });
     Object.keys(state.items || {}).forEach(function (k2) {
+      if (!live[k2]) return;
       var v = new Date(state.items[k2].at).getTime();
       if (v > t) t = v;
     });
