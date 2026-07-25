@@ -1,0 +1,358 @@
+{
+  "version": "2026-07-25",
+  "groups": [
+    {
+      "id": "ticket-model",
+      "title": "票券資料模型",
+      "summary": "新增 Ticket 型別與 ticketStatus() 函式，並遷移現有 feeItems 資料",
+      "items": [
+        {
+          "id": "ticket-ts-type",
+          "title": "新增 data/ticket.ts：Ticket 型別與 ticketStatus()",
+          "detail": "建立 Ticket interface（id / name / price / quantity / sold / saleStart / saleEnd / description / order）與 TicketStatusKey（'soon' | 'live' | 'ended' | 'soldout'），以及純函式 ticketStatus(t, now)。前後端共用同一份邏輯，無狀態欄位，完全由時間與 sold 即時計算。",
+          "accept": "import { ticketStatus } from 'data/ticket' 可跑，回傳值為 'soon'|'live'|'ended'|'soldout'",
+          "ref": "INTEGRATION.md §3.1",
+          "note": ""
+        },
+        {
+          "id": "activity-tickets-field",
+          "title": "activity.ts 加 tickets: Ticket[] 欄位",
+          "detail": "在 ActivityData interface 新增 tickets 陣列欄位。舊的 feeAmount / feeItems 暫保留讀取相容，新建活動一律走 tickets。",
+          "accept": "ActivityData 型別含 tickets?: Ticket[]，TypeScript 不報型別錯誤",
+          "ref": "INTEGRATION.md §3.2",
+          "note": ""
+        },
+        {
+          "id": "feeitem-migration-script",
+          "title": "寫一次性 migration：feeItems → tickets[]",
+          "detail": "對既有活動，把每筆 feeItems[i]{name, price} 轉成 Ticket，quantity=null、saleStart=活動建立時間、saleEnd=活動開始時間、sold=0。以 Node.js 腳本跑一次，不影響線上讀取。",
+          "accept": "migration 腳本可在 staging 跑通，結果 tickets 陣列長度 >= 原 feeItems 長度",
+          "ref": "INTEGRATION.md §3.2",
+          "note": ""
+        },
+        {
+          "id": "firestore-ticket-structure",
+          "title": "決定 Firestore 票券結構（內嵌 vs 子集合）",
+          "detail": "依活動票種數量選擇：票種少用內嵌（activities/{id}.tickets 陣列），高併發用子集合（activities/{id}/tickets/{ticketId}）。sold 欄位統一用 FieldValue.increment() 更新，不可前端直接寫。",
+          "accept": "選定結構並記錄在 PR 描述，staging 可寫入 ticket 文件並讀取 sold",
+          "ref": "INTEGRATION.md §3.3",
+          "note": ""
+        }
+      ]
+    },
+    {
+      "id": "editor-frontend",
+      "title": "活動編輯器前端",
+      "summary": "票券設定卡片 UI、表單拖曳排序（@dnd-kit）、驗證規則",
+      "items": [
+        {
+          "id": "ticket-card-ui",
+          "title": "activity-form-schema.ts 票券步驟換成票券卡片 UI",
+          "detail": "把 activity-form-schema.ts:328 的 feeItems 輸入區改為票券卡片清單，每張卡可原地展開編輯（名稱 / 售價 / 數量上限 / 販售起訖 / 說明），卡片標題即時顯示 ticketStatus() 算出的狀態徽章。",
+          "accept": "編輯器票券步驟可新增 / 刪除票券卡，狀態徽章隨時間即時變化",
+          "ref": "INTEGRATION.md §4.2, §1.2 A",
+          "note": "staging 已有票券販售引擎實作，需 QA 確認此 UI 是否已合併"
+        },
+        {
+          "id": "ticket-validation",
+          "title": "加票券驗證規則（起迄/數量/至少一張）",
+          "detail": "在 activity-form-schema.ts:371 樣式處加驗證：saleStart < saleEnd、quantity >= 1 或 null、price >= 0、付費活動至少 1 張票。沿用既有 Zod 或同段驗證寫法。",
+          "accept": "送出空票券或 saleEnd < saleStart 時表單顯示對應錯誤訊息，不可提交",
+          "ref": "INTEGRATION.md §3.2, §4.2",
+          "note": ""
+        },
+        {
+          "id": "dnd-kit-install",
+          "title": "安裝 @dnd-kit 並改寫 FormPreview.tsx 拖曳排序",
+          "detail": "npm i @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities。在 components/Activities/FormBuilder/FormPreview.tsx 包 DndContext + SortableContext，拖曳結束呼叫既有 handleReorderFields(FormBuilder.tsx:88)。系統必填欄位加 locked 旗標，useSortable({ disabled: true }) 鎖最上方。",
+          "accept": "在編輯器拖曳欄位可改變順序；鎖定欄位（姓名/Email）無法被拖移；鍵盤 Tab+Space 也可排序",
+          "ref": "INTEGRATION.md §4.3",
+          "note": ""
+        },
+        {
+          "id": "field-settings-drawer",
+          "title": "確認 FieldSettingsDrawer 支援所有新欄位型別設定",
+          "detail": "FormBuilder/FieldSettingsDrawer.tsx 需支援：檔案型（accept / maxFileSize / maxFiles）、Email 型（allowedDomains）、數字型（min / max）、選項型（options / allowOther）。對照 FormBuilder/types.ts 現有欄位逐項確認，缺漏補上。",
+          "accept": "新增檔案欄位後可設定 .pdf 格式限制，報名頁依設定顯示「接受 .pdf · 單檔 ≤ 5MB」",
+          "ref": "INTEGRATION.md §4.3",
+          "note": ""
+        }
+      ]
+    },
+    {
+      "id": "registration-backend",
+      "title": "報名後端與狀態機",
+      "summary": "Registration 資料模型、Cloud Functions、防超賣、Firestore 規則",
+      "items": [
+        {
+          "id": "registration-status-model",
+          "title": "data/registration.ts 加 status 狀態機欄位",
+          "detail": "擴充 RegistrationData：加 status（pending/approved/paid/rejected/cancelled/refunded）、ticketId、qty、amount、approvedAt、paidAt、rejectedAt、rejectReason、paymentId、reviewerUid。amount 在送出當下快照（之後票價變動不影響）。",
+          "accept": "TypeScript 型別通過；status 欄位不可由前端直接 updateDoc 改動",
+          "ref": "INTEGRATION.md §12.1",
+          "note": "staging 已有報名審核狀態機實作，需 QA 確認欄位是否符合規格再合併"
+        },
+        {
+          "id": "submit-registration-cf",
+          "title": "Cloud Function：submitRegistration（含防超賣 transaction）",
+          "detail": "用 Firestore runTransaction：先讀 ticketRef，呼叫 ticketStatus() 驗證 live，檢查 sold + qty <= quantity，通過才 tx.update sold += qty、tx.set registration{status:'pending'}。失敗回 TICKET_NOT_ON_SALE 或 SOLD_OUT。",
+          "accept": "同時送出 2 筆搶同一張剩餘票，只有 1 筆成功，另一筆收到 SOLD_OUT 錯誤",
+          "ref": "INTEGRATION.md §5, §14",
+          "note": ""
+        },
+        {
+          "id": "approve-reject-cf",
+          "title": "Cloud Function：approveRegistration / rejectRegistration",
+          "detail": "approveRegistration：pending → approved，寫 approvedAt / reviewerUid，驗 caller 是該 activity 的 admining 成員，發繳費通知。rejectRegistration：pending → rejected，寫 rejectedAt，釋放 ticket.sold -= qty，通知報名者（含 rejectReason）。",
+          "accept": "非主辦方呼叫 approveRegistration 回 FORBIDDEN；重複通過同一筆回 NOT_PENDING",
+          "ref": "INTEGRATION.md §14, §12.2",
+          "note": ""
+        },
+        {
+          "id": "payment-webhook-cf",
+          "title": "Cloud Function：onPaymentSucceeded（付款 webhook）",
+          "detail": "平台金流回調：approved → paid，寫 paidAt / paymentId，觸發站內通知主辦方「已付款」並寄收據給報名者。前端不可直接呼叫此端點。另補 refundRegistration：paid → refunded，釋放 sold，建退款記錄。",
+          "accept": "staging 模擬 webhook 後，registration.status 轉 paid，主辦後台自動顯示「已付款」",
+          "ref": "INTEGRATION.md §6, §14",
+          "note": "staging 已有平台代收代付實作，需 QA 驗 webhook 觸發流程後合併"
+        },
+        {
+          "id": "payment-session-cf",
+          "title": "Cloud Function：createPaymentSession（報名者繳費入口）",
+          "detail": "接受 registrationId，驗 status === 'approved'，金額取自 registration.amount（快照值），回傳 paymentUrl 導向既有 Payments.tsx 金流頁面。非 approved 狀態回 NOT_APPROVED。",
+          "accept": "pending 狀態的 registration 呼叫 createPaymentSession 回 NOT_APPROVED 錯誤",
+          "ref": "INTEGRATION.md §14",
+          "note": ""
+        },
+        {
+          "id": "firestore-rules-registration",
+          "title": "設定 Firestore 安全規則（registrations / tickets）",
+          "detail": "在 internx-me/firebase-contents 的 firestore.rules 中加：registrations 只允許本人建立 pending；status / sold / paidAt 一律禁止前端 update/delete，只走 Cloud Functions。tickets 的 sold 欄位禁前端寫。",
+          "accept": "直接用 client SDK updateDoc(registrationRef, {status:'paid'}) 被規則拒絕（permission-denied）",
+          "ref": "INTEGRATION.md §16",
+          "note": ""
+        }
+      ]
+    },
+    {
+      "id": "backstage-frontend",
+      "title": "後台與報名者頁面前端",
+      "summary": "professional 後台側欄、報名名單 UI、報名者公開頁版型",
+      "items": [
+        {
+          "id": "professional-sidebar",
+          "title": "lib/config.js 後台側欄加報名名單與創作內容入口",
+          "detail": "在 PROFESSIONAL_SERVICES 加 'registrations'（報名名單，帶待審數 badge）與 'blog'（創作內容）。進入條件從只認 admining 放寬為 admining OR verified-creator。PROFESSIONAL_SERVICES_REQUIRE_ADMINING 清單按此調整（活動/成果展示仍限 admining）。",
+          "accept": "帶 verified-creator 標章的帳號可進 professional 後台，且側欄顯示創作內容入口；帶 admining 才顯示活動管理",
+          "ref": "INTEGRATION.md §11",
+          "note": ""
+        },
+        {
+          "id": "registrations-page",
+          "title": "新增 professional/registrations 報名名單頁",
+          "detail": "新增 pages/[lang]/professional/registrations.tsx：列出某活動的報名者（姓名 / 票種 / 狀態 chip / 操作按鈕），狀態機 pending→approved→paid/rejected 的 chip，「通過」鈕呼叫 approveRegistration CF，「拒絕」鈕彈拒絕原因輸入後呼叫 rejectRegistration CF。",
+          "accept": "主辦方按「通過」後 chip 即時轉為「待繳費（已通知）」；「已付款」由 webhook 自動翻轉無須手動",
+          "ref": "INTEGRATION.md §1.1, §11, §1.2 C",
+          "note": "staging 已有報名審核 UI 實作，需 QA 確認狀態機流程後合併"
+        },
+        {
+          "id": "attendee-page-layout",
+          "title": "活動公開頁版型：介紹→表單→票券三段排序",
+          "detail": "調整 ActivityContent.jsx + Registration.tsx：頁面由上到下依序為 1) 活動介紹（cover / 標題 / 流程 / FAQ）、2) 報名表單（依 formSchema 順序渲染）、3) 選擇票券（ticketStatus() 判斷可否選，live 才出數量 stepper，其餘反灰）。右側 sticky 卡片顯示費用/名額/送出。",
+          "accept": "opened/ended/soldout 票券在報名頁呈灰色不可選；live 票券可點選數量並送出",
+          "ref": "INTEGRATION.md §4.4, §1.2 B",
+          "note": ""
+        },
+        {
+          "id": "formschema-render",
+          "title": "報名頁依 formSchema 順序渲染欄位並前端驗證",
+          "detail": "Registration.tsx 的表單依 activity.formSchema（FormField[]，按 order 排序）動態渲染：file 型驗 accept + maxFileSize + maxFiles、email 型驗 allowedDomains、number 型驗 min/max、required 欄位非空才可送出。",
+          "accept": "拖曳後的欄位新順序在報名頁正確呈現；上傳錯格式檔案時顯示驗證錯誤",
+          "ref": "INTEGRATION.md §13",
+          "note": ""
+        },
+        {
+          "id": "agenda-field",
+          "title": "活動加 agenda[] 欄位與當天流程顯示",
+          "detail": "在 ActivityData 加 agenda?: {time: string; title: string; desc?: string}[]。編輯器「活動內容」步驟加時段新增入口。報名頁在 agenda.length > 0 時顯示當天流程時間軸區塊，為空不顯示。",
+          "accept": "新增活動時填入 2 個時段，報名頁顯示時間軸；舊活動無 agenda 時時間軸區塊不出現",
+          "ref": "INTEGRATION.md §19 #16",
+          "note": ""
+        }
+      ]
+    },
+    {
+      "id": "notification-payment",
+      "title": "通知與金流串接",
+      "summary": "審核事件通知（Email + 站內）、平台代收代付完整流程",
+      "items": [
+        {
+          "id": "notify-new-registration",
+          "title": "通知主辦方：有新報名待審",
+          "detail": "在 submitRegistration CF 建立 registration 後，向 activity.admining 成員發站內通知（可選 Email）：「X 報名了〈活動〉」含前往審核連結。呼叫既有 addSideNotification() 或 Notification 集合寫入。",
+          "accept": "測試帳號送出報名後，主辦方站內通知列出現該筆通知且可點連結",
+          "ref": "INTEGRATION.md §15",
+          "note": ""
+        },
+        {
+          "id": "notify-approved",
+          "title": "通知報名者：審核通過，前往繳費",
+          "detail": "approveRegistration CF 轉 approved 後，發 Email + 站內通知給報名者：「已通過，點此於實習通繳費（金額 / 期限）」，含 createPaymentSession 產生的連結。",
+          "accept": "主辦方按「通過」後，報名者收到站內通知且通知含繳費連結",
+          "ref": "INTEGRATION.md §15",
+          "note": ""
+        },
+        {
+          "id": "notify-rejected",
+          "title": "通知報名者：審核未通過（含原因）",
+          "detail": "rejectRegistration CF 轉 rejected 後，發 Email + 站內通知含 rejectReason 說明。前端拒絕彈窗的 reason 欄位最長 500 字。",
+          "accept": "主辦方填原因按「拒絕」後，報名者站內通知顯示拒絕說明文字",
+          "ref": "INTEGRATION.md §15",
+          "note": ""
+        },
+        {
+          "id": "notify-paid",
+          "title": "通知主辦方付款完成 + 寄報名者收據",
+          "detail": "onPaymentSucceeded webhook CF 轉 paid 後：站內通知主辦方「X 已完成繳費」（後台自動轉已付款）；Email 寄報名者收據（含活動名稱、票種、金額、paidAt）。",
+          "accept": "webhook 觸發後主辦後台狀態自動翻為「已付款」，不需手動標記",
+          "ref": "INTEGRATION.md §15, §6",
+          "note": ""
+        }
+      ]
+    },
+    {
+      "id": "needs-wall",
+      "title": "話題牆串接",
+      "summary": "活動上架自動建話題、專屬討論區、行業認證專家顯示",
+      "items": [
+        {
+          "id": "activity-forum-id",
+          "title": "活動加 forumId 欄位（行業版區）",
+          "detail": "在 ActivityData 加 forumId?: string，對應 lib/needs-wall-forum-ids.ts 的 24 個行業 id。在建立活動編輯器「活動內容」步驟加「活動行業」選單（或由 company.industryCategory 推導）。這是活動上架建話題的必要前提。",
+          "accept": "建立活動時選「科技業」，activity.forumId === 'tech' 存入 Firestore",
+          "ref": "INTEGRATION.md §17",
+          "note": ""
+        },
+        {
+          "id": "needs-wall-topic-hook",
+          "title": "活動上架自動建話題（needsWallTopicId 回寫）",
+          "detail": "在 approvalStatus 轉 approved 的後端 hook（Cloud Function 或觸發點），呼叫既有 createNeedsWallTopic({ forumId: activity.forumId, title: 活動名, createdBy })，取得 topicId 後回寫 activity.needsWallTopicId。活動頁依此顯示「社群討論」連結。",
+          "accept": "活動上架後，activity.needsWallTopicId 有值，話題牆對應行業版可查到該話題",
+          "ref": "INTEGRATION.md §17 #1",
+          "note": ""
+        },
+        {
+          "id": "activity-chat-room",
+          "title": "付費/internx_form 活動建專屬討論區（chatRoomId）",
+          "detail": "活動上架時（或主辦方手動開啟），呼叫 ChatRoom.create({ tags:[{targetType:'topic', targetId:activityId}] })，取得 chatRoomId 後寫入 activity.chatRoomId。活動頁顯示「加入活動討論」按鈕。",
+          "accept": "activity.chatRoomId 有值，「加入活動討論」連結導向 /dashboard/forum/[chatRoomId]",
+          "ref": "INTEGRATION.md §17 #2",
+          "note": ""
+        },
+        {
+          "id": "needs-wall-expert",
+          "title": "話題頁顯示行業認證專家（純查詢，無新欄位）",
+          "detail": "話題牆單一話題頁，查詢 profiles 中 badges 含 verified-creator 且 verifiedRolePitch.expertiseForumIds 包含當前 topic.forumId 的創作者，顯示「行業認證專家」卡片，連到 /user/[uid]。無需新增資料欄位，純查詢既有 badge 資料。",
+          "accept": "forumId=finance 的話題頁，顯示 expertiseForumIds 含 finance 的認證創作者卡片",
+          "ref": "INTEGRATION.md §17 #3",
+          "note": ""
+        }
+      ]
+    },
+    {
+      "id": "creator-zone",
+      "title": "創作者專區",
+      "summary": "認證入口、創作者主頁分頁、部落格發佈權、檢舉與追蹤後端",
+      "items": [
+        {
+          "id": "onboarding-identity-step",
+          "title": "onboarding 插入身分選擇步驟（入口 B）",
+          "detail": "在 onboarding.jsx steps 陣列 Step 2（基本資料）之後插入「選擇您的身分」步驟（學生 / 專業人士 / 認證創作者）。選創作者者直接進 /dashboard/verified-role-apply。完成頁從 index 5 改為 index 6（只改跳過按鈕的 setCurrentTab(5) → setCurrentTab(6)）。新增 users.userRole 欄位。",
+          "accept": "選「認證創作者」後導向認證表單；選「學生」直接完成 onboarding；跳過按鈕仍跳到完成頁",
+          "ref": "CREATOR-HANDOFF.md §3.2, Phase 1",
+          "note": ""
+        },
+        {
+          "id": "creator-profile-tabs",
+          "title": "Profile.tsx 加部落格/主辦活動/活動紀錄三分頁",
+          "detail": "沿用 activeSectionTab 機制（Profile.tsx:281）新增 index 3（部落格）/4（主辦活動）/5（活動紀錄）。部落格用 BlogPost.fetchUserPosts(db, userId)；主辦活動用 Activity.fetchUserActivities(db, userId)；活動紀錄需新增 Registration.getRegistrationsByUserUid(db, userUid)（見待補）。",
+          "accept": "創作者主頁三個分頁可切換且有資料；手機版分頁列水平捲動不溢出",
+          "ref": "CREATOR-HANDOFF.md §9, Phase 2",
+          "note": ""
+        },
+        {
+          "id": "registrations-by-user",
+          "title": "新增 Registration.getRegistrationsByUserUid()",
+          "detail": "在 data/registration.ts 新增靜態方法 getRegistrationsByUserUid(db, userUid)：query registrations where userUid == creatorId，取 activityId 再 Activity.load() 組成活動卡資料。用於創作者主頁「活動紀錄」分頁。",
+          "accept": "以測試帳號 uid 呼叫，回傳該帳號歷史參與的活動清單，數量與 Firestore 一致",
+          "ref": "CREATOR-HANDOFF.md §6, §19 #2",
+          "note": ""
+        },
+        {
+          "id": "blog-publish-gating",
+          "title": "blog/create.tsx 發佈權放寬給 verified-creator",
+          "detail": "blog/create.tsx 的 admin 檢查三處（useEffect:23-29 / handleSubmit:32 / render:80）改為 const canCreate = admin || badges?.includes('verified-creator')，三處都換成 canCreate。Firestore 規則同步放寬（blogPosts 允許 verified-creator 建立/編輯自己的文章）。",
+          "accept": "帶 verified-creator 標章的非 admin 帳號可進 /blog/create 發文；非創作者被導回",
+          "ref": "CREATOR-HANDOFF.md §5.1, Phase 3",
+          "note": ""
+        },
+        {
+          "id": "blog-byline-badge",
+          "title": "BlogView.tsx byline 補 MergedSenderBadges",
+          "detail": "BlogView.tsx:141-156 的作者區塊補上 <MergedSenderBadges senderId={post.authorId} show />，讓文章頁作者署名顯示金色認證創作者標章。另確認 BlogPost.create 呼叫時帶入 authorAvatar（目前不會自動帶入）。",
+          "accept": "認證創作者的文章頁，作者名稱旁出現金色「認證創作者」膠囊標章",
+          "ref": "CREATOR-HANDOFF.md §5.3, §19 #3, #4",
+          "note": ""
+        },
+        {
+          "id": "reports-collection",
+          "title": "新增 reports 集合、createReport()、/admin/reports 頁",
+          "detail": "新增 data/report.ts（ReportData interface：targetType / targetId / reporterUid / reason / description / processed / action）與 createReport() 函式。/admin/reports 管理頁仿 /admin/verified-role-applications 模式，可標 processed 與 action（none/warned/content-removed/badge-revoked/banned）。",
+          "accept": "訪客點「檢舉」送出後 reports/{id} processed:false 出現；管理員處理後 processed:true",
+          "ref": "CREATOR-HANDOFF.md §11, Phase 5",
+          "note": ""
+        },
+        {
+          "id": "revoke-badge-fn",
+          "title": "新增 revokeVerifiedBadgeFromUser() 撤標章函式",
+          "detail": "在 data/verified-role-application.ts 新增 revokeVerifiedBadgeFromUser(db, adminUid, uid, badge)：移除 profiles.badges 中的 badge、清空 verifiedRolePitch、同步更新 subprofiles/realProfile。與既有 grantVerifiedBadgeToUser 對稱。",
+          "accept": "管理員呼叫 revoke 後，該用戶 profiles.badges 不再含 verified-creator，個人頁金標消失",
+          "ref": "CREATOR-HANDOFF.md §11.4, §19 #8",
+          "note": ""
+        },
+        {
+          "id": "unidirectional-follow",
+          "title": "新增單向 follow 資料結構與 followCreator()/unfollow()",
+          "detail": "新增 follows/{followerUid}_{creatorUid} 文件（或在 realProfile 存 followerUids[]），配合 followerCount 欄位（aggregate count）。新增 followCreator(db, uid, creatorId) / unfollow() 函式。創作者主頁側欄「追蹤」按鈕接此。與既有雙向 Connection 分開。",
+          "accept": "點「追蹤」後 follows 文件出現，followerCount +1；取消追蹤 -1",
+          "ref": "CREATOR-HANDOFF.md §12.1, §19 #9",
+          "note": ""
+        },
+        {
+          "id": "blog-publish-fanout-cf",
+          "title": "Cloud Function：onBlogPublished 發文通知扇出",
+          "detail": "BlogPost.create 發佈後觸發 Cloud Function onBlogPublished：讀取作者的所有追蹤者，批次寫 Notification 文件，避免前端逐筆寫造成大量 client 寫入。Notification 持久化模型需先確認/補齊。",
+          "accept": "創作者發新文章後，追蹤者的站內通知列出現該文章的通知",
+          "ref": "CREATOR-HANDOFF.md §12.3, §19 #10",
+          "note": ""
+        },
+        {
+          "id": "creators-directory-page",
+          "title": "新增 /creators 創作者專區首頁與探索頁",
+          "detail": "新增路由 /[lang]/creators（對應 Demo index.html / directory.html）。在 lib/config.js TOP_BAR_TABS 加「創作者」入口（icon: ri-quill-pen-line）。頁面以 verified-creator 標章過濾 profiles，列出創作者卡片，可依行業篩選。",
+          "accept": "/creators 頁可訪問，顯示至少一位認證創作者卡片，點擊導向 /user/[uid]",
+          "ref": "CREATOR-HANDOFF.md §13, Phase 6",
+          "note": ""
+        },
+        {
+          "id": "creator-firestore-rules",
+          "title": "firebase-contents 補 Firestore 安全規則（blog/badges/申請）",
+          "detail": "在 internx-me/firebase-contents/firestore.rules 確認並補：verifiedRoleApplications 本人可建 pending，狀態只能 admin 改；profiles 的 badges / verifiedRolePitch 使用者不可自改；blogPosts 允許 verified-creator 建立與編輯自己的文章。",
+          "accept": "client SDK 直接改 profiles.badges 被 permission-denied；verified-creator 可建 blogPosts",
+          "ref": "CREATOR-HANDOFF.md §15",
+          "note": ""
+        }
+      ]
+    }
+  ]
+}

@@ -1,10 +1,13 @@
 {
   "name": "internx-activity-handoff",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
-  "description": "實習通 活動報名編輯器改版交接 — 介面示意 mockup",
+  "description": "實習通 活動報名編輯器改版交接 — 介面示意 mockup ＋ 串接進度看板",
   "scripts": {
     "start": "node server.js"
+  },
+  "dependencies": {
+    "pg": "^8.13.1"
   },
   "engines": {
     "node": ">=18"

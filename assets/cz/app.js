@@ -82,6 +82,7 @@
             <a class="dd-button" href="/directory"><i class="ri-compass-3-line"></i> 探索創作者</a>
             <a class="dd-button" href="/academy-admin"><i class="ri-shield-star-line"></i> 課程管理（Admin）</a>
             <a class="dd-button" href="/spec"><i class="ri-file-list-3-line"></i> 工程交接文件</a>
+            <a class="dd-button" href="/checklist"><i class="ri-checkbox-multiple-line"></i> 串接進度</a>
           </div>
           <a class="dd-logout" href="#" onclick="CZ.toast('Demo 不含登入功能');return false"><i class="ri-logout-box-line"></i> 登出</a>
         </div>
@@ -120,6 +121,7 @@
           <a href="/club"><i class="ri-group-line"></i>社團主頁</a>
           <a href="/directory"><i class="ri-compass-3-line"></i>探索創作者</a>
           <a href="/spec"><i class="ri-file-list-3-line"></i>工程交接文件</a>
+          <a href="/checklist"><i class="ri-checkbox-multiple-line"></i>串接進度</a>
         </div>
       </div>`);
   }
